@@ -7,7 +7,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 
 from .evidence import Evidence
 
@@ -31,6 +31,48 @@ class Node(BaseModel):
     label: str = ""
     id_namespace: str = ""  # e.g. "ncbi_gene", "veupathdb", "uniprot"
     attrs: dict[str, Any] = Field(default_factory=dict)
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def url(self) -> str | None:
+        """External database page for this entity, derived from id/namespace.
+
+        Single source of truth — flows to CLI JSON, API, web UI and HTML
+        report automatically via model_dump.
+        """
+        ns, nid = self.id_namespace, self.id
+        if ":" in nid:
+            prefix, _, rest = nid.partition(":")
+        else:
+            prefix, rest = "", nid
+        if self.type == NodeType.GENE:
+            if ns == "uniprot":
+                return f"https://www.uniprot.org/uniprotkb/{rest}"
+            if ns == "oma":
+                return f"https://omabrowser.org/oma/info/{rest}"
+            if ns == "veupathdb":
+                return f"https://veupathdb.org/veupathdb/app/record/gene/{rest}"
+            gene_id = self.attrs.get("gene_id") or (rest if rest.isdigit() else None)
+            if gene_id:
+                return f"https://www.ncbi.nlm.nih.gov/gene/{gene_id}"
+            return None
+        if prefix == "assembly":
+            return f"https://www.ncbi.nlm.nih.gov/datasets/genome/{rest}/"
+        if prefix == "taxon":
+            return f"https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={rest}"
+        if prefix == "go":
+            return f"https://www.ebi.ac.uk/QuickGO/term/{rest}"
+        if prefix == "kegg":
+            return f"https://www.kegg.jp/entry/{rest}"
+        if prefix == "domain":
+            if ns == "pfam":
+                return f"https://www.ebi.ac.uk/interpro/entry/pfam/{rest}"
+            return f"https://www.ebi.ac.uk/interpro/entry/InterPro/{rest}"
+        if prefix == "dataset":
+            if rest.startswith("E-"):
+                return f"https://www.ebi.ac.uk/gxa/experiments/{rest}"
+            return f"https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={rest}"
+        return None
 
 
 class Edge(BaseModel):
@@ -66,6 +108,25 @@ class KnowledgeGraph(BaseModel):
     def add_edge(self, edge: Edge) -> Edge:
         self.edges.append(edge)
         return edge
+
+    def filter_by_confidence(self, min_confidence: float) -> "KnowledgeGraph":
+        """Drop edges below `min_confidence`, then nodes left with no edges.
+
+        The query node (metadata['query']) is always kept so the graph
+        retains a root even when everything is filtered out.
+        """
+        if min_confidence <= 0:
+            return self
+        keep = {
+            x
+            for e in self.edges
+            if e.confidence >= min_confidence
+            for x in (e.subject, e.object)
+        }
+        keep.add(self.metadata.get("query", ""))
+        self.edges = [e for e in self.edges if e.confidence >= min_confidence]
+        self.nodes = {k: v for k, v in self.nodes.items() if k in keep}
+        return self
 
     def to_json(self, path: str | Path) -> None:
         Path(path).write_text(self.model_dump_json(indent=2) + "\n")

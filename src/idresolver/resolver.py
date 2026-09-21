@@ -54,6 +54,7 @@ class Resolver:
         graph = KnowledgeGraph(
             metadata={
                 "input": identifier,
+                "query": identifier,
                 "depth": depth,
                 "stages": [],
                 "jev_usage": {},
@@ -552,7 +553,7 @@ class Resolver:
                     Node(
                         id=node_id,
                         type=NodeType.DOMAIN,
-                        label=d.get("name") or dom_id,
+                        label=f"{source.capitalize()}: {d.get('name') or dom_id}",
                         id_namespace=source,
                     )
                 )

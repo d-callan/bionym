@@ -38,6 +38,7 @@ def resolve(
     out: Path = typer.Option(Path("graph.json"), "-o", "--out", help="Output JSON path."),
     depth: int = typer.Option(6, "--depth", help="Stages: 0=classify, 1=+resolve, 2=+assemblies, 3=+orthologs, 4=+annotation, 5=+expression, 6=+remap."),
     max_candidates: int = typer.Option(20, "--max-candidates"),
+    min_confidence: float = typer.Option(0.0, "--min-confidence", help="Drop edges below this confidence (and orphan nodes)."),
     mock_jev: bool = typer.Option(False, "--mock-jev", help="Offline dev: no API key needed."),
     report: bool = typer.Option(False, "--report", help="Also write an HTML report next to the JSON."),
     verbose: bool = typer.Option(False, "-v", "--verbose"),
@@ -61,6 +62,7 @@ def resolve(
         max_candidates=max_candidates,
     )
     graph = resolver.resolve(identifier, depth=depth)
+    graph.filter_by_confidence(min_confidence)
     graph.to_json(out)
 
     usage = jev.total_usage()

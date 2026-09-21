@@ -34,16 +34,31 @@ def render_html(graph: KnowledgeGraph) -> str:
     meta = graph.metadata
     usage = (meta.get("jev_usage") or {}).get("total") or {}
 
+    def _link(n: dict) -> str:
+        text = html.escape(n.get("label") or n["id"])
+        if n.get("url"):
+            return f'<a href="{html.escape(n["url"])}" target="_blank" rel="noopener">{text}</a>'
+        return text
+
+    url_by_id = {n["id"]: n.get("url") for n in nodes}
+
+    def _cell(node_id: str) -> str:
+        url = url_by_id.get(node_id)
+        text = html.escape(node_id)
+        if url:
+            return f'<a href="{html.escape(url)}" target="_blank" rel="noopener">{text}</a>'
+        return text
+
     node_rows = "".join(
         f"<tr><td>{html.escape(n['id'])}</td><td>{n['type']}</td>"
-        f"<td>{html.escape(n.get('label') or '')}</td>"
+        f"<td>{_link(n)}</td>"
         f"<td>{html.escape(n.get('id_namespace') or '')}</td></tr>"
         for n in sorted(nodes, key=lambda x: (x["type"], x["id"]))
     )
     edge_rows = "".join(
-        f"<tr><td>{html.escape(e['subject'])}</td>"
+        f"<tr><td>{_cell(e['subject'])}</td>"
         f"<td>{html.escape(e['predicate'])}</td>"
-        f"<td>{html.escape(e['object'])}</td>"
+        f"<td>{_cell(e['object'])}</td>"
         f"<td>{e['confidence']:.2f}</td>"
         f"<td>{len(e.get('evidence') or [])}</td></tr>"
         for e in sorted(edges, key=lambda x: -x["confidence"])
@@ -118,16 +133,16 @@ svg.selectAll(".link").data(graph.edges).join("path")
   .attr("stroke-opacity", e => 0.15 + 0.85 * e.confidence)
   .attr("stroke-width", e => 0.5 + 2.5 * e.confidence);
 
-const node = svg.selectAll(".node").data(graph.nodes).join("circle")
-  .attr("class", "node")
-  .attr("cx", d => pos[d.id].x).attr("cy", d => pos[d.id].y)
+const nodeG = svg.selectAll(".nodeg").data(graph.nodes).join("g")
+  .attr("transform", d => `translate(${{pos[d.id].x}},${{pos[d.id].y}})`)
+  .style("cursor", d => d.url ? "pointer" : "default")
+  .on("click", (e, d) => {{ if (d.url) window.open(d.url, "_blank"); }});
+nodeG.append("circle").attr("class", "node")
   .attr("r", 5).attr("fill", d => COLORS[d.type] || "#999");
-node.append("title").text(d => `${{d.id}} (${{d.type}})`);
-
-svg.selectAll(".nodelabel").data(graph.nodes).join("text")
-  .attr("class", "nodelabel")
-  .attr("x", d => pos[d.id].x + 7).attr("y", d => pos[d.id].y + 3)
+nodeG.append("text").attr("class", "nodelabel").attr("x", 7).attr("y", 3)
   .text(d => (d.label || d.id).slice(0, 24));
+nodeG.append("title")
+  .text(d => `${{d.id}} (${{d.type}})${{d.url ? " — click to open" : ""}}`);
 </script>
 </body></html>"""
 

@@ -228,3 +228,21 @@ def test_depth_six_adds_remap():
     assert "likely_present" in predicates
     lp = [e for e in g.edges if e.predicate == "likely_present"]
     assert lp[0].object == "assembly:GCF_999999999.1"
+
+
+def test_filter_by_confidence_and_url():
+    from idresolver.graph import KnowledgeGraph, Node, NodeType, Edge
+    g = KnowledgeGraph(metadata={"query": "Q"})
+    g.add_node(Node(id="Q", type=NodeType.GENE, attrs={"gene_id": "672"}))
+    g.add_node(Node(id="kegg:hsa05290", type=NodeType.PATHWAY, id_namespace="kegg"))
+    g.add_node(Node(id="dataset:GSE1", type=NodeType.DATASET))
+    g.add_edge(Edge(subject="Q", predicate="in_pathway", object="kegg:hsa05290", confidence=0.8))
+    g.add_edge(Edge(subject="Q", predicate="measured_in", object="dataset:GSE1", confidence=0.2))
+    # urls
+    assert g.nodes["Q"].url == "https://www.ncbi.nlm.nih.gov/gene/672"
+    assert g.nodes["kegg:hsa05290"].url == "https://www.kegg.jp/entry/hsa05290"
+    assert "geo/query/acc.cgi?acc=GSE1" in g.nodes["dataset:GSE1"].url
+    # filter
+    g.filter_by_confidence(0.5)
+    assert len(g.edges) == 1 and g.edges[0].predicate == "in_pathway"
+    assert "dataset:GSE1" not in g.nodes and "Q" in g.nodes
