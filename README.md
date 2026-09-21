@@ -2,12 +2,12 @@
 
 Resolve bioinformatics identifiers into confidence-scored knowledge graphs.
 
-Given an identifier (v1 scope: gene IDs, eukaryotic pathogens), BioNym
-gathers evidence from public APIs (NCBI, VEuPathDB, OMA, UniProt, GEO,
-Expression Atlas, ...), asks [JEV](https://typesafe.ai) (TypeSafe
-`systemone`) an ordered workflow of typed questions, and emits a knowledge
-graph where every claim carries a confidence score and a list of supporting
-evidence.
+Given a gene identifier (any species — NCBI gene ID, symbol, VEuPathDB
+locus tag, UniProt accession, Ensembl ID, ...), BioNym gathers evidence
+from public APIs (NCBI, VEuPathDB, OMA, UniProt, GEO, Expression Atlas,
+...), asks [JEV](https://typesafe.ai) (TypeSafe `systemone`) an ordered
+workflow of typed questions, and emits a knowledge graph where every claim
+carries a confidence score and a list of supporting evidence.
 
 ## Status
 
@@ -49,6 +49,14 @@ bionym resolve 672 --report             # + self-contained HTML report
 bionym resolve 672 --min-confidence 0.7 # drop low-confidence edges
 bionym resolve 672 --mock-jev           # offline dev, no API key
 ```
+
+> **`--mock-jev` is for development only.** It returns deterministic
+> placeholder answers (first option / midpoint score / 0.5) instead of real
+> JEV judgments, so the resulting graph **will not be biologically
+> meaningful** — edges and confidences are arbitrary. It's a free way to
+> exercise the full pipeline and surface *technical* bugs (crashes, parsing,
+> wiring) without an API key or cost. Never interpret mock output as a
+> result.
 
 Output: a JSON knowledge graph — `nodes` (typed: Gene, Organism, Assembly,
 IdType, ...; each with an external `url`), `edges` (claims with
