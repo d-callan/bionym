@@ -33,6 +33,7 @@ class NcbiClient:
         self.timeout = timeout
         self._last_request = 0.0
         self._min_interval = 0.1 if self.api_key else 0.34  # 10/s vs 3/s
+        self._retmax = 20
         self._cache = None
         if cache_dir:
             import diskcache
@@ -132,6 +133,56 @@ class NcbiClient:
         )
         return records, [ev]
 
+    def geo_datasets_for_gene(
+        self, symbol: str, organism: str | None = None
+    ) -> tuple[list[dict[str, Any]], list[Evidence]]:
+        """GEO DataSets/Series (db=gds) that profile a gene symbol.
+
+        GSE = submitted series, GDS = curated datasets; both are
+        dataset-level units (as opposed to per-gene Profiles).
+        """
+        term = f"{symbol}[Gene Symbol]"
+        if organism:
+            term += f" AND {organism}[Organism]"
+        term += " AND (GSE[ETYP] OR GDS[ETYP])"
+        search_url = f"{EUTILS}/esearch.fcgi"
+        data = self._get(
+            search_url,
+            params={
+                "db": "gds", "term": term,
+                "retmode": "json", "retmax": str(self._retmax),
+            },
+        )
+        result = data.get("esearchresult", {})
+        ids = result.get("idlist", [])
+        ev = Evidence(
+            source="ncbi_eutils",
+            endpoint=search_url,
+            summary=f"esearch db=gds '{term}': {result.get('count', 0)} hit(s)",
+            payload={"term": term, "count": int(result.get("count", 0))},
+        )
+        if not ids:
+            return [], [ev]
+
+        summary_url = f"{EUTILS}/esummary.fcgi"
+        data = self._get(
+            summary_url,
+            params={"db": "gds", "id": ",".join(ids), "retmode": "json"},
+        )
+        sresult = data.get("result", {})
+        records = [
+            self._normalize_gds_summary(sresult[uid])
+            for uid in sresult.get("uids", [])
+            if uid in sresult
+        ]
+        ev2 = Evidence(
+            source="ncbi_eutils",
+            endpoint=summary_url,
+            summary=f"esummary db=gds: {len(records)} record(s)",
+            payload={"uids": sresult.get("uids", [])},
+        )
+        return records, [ev, ev2]
+
     # -- normalizers -------------------------------------------------------
 
     @staticmethod
@@ -181,6 +232,21 @@ class NcbiClient:
                 g.get("chraccver") for g in genomic if g.get("chraccver")
             ],
             "raw": r,
+        }
+
+    @staticmethod
+    def _normalize_gds_summary(r: dict[str, Any]) -> dict[str, Any]:
+        return {
+            "source": "geo",
+            "accession": r.get("accession"),
+            "title": r.get("title") or r.get("seriestitle"),
+            "taxon": r.get("taxon"),
+            "n_samples": r.get("n_samples"),
+            "gds_type": r.get("gdstype"),
+            "tech_type": r.get("ptechtype"),
+            "pubmed_ids": r.get("pubmedids"),
+            "summary": r.get("summary"),
+            "raw": {},
         }
 
     @staticmethod

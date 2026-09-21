@@ -60,6 +60,22 @@ class FakeNcbi:
             }
         ], []
 
+    def geo_datasets_for_gene(self, symbol, organism=None):
+        return [
+            {
+                "source": "geo",
+                "accession": "GSE12345",
+                "title": "Expression profiling of BRCA1",
+                "taxon": "Homo sapiens",
+                "n_samples": 20,
+                "gds_type": "Expression profiling by array",
+                "tech_type": "in situ oligonucleotide",
+                "pubmed_ids": [],
+                "summary": "",
+                "raw": {},
+            }
+        ], []
+
 
 class FakeVeuPathDB:
     def lookup_gene(self, gene_id):
@@ -106,6 +122,23 @@ class FakeUniProt:
         ], []
 
 
+class FakeGxa:
+    def experiments_for_gene(self, symbol, organism=None):
+        return [
+            {
+                "source": "expression_atlas",
+                "accession": "E-MTAB-0000",
+                "title": "RNA-seq of human tissues",
+                "type": "Baseline",
+                "species": "Homo sapiens",
+                "factors": ["organism part"],
+                "n_assays": 100,
+                "technology": ["RNA-Seq mRNA"],
+                "raw": {},
+            }
+        ], []
+
+
 def _resolver():
     return Resolver(
         jev=JevClient(mock=True),
@@ -113,6 +146,7 @@ def _resolver():
         veupathdb=FakeVeuPathDB(),
         oma=FakeOma(),
         uniprot=FakeUniProt(),
+        gxa=FakeGxa(),
     )
 
 
@@ -171,3 +205,13 @@ def test_depth_four_adds_annotation():
     # IDA evidence should outscore IEA
     conf = {e.object: e.confidence for e in g.edges if e.predicate == "has_go_term"}
     assert conf["go:GO:0003677"] > conf["go:GO:0006281"]
+
+
+def test_depth_five_adds_expression():
+    r = _resolver()
+    g = r.resolve("672", depth=5)
+    assert "dataset:GSE12345" in g.nodes
+    assert "dataset:E-MTAB-0000" in g.nodes
+    assert "condition:organism part" in g.nodes
+    predicates = {e.predicate for e in g.edges}
+    assert {"measured_in", "has_factor"} <= predicates

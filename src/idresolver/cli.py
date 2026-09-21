@@ -36,7 +36,7 @@ def version() -> None:
 def resolve(
     identifier: str = typer.Argument(..., help="Identifier to resolve (v1: gene IDs)."),
     out: Path = typer.Option(Path("graph.json"), "-o", "--out", help="Output JSON path."),
-    depth: int = typer.Option(4, "--depth", help="Stages: 0=classify, 1=+resolve, 2=+assemblies, 3=+orthologs, 4=+annotation."),
+    depth: int = typer.Option(5, "--depth", help="Stages: 0=classify, 1=+resolve, 2=+assemblies, 3=+orthologs, 4=+annotation, 5=+expression."),
     max_candidates: int = typer.Option(20, "--max-candidates"),
     mock_jev: bool = typer.Option(False, "--mock-jev", help="Offline dev: no API key needed."),
     report: bool = typer.Option(False, "--report", help="Also write an HTML report next to the JSON."),

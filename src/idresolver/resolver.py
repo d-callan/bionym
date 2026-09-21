@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+from .clients.expression import ExpressionAtlasClient
 from .clients.ncbi import NcbiClient
 from .clients.oma import OmaClient
 from .clients.uniprot import GO_EVIDENCE_CONFIDENCE, DEFAULT_GO_CONFIDENCE, UniProtClient
@@ -23,6 +24,7 @@ from .questions import (
     s2_assemblies,
     s3_orthologs,
     s4_annotate,
+    s5_expression,
 )
 
 log = logging.getLogger(__name__)
@@ -36,6 +38,7 @@ class Resolver:
         veupathdb: VEuPathDBClient | None = None,
         oma: OmaClient | None = None,
         uniprot: UniProtClient | None = None,
+        gxa: ExpressionAtlasClient | None = None,
         max_candidates: int = 20,
     ) -> None:
         self.jev = jev
@@ -43,6 +46,7 @@ class Resolver:
         self.veupathdb = veupathdb or VEuPathDBClient()
         self.oma = oma or OmaClient()
         self.uniprot = uniprot or UniProtClient()
+        self.gxa = gxa or ExpressionAtlasClient()
         self.max_candidates = max_candidates
 
     def resolve(self, identifier: str, depth: int = 1) -> KnowledgeGraph:
@@ -79,6 +83,10 @@ class Resolver:
         if depth >= 4 and match:
             self._s4_annotate(identifier, match, graph)
             graph.metadata["stages"].append("s4_annotate")
+
+        if depth >= 5 and match:
+            self._s5_expression(identifier, match, graph)
+            graph.metadata["stages"].append("s5_expression")
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -558,3 +566,71 @@ class Resolver:
         graph.nodes[identifier].attrs["function_characterization"] = answers[
             "characterization"
         ].get("score")
+
+    # -- S5 ----------------------------------------------------------------
+
+    def _s5_expression(
+        self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
+    ) -> None:
+        symbol = match.get("symbol") or match.get("locus_tag") or identifier
+        organism = match.get("organism")
+
+        geo, geo_ev = self.ncbi.geo_datasets_for_gene(symbol, organism)
+        gxa, gxa_ev = self.gxa.experiments_for_gene(symbol, organism)
+        evidence = geo_ev + gxa_ev
+
+        # Cap each source independently so one noisy source can't starve the
+        # other; JEV scores every candidate for relevance.
+        candidates = geo[: self.max_candidates] + gxa[: self.max_candidates]
+        if not candidates:
+            graph.metadata["stages"].append("s5_expression:no_data")
+            return
+
+        state = s5_expression.build_state(identifier, match, candidates)
+        questions = s5_expression.build_questions(candidates)
+        answers = self.jev.ask(state, questions, stage="s5_expression")
+
+        for i, c in enumerate(candidates):
+            acc = c.get("accession")
+            if not acc:
+                continue
+            node_id = f"dataset:{acc}"
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.DATASET,
+                    label=c.get("title") or acc,
+                    id_namespace=c.get("source", ""),
+                    attrs={
+                        "type": c.get("type") or c.get("gds_type"),
+                        "species": c.get("species") or c.get("taxon"),
+                        "n_samples": c.get("n_samples") or c.get("n_assays"),
+                    },
+                )
+            )
+            ans = answers.get(f"relevant_{i}", {})
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="measured_in",
+                    object=node_id,
+                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                    jev_question_id=f"relevant_{i}",
+                    evidence=evidence,
+                )
+            )
+            # Experimental factors -> Condition nodes (deterministic metadata).
+            for factor in c.get("factors", []):
+                cond_id = f"condition:{factor}"
+                graph.add_node(
+                    Node(id=cond_id, type=NodeType.CONDITION, label=factor)
+                )
+                graph.add_edge(
+                    Edge(
+                        subject=node_id,
+                        predicate="has_factor",
+                        object=cond_id,
+                        confidence=1.0,
+                        evidence=evidence,
+                    )
+                )
