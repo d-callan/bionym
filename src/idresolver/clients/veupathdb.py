@@ -39,11 +39,24 @@ PREFIX_PROJECTS: list[tuple[str, str]] = [
 # Fallback order when no prefix matches.
 DEFAULT_PROJECTS = ["plasmodb", "toxodb", "cryptodb"]
 
-BASE = "https://{project}.org/{project}/service/record-types/gene/searches/GenesByGeneId/reports/standard"
+# All VEuPathDB sites accept /a as the webapp path; it auto-resolves to
+# the project's real context (plasmo, toxo, tritrypdb, ...).
+BASE = "https://{project}.org/a/service/record-types/gene/searches/GenesByGeneId/reports/standard"
 
 
 class VEuPathDBClient:
-    def __init__(self, timeout: float = 30.0, cache_dir: str | None = None) -> None:
+    """WDK service client. Since VEuPathDB release 71 the service API
+    requires a registered-user API key; set VEUPATHDB_API_KEY (sent as an
+    Authorization bearer). Without it, lookups 401 and callers should fall
+    back to NCBI, which indexes VEuPathDB locus tags in db=gene."""
+
+    def __init__(
+        self,
+        api_key: str | None = None,
+        timeout: float = 30.0,
+        cache_dir: str | None = None,
+    ) -> None:
+        self.api_key = api_key or os.environ.get("VEUPATHDB_API_KEY") or None
         self.timeout = timeout
         self._cache = None
         if cache_dir:
@@ -123,8 +136,17 @@ class VEuPathDBClient:
         cache_key = url + "|" + json.dumps(body, sort_keys=True)
         if self._cache is not None and cache_key in self._cache:
             return self._cache[cache_key]
+        headers = {}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
         try:
-            resp = httpx.post(url, json=body, timeout=self.timeout)
+            resp = httpx.post(url, json=body, headers=headers, timeout=self.timeout)
+            if resp.status_code == 401 and not self.api_key:
+                log.info(
+                    "VEuPathDB requires an API key (register at "
+                    "veupathdb.org user profile); set VEUPATHDB_API_KEY"
+                )
+                return {}
             if resp.status_code != 200:
                 log.warning(
                     "VEuPathDB %s -> %s: %s", url, resp.status_code, resp.text[:200]
