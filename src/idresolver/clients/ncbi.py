@@ -1,0 +1,239 @@
+"""NCBI client: Datasets v2 + E-utilities, with polite rate limiting.
+
+Covers the M1 needs (gene resolution, taxon lineage) plus
+`assemblies_for_taxon` which S2 will consume. All methods return
+(normalized_records, Evidence) so claims can cite what was retrieved.
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+import time
+from typing import Any
+
+import httpx
+
+from ..evidence import Evidence
+
+log = logging.getLogger(__name__)
+
+EUTILS = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
+DATASETS = "https://api.ncbi.nlm.nih.gov/datasets/v2"
+
+
+class NcbiClient:
+    def __init__(
+        self,
+        api_key: str | None = None,
+        timeout: float = 30.0,
+        cache_dir: str | None = None,
+    ) -> None:
+        self.api_key = api_key or os.environ.get("NCBI_API_KEY") or None
+        self.timeout = timeout
+        self._last_request = 0.0
+        self._min_interval = 0.1 if self.api_key else 0.34  # 10/s vs 3/s
+        self._cache = None
+        if cache_dir:
+            import diskcache
+
+            self._cache = diskcache.Cache(os.path.join(cache_dir, "ncbi"))
+
+    # -- public API --------------------------------------------------------
+
+    def gene_by_id(self, gene_id: str) -> tuple[list[dict[str, Any]], list[Evidence]]:
+        """Datasets v2 gene report for a numeric NCBI Gene ID."""
+        url = f"{DATASETS}/gene/id/{gene_id}"
+        data = self._get(url)
+        reports = data.get("reports", [])
+        records = [self._normalize_gene_report(r) for r in reports]
+        ev = Evidence(
+            source="ncbi_datasets",
+            endpoint=url,
+            summary=f"gene/id/{gene_id}: {len(reports)} report(s)",
+            payload={"n_reports": len(reports)},
+        )
+        return records, [ev]
+
+    def find_gene(self, term: str) -> tuple[list[dict[str, Any]], list[Evidence]]:
+        """E-utilities esearch+esummary on db=gene. Works for symbols and
+        locus tags (incl. VEuPathDB-style IDs, which NCBI indexes)."""
+        search_url = f"{EUTILS}/esearch.fcgi"
+        search = self._get(
+            search_url,
+            params={"db": "gene", "term": term, "retmode": "json", "retmax": 20},
+        )
+        ids = search.get("esearchresult", {}).get("idlist", [])
+        ev = Evidence(
+            source="ncbi_eutils",
+            endpoint=search_url,
+            summary=f"esearch db=gene term={term!r}: {len(ids)} hit(s)",
+            payload={"term": term, "idlist": ids},
+        )
+        if not ids:
+            return [], [ev]
+
+        summary_url = f"{EUTILS}/esummary.fcgi"
+        summ = self._get(
+            summary_url,
+            params={
+                "db": "gene",
+                "id": ",".join(ids),
+                "retmode": "json",
+            },
+        )
+        result = summ.get("result", {})
+        records = [
+            self._normalize_gene_summary(result[uid]) for uid in result.get("uids", [])
+        ]
+        ev2 = Evidence(
+            source="ncbi_eutils",
+            endpoint=summary_url,
+            summary=f"esummary db=gene: {len(records)} record(s)",
+            payload={"uids": result.get("uids", [])},
+        )
+        return records, [ev, ev2]
+
+    def taxon(self, tax_id: int | str) -> tuple[dict[str, Any] | None, list[Evidence]]:
+        """Datasets v2 taxonomy report: rank, lineage, classification."""
+        url = f"{DATASETS}/taxon/{tax_id}"
+        data = self._get(url)
+        reports = data.get("reports", [])
+        ev = Evidence(
+            source="ncbi_datasets",
+            endpoint=url,
+            summary=f"taxon/{tax_id}: {len(reports)} report(s)",
+            payload={"n_reports": len(reports)},
+        )
+        if not reports:
+            return None, [ev]
+        return self._normalize_taxon_report(reports[0]), [ev]
+
+    def assemblies_for_taxon(
+        self, tax_id: int | str
+    ) -> tuple[list[dict[str, Any]], list[Evidence]]:
+        """All assemblies annotated to a taxid (S2 will consume this)."""
+        url = f"{DATASETS}/genome/taxon/{tax_id}/dataset_report"
+        data = self._get(url, params={"filters.assembly_source": "all"})
+        reports = data.get("reports", [])
+        records = [self._normalize_assembly_report(r) for r in reports]
+        ev = Evidence(
+            source="ncbi_datasets",
+            endpoint=url,
+            summary=f"genome/taxon/{tax_id}: {len(records)} assemblies",
+            payload={"n_reports": len(reports)},
+        )
+        return records, [ev]
+
+    # -- normalizers -------------------------------------------------------
+
+    @staticmethod
+    def _normalize_gene_report(r: dict[str, Any]) -> dict[str, Any]:
+        # Datasets v2 wraps the gene record: report = {"gene": {...}, "query": ...}
+        g = r.get("gene") or r
+        annotations = g.get("annotations") or []
+        assemblies = [
+            a["assembly_accession"]
+            for a in annotations
+            if a.get("assembly_accession")
+        ]
+        genomic = [
+            loc["genomic_accession_version"]
+            for a in annotations
+            for loc in (a.get("genomic_locations") or [])
+            if loc.get("genomic_accession_version")
+        ]
+        return {
+            "source": "ncbi_datasets",
+            "gene_id": str(g.get("gene_id", "")),
+            "symbol": g.get("symbol"),
+            "description": g.get("description"),
+            "locus_tag": g.get("locus_tag"),
+            "tax_id": g.get("tax_id"),
+            "organism": g.get("taxname"),
+            "assembly_accession": assemblies[0] if assemblies else None,
+            "assembly_accessions": assemblies,
+            "genomic_accessions": genomic,
+            "raw": r,
+        }
+
+    @staticmethod
+    def _normalize_gene_summary(r: dict[str, Any]) -> dict[str, Any]:
+        genomic = r.get("genomicinfo") or []
+        return {
+            "source": "ncbi_eutils",
+            "gene_id": str(r.get("uid", "")),
+            "symbol": r.get("name"),
+            "description": r.get("description"),
+            "locus_tag": None,
+            "aliases": r.get("otheraliases"),
+            "tax_id": (r.get("organism") or {}).get("taxid"),
+            "organism": (r.get("organism") or {}).get("scientificname"),
+            "assembly_accession": None,
+            "genomic_accessions": [
+                g.get("chraccver") for g in genomic if g.get("chraccver")
+            ],
+            "raw": r,
+        }
+
+    @staticmethod
+    def _normalize_taxon_report(r: dict[str, Any]) -> dict[str, Any]:
+        tax = r.get("taxonomy") or {}
+        classification = tax.get("classification") or {}
+        species = classification.get("species") or {}
+        lineage = [
+            {"tax_id": t.get("id"), "name": t.get("name"), "rank": t.get("rank")}
+            for t in (tax.get("lineage") or [])
+        ]
+        return {
+            "tax_id": tax.get("id"),
+            "name": tax.get("name"),
+            "rank": tax.get("rank"),
+            "species_tax_id": species.get("id") or (
+                tax.get("id") if tax.get("rank") == "species" else None
+            ),
+            "species_name": species.get("name") or (
+                tax.get("name") if tax.get("rank") == "species" else None
+            ),
+            "lineage": lineage,
+            "raw": r,
+        }
+
+    @staticmethod
+    def _normalize_assembly_report(r: dict[str, Any]) -> dict[str, Any]:
+        info = r.get("assembly_info") or {}
+        org = r.get("organism") or {}
+        return {
+            "accession": r.get("accession"),
+            "name": (info.get("assembly_name")) or r.get("assembly_name"),
+            "organism": org.get("organism_name"),
+            "tax_id": org.get("tax_id"),
+            "level": info.get("assembly_level") or r.get("assembly_level"),
+            "refseq": bool(info.get("refseq") or r.get("refseq_category")),
+            "submission_date": info.get("submission_date"),
+            "raw": r,
+        }
+
+    # -- transport ---------------------------------------------------------
+
+    def _get(self, url: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+        params = dict(params or {})
+        if self.api_key:
+            params["api_key"] = self.api_key
+        cache_key = url + "?" + "&".join(f"{k}={v}" for k, v in sorted(params.items()))
+        if self._cache is not None and cache_key in self._cache:
+            return self._cache[cache_key]
+
+        wait = self._min_interval - (time.monotonic() - self._last_request)
+        if wait > 0:
+            time.sleep(wait)
+        self._last_request = time.monotonic()
+
+        resp = httpx.get(url, params=params, timeout=self.timeout)
+        if resp.status_code != 200:
+            log.warning("NCBI %s -> %s: %s", url, resp.status_code, resp.text[:200])
+            return {}
+        data = resp.json()
+        if self._cache is not None:
+            self._cache[cache_key] = data
+        return data
