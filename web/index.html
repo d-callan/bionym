@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>idresolver</title>
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<style>
+  :root { --ink:#1a202c; --muted:#4a5568; --line:#cbd5e0; --bg:#f7fafc; }
+  * { box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; margin: 0; color: var(--ink); background: var(--bg); }
+  header { padding: 1.2rem 2rem; border-bottom: 1px solid var(--line); background: #fff; }
+  h1 { font-size: 1.3rem; margin: 0 0 .6rem; }
+  form { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
+  input[type=text] { padding: .45rem .7rem; border: 1px solid var(--line); border-radius: 6px; font-size: .95rem; width: 22rem; }
+  input[type=number] { width: 4.5rem; padding: .45rem .5rem; border: 1px solid var(--line); border-radius: 6px; }
+  button { padding: .45rem 1rem; border: 0; border-radius: 6px; background: #2b6cb0; color: #fff; font-size: .95rem; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  label { font-size: .8rem; color: var(--muted); }
+  #status { padding: .6rem 2rem; font-size: .85rem; color: var(--muted); }
+  #status.error { color: #c53030; }
+  main { padding: 0 2rem 3rem; }
+  h2 { font-size: 1.05rem; margin: 1.6rem 0 .5rem; }
+  svg { background: #fff; border: 1px solid var(--line); border-radius: 8px; width: 100%; height: auto; }
+  table { border-collapse: collapse; font-size: .82rem; background: #fff; }
+  th, td { border: 1px solid var(--line); padding: 3px 8px; text-align: left; }
+  th { background: #edf2f7; position: sticky; top: 0; }
+  .tablewrap { max-height: 22rem; overflow: auto; border-radius: 8px; }
+  .node { stroke: #fff; stroke-width: 1px; cursor: default; }
+  .nodelabel { font-size: 9px; pointer-events: none; }
+  .link { fill: none; }
+  .colhead { font-size: 11px; font-weight: 600; fill: var(--muted); }
+  .conf { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+<header>
+  <h1>idresolver</h1>
+  <form id="f">
+    <input type="text" id="id" placeholder="gene ID — e.g. PF3D7_0710100, 672, BRCA1" required>
+    <label>depth <input type="number" id="depth" value="6" min="0" max="6"></label>
+    <label>backend <input type="text" id="backend" value="http://localhost:8001" style="width:14rem"></label>
+    <button id="go" type="submit">Resolve</button>
+  </form>
+</header>
+<div id="status">Enter an identifier to resolve.</div>
+<main>
+  <h2>Network</h2>
+  <svg id="net" viewBox="0 0 1100 600" preserveAspectRatio="xMidYMid meet"></svg>
+  <h2>Edges</h2>
+  <div class="tablewrap"><table id="edges"><thead><tr><th>subject</th><th>predicate</th><th>object</th><th>conf</th></tr></thead><tbody></tbody></table></div>
+  <h2>Nodes</h2>
+  <div class="tablewrap"><table id="nodes"><thead><tr><th>id</th><th>type</th><th>label</th><th>namespace</th></tr></thead><tbody></tbody></table></div>
+</main>
+<script>
+const COLS = ["IdType","Gene","Organism","Assembly","OrthologGroup","Domain","GOTerm","Pathway","Dataset","Condition"];
+const COLORS = {IdType:"#8d99ae",Gene:"#2b6cb0",Organism:"#2f855a",Assembly:"#b7791f",OrthologGroup:"#6b46c1",Domain:"#c05621",GOTerm:"#2c7a7b",Pathway:"#97266d",Dataset:"#4a5568",Condition:"#9b2c2c"};
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+$("#f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const id = $("#id").value.trim(), depth = $("#depth").value, base = $("#backend").value.replace(/\/$/,"");
+  const status = $("#status"); status.className = ""; status.textContent = "Resolving " + id + "…";
+  $("#go").disabled = true;
+  try {
+    const r = await fetch(`${base}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${depth}`);
+    if (!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || r.statusText);
+    const g = await r.json();
+    render(g);
+    const u = (g.metadata.jev_usage||{}).total||{};
+    status.textContent = `${Object.keys(g.nodes).length} nodes, ${g.edges.length} edges · JEV ${u.input_tokens||0}in/${u.output_tokens||0}out · stages: ${(g.metadata.stages||[]).join(", ")}`;
+  } catch (err) {
+    status.className = "error"; status.textContent = "Error: " + err.message;
+  } finally { $("#go").disabled = false; }
+});
+
+function render(g) {
+  const nodes = Object.values(g.nodes), edges = g.edges;
+  const svg = d3.select("#net"); svg.selectAll("*").remove();
+  const W = 1100, H = 600;
+  const byType = d3.group(nodes, d => d.type);
+  const cols = COLS.filter(t => byType.has(t));
+  const x = d3.scalePoint(cols, [70, W-70]);
+  const pos = {};
+  cols.forEach(t => {
+    const ns = byType.get(t);
+    const y = d3.scalePoint(d3.range(ns.length), [45, H-30]);
+    ns.forEach((n,i) => pos[n.id] = {x:x(t), y:y(i)});
+  });
+  svg.selectAll(".colhead").data(cols).join("text").attr("class","colhead")
+    .attr("x", d=>x(d)).attr("y", 20).attr("text-anchor","middle").text(d=>d);
+  svg.selectAll(".link").data(edges).join("path").attr("class","link")
+    .attr("d", e => { const s=pos[e.subject], t=pos[e.object]; if(!s||!t) return "";
+      const mx=(s.x+t.x)/2; return `M${s.x},${s.y} C${mx},${s.y} ${mx},${t.y} ${t.x},${t.y}`; })
+    .attr("stroke","#718096").attr("stroke-opacity", e=>0.12+0.88*e.confidence)
+    .attr("stroke-width", e=>0.5+2.5*e.confidence);
+  const node = svg.selectAll(".node").data(nodes).join("circle").attr("class","node")
+    .attr("cx", d=>pos[d.id].x).attr("cy", d=>pos[d.id].y).attr("r",5)
+    .attr("fill", d=>COLORS[d.type]||"#999");
+  node.append("title").text(d=>`${d.id} (${d.type})`);
+  svg.selectAll(".nodelabel").data(nodes).join("text").attr("class","nodelabel")
+    .attr("x", d=>pos[d.id].x+7).attr("y", d=>pos[d.id].y+3)
+    .text(d=>(d.label||d.id).slice(0,22));
+
+  document.querySelector("#edges tbody").innerHTML = edges.slice().sort((a,b)=>b.confidence-a.confidence)
+    .map(e=>`<tr><td>${esc(e.subject)}</td><td>${esc(e.predicate)}</td><td>${esc(e.object)}</td><td class="conf">${e.confidence.toFixed(2)}</td></tr>`).join("");
+  document.querySelector("#nodes tbody").innerHTML = nodes.slice().sort((a,b)=>a.type.localeCompare(b.type)||a.id.localeCompare(b.id))
+    .map(n=>`<tr><td>${esc(n.id)}</td><td>${esc(n.type)}</td><td>${esc(n.label)}</td><td>${esc(n.id_namespace)}</td></tr>`).join("");
+}
+</script>
+</body>
+</html>

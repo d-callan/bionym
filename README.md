@@ -10,11 +10,15 @@ confidence score and a list of supporting evidence.
 
 ## Status
 
-M1+M2 (partial): CLI → `graph.json`. Stages implemented: S0 (ID
-classification), S1 (entity resolution → organism + assembly), S2 (related
-& newer assemblies with species-rank lineage normalization). Later stages
-(orthologs, annotation, expression, cross-assembly remap) and the FastAPI
-backend + static web frontend are planned — see the repo plan.
+All pipeline stages implemented: S0 (ID classification), S1 (entity
+resolution → organism + assembly), S2 (related & newer assemblies with
+species-rank lineage normalization), S3 (orthologs via OMA), S4 (UniProt
+annotation: GO evidence-code confidence, KEGG, InterPro/Pfam), S5
+(expression: GEO + Expression Atlas, JEV-scored), S6 (cross-assembly
+presence: `annotated_in` + JEV `likely_present`).
+
+Interfaces: CLI (`idresolver resolve`), FastAPI backend (`backend/`),
+static web frontend (`web/`, D3 multi-partite network).
 
 ## Install
 
@@ -39,7 +43,8 @@ cp .env.example .env   # then edit
 ```bash
 idresolver resolve PF3D7_0710100 -o graph.json -v
 idresolver resolve 672 --depth 0            # classify only
-idresolver resolve PF3D7_0710100 --mock-jev # dev: no API key needed
+idresolver resolve 672 --report             # + self-contained HTML report
+idresolver resolve 672 --mock-jev           # offline dev, no API key
 ```
 
 Output: a JSON knowledge graph — `nodes` (typed: Gene, Organism, Assembly,
