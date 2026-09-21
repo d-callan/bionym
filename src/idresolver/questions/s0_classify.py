@@ -12,6 +12,7 @@ PATTERNS: list[tuple[str, str]] = [
     ("uniprot", r"^[OPQ][0-9][A-Z0-9]{3}[0-9]$|^[A-NR-Z][0-9][A-Z][A-Z0-9]{2}[0-9]$"),
     ("veupathdb", r"^[A-Za-z][A-Za-z0-9]{1,9}[_.][0-9][\w.]*$"),  # PF3D7_, Tb927., TGME49_
     ("ncbi_gene", r"^[0-9]{1,10}$"),
+    ("gene_symbol", r"^[A-Z][A-Z0-9]{2,15}$"),  # BRCA1, TP53 — uppercase symbol-like
     ("locus_tag", r"^[A-Za-z][\w.-]{2,}$"),
 ]
 
@@ -21,6 +22,7 @@ NAMESPACE_DESCRIPTIONS: dict[str, str] = {
     "veupathdb": "VEuPathDB gene ID (e.g. PF3D7_0710100, TGME49_..., Tb927...).",
     "uniprot": "UniProt accession (e.g. P12345, Q9Y6K9).",
     "refseq": "RefSeq accession (e.g. NM_000000, XP_..., GCF_...).",
+    "gene_symbol": "HGNC-style gene symbol (e.g. BRCA1, TP53).",
     "locus_tag": "Generic locus tag / gene identifier not matching a known namespace.",
 }
 

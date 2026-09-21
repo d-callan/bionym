@@ -57,22 +57,35 @@ class NcbiClient:
         return records, [ev]
 
     def find_gene(self, term: str) -> tuple[list[dict[str, Any]], list[Evidence]]:
-        """E-utilities esearch+esummary on db=gene. Works for symbols and
-        locus tags (incl. VEuPathDB-style IDs, which NCBI indexes)."""
+        """E-utilities esearch+esummary on db=gene.
+
+        Tries a fielded `[Gene Name]` search first — a bare All Fields query
+        matches any record mentioning the term (37k hits for BRCA1, top hits
+        in unrelated species), so symbol-like inputs need the field
+        qualifier. Falls back to unqualified for locus tags and other IDs
+        that aren't symbols (incl. VEuPathDB-style IDs NCBI indexes).
+        """
         search_url = f"{EUTILS}/esearch.fcgi"
-        search = self._get(
-            search_url,
-            params={"db": "gene", "term": term, "retmode": "json", "retmax": 20},
-        )
-        ids = search.get("esearchresult", {}).get("idlist", [])
-        ev = Evidence(
-            source="ncbi_eutils",
-            endpoint=search_url,
-            summary=f"esearch db=gene term={term!r}: {len(ids)} hit(s)",
-            payload={"term": term, "idlist": ids},
-        )
+        evidence = []
+        ids: list[str] = []
+        for query in (f"{term}[Gene Name]", term):
+            search = self._get(
+                search_url,
+                params={"db": "gene", "term": query, "retmode": "json", "retmax": 20},
+            )
+            ids = search.get("esearchresult", {}).get("idlist", [])
+            evidence.append(
+                Evidence(
+                    source="ncbi_eutils",
+                    endpoint=search_url,
+                    summary=f"esearch db=gene term={query!r}: {len(ids)} hit(s)",
+                    payload={"term": query, "idlist": ids},
+                )
+            )
+            if ids:
+                break
         if not ids:
-            return [], [ev]
+            return [], evidence
 
         summary_url = f"{EUTILS}/esummary.fcgi"
         summ = self._get(
@@ -93,7 +106,7 @@ class NcbiClient:
             summary=f"esummary db=gene: {len(records)} record(s)",
             payload={"uids": result.get("uids", [])},
         )
-        return records, [ev, ev2]
+        return records, evidence + [ev2]
 
     def taxon(self, tax_id: int | str) -> tuple[dict[str, Any] | None, list[Evidence]]:
         """E-utilities efetch db=taxonomy: rank + lineage with ranks/taxids.
