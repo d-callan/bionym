@@ -39,7 +39,7 @@ def render_html(graph: KnowledgeGraph) -> str:
     colors = json.dumps(_COLORS)
 
     return f"""<!doctype html>
-<html><head><meta charset="utf-8"><title>idresolver: {html.escape(str(meta.get('input','')))}</title>
+<html><head><meta charset="utf-8"><title>BioNym: {html.escape(str(meta.get('input','')))}</title>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <style>
  body {{ font-family: system-ui, sans-serif; margin: 2rem; color: #1a202c; }}
@@ -57,7 +57,7 @@ def render_html(graph: KnowledgeGraph) -> str:
  th {{ cursor: pointer; user-select: none; }}
  th:hover {{ background: #e2e8f0; }}
 </style></head><body>
-<h1>idresolver report: <code>{html.escape(str(meta.get('input','')))}</code></h1>
+<h1>BioNym report: <code>{html.escape(str(meta.get('input','')))}</code></h1>
 <p class="meta">stages: {html.escape(', '.join(meta.get('stages', [])))} &middot;
  {len(nodes)} nodes, {len(edges)} edges &middot;
  JEV tokens: {usage.get('input_tokens', 0)} in / {usage.get('output_tokens', 0)} out

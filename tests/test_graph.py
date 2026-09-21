@@ -1,5 +1,5 @@
-from idresolver.evidence import Evidence
-from idresolver.graph import Edge, KnowledgeGraph, Node, NodeType
+from bionym.evidence import Evidence
+from bionym.graph import Edge, KnowledgeGraph, Node, NodeType
 
 
 def test_add_node_merges_attrs():

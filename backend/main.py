@@ -1,7 +1,7 @@
-"""FastAPI backend for idresolver — thin wrapper over the installed package.
+"""FastAPI backend for bionym — thin wrapper over the installed package.
 
 Run:  uvicorn main:app --reload --port 8000   (from backend/, with the
-      idresolver conda env active and .env loaded or vars exported)
+      bionym conda env active and .env loaded or vars exported)
 
 The static frontend in ../web calls GET /api/resolve.
 """
@@ -14,14 +14,14 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
-from idresolver.clients.ncbi import NcbiClient
-from idresolver.clients.veupathdb import VEuPathDBClient
-from idresolver.jev import JevClient
-from idresolver.resolver import Resolver
+from bionym.clients.ncbi import NcbiClient
+from bionym.clients.veupathdb import VEuPathDBClient
+from bionym.jev import JevClient
+from bionym.resolver import Resolver
 
 load_dotenv()
 
-app = FastAPI(title="idresolver", version="0.1.0")
+app = FastAPI(title="bionym", version="0.1.0")
 
 # Static frontend is served from a different origin (file://, GH Pages, or
 # a separate port) — allow all origins for local dev; tighten on deploy.
@@ -32,7 +32,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-_cache_dir = os.environ.get("IDRESOLVER_CACHE_DIR") or None
+_cache_dir = os.environ.get("BIONYM_CACHE_DIR") or None
 
 
 def _resolver(mock_jev: bool = False) -> Resolver:

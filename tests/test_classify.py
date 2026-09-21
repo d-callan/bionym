@@ -1,4 +1,4 @@
-from idresolver.questions import s0_classify
+from bionym.questions import s0_classify
 
 
 def test_ncbi_gene_numeric():

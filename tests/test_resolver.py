@@ -1,5 +1,5 @@
-from idresolver.jev import JevClient
-from idresolver.resolver import Resolver
+from bionym.jev import JevClient
+from bionym.resolver import Resolver
 
 
 class FakeNcbi:
@@ -231,7 +231,7 @@ def test_depth_six_adds_remap():
 
 
 def test_filter_by_confidence_and_url():
-    from idresolver.graph import KnowledgeGraph, Node, NodeType, Edge
+    from bionym.graph import KnowledgeGraph, Node, NodeType, Edge
     g = KnowledgeGraph(metadata={"query": "Q"})
     g.add_node(Node(id="Q", type=NodeType.GENE, attrs={"gene_id": "672"}))
     g.add_node(Node(id="kegg:hsa05290", type=NodeType.PATHWAY, id_namespace="kegg"))

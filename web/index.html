@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>idresolver</title>
+<title>BioNym</title>
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <style>
   :root { --ink:#1a202c; --muted:#4a5568; --line:#cbd5e0; --bg:#f7fafc; }
@@ -40,11 +40,9 @@
 </head>
 <body>
 <header>
-  <h1>idresolver <span class="tagline">gene identifiers → confidence-scored knowledge graphs, judged by <a href="https://typesafe.ai" target="_blank" rel="noopener">JEV (TypeSafe.ai)</a></span></h1>
+  <h1>BioNym <span class="tagline">identifiers → confidence-scored knowledge graphs, judged by <a href="https://typesafe.ai" target="_blank" rel="noopener">JEV (TypeSafe.ai)</a></span></h1>
   <form id="f">
-    <input type="text" id="id" placeholder="gene ID — e.g. PF3D7_0710100, 672, BRCA1" required>
-    <label>depth <input type="number" id="depth" value="6" min="0" max="6"></label>
-    <label>backend <input type="text" id="backend" value="http://localhost:8001" style="width:14rem"></label>
+    <input type="text" id="id" placeholder="identifier — e.g. PF3D7_0710100, 672, BRCA1" required>
     <button id="go" type="submit">Resolve</button>
     <label>min conf <input type="range" id="minconf" min="0" max="1" step="0.05" value="0" style="width:8rem;vertical-align:middle"><span id="minconfv">0.00</span></label>
   </form>
@@ -65,13 +63,17 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let GRAPH = null;
 
+// Admin-configurable: point at the deployed backend. Not user-facing.
+const BACKEND = "http://localhost:8001";
+const DEPTH = 6;  // full pipeline
+
 $("#f").addEventListener("submit", async e => {
   e.preventDefault();
-  const id = $("#id").value.trim(), depth = $("#depth").value, base = $("#backend").value.replace(/\/$/,"");
+  const id = $("#id").value.trim();
   const status = $("#status"); status.className = ""; status.textContent = "Resolving " + id + "…";
   $("#go").disabled = true;
   try {
-    const r = await fetch(`${base}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${depth}`);
+    const r = await fetch(`${BACKEND}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${DEPTH}`);
     if (!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || r.statusText);
     GRAPH = await r.json();
     renderFiltered();

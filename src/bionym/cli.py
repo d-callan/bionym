@@ -1,4 +1,4 @@
-"""idresolver CLI: `idresolver resolve <id>` -> graph.json"""
+"""bionym CLI: `bionym resolve <id>` -> graph.json"""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ app = typer.Typer(
 
 
 def _cache_dir() -> str | None:
-    return os.environ.get("IDRESOLVER_CACHE_DIR") or None
+    return os.environ.get("BIONYM_CACHE_DIR") or None
 
 
 @app.command()
