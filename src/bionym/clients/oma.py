@@ -48,6 +48,17 @@ class OmaClient:
             return None, [ev]
         return self._normalize_entry(data), [ev]
 
+    def xrefs(self, entry_nr: int | str) -> list[dict[str, Any]]:
+        """Cross-references for an OMA entry (SourceID, ORF name, UniProt…).
+
+        Used to find a resolvable identifier for an ortholog — OMA returns
+        UniProt canonical IDs, which don't resolve well via NCBI gene; the
+        SourceID (e.g. a VEuPathDB locus tag) usually does.
+        """
+        url = f"{BASE}/protein/{entry_nr}/xref/"
+        data = self._get(url)
+        return data if isinstance(data, list) else []
+
     def orthologs(
         self, identifier: str
     ) -> tuple[list[dict[str, Any]], list[Evidence]]:
@@ -70,6 +81,7 @@ class OmaClient:
         species = e.get("species") or {}
         return {
             "source": "oma",
+            "entry_nr": e.get("entry_nr"),
             "omaid": e.get("omaid"),
             "canonical_id": e.get("canonicalid"),
             "species": species.get("name"),

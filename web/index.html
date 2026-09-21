@@ -108,6 +108,7 @@ function link(n) {
 // to seed the next query (e.g. follow an ortholog when the query gene has
 // no downstream data).
 function resolveId(n) {
+  if (n.attrs && n.attrs.resolve_id) return String(n.attrs.resolve_id);
   if (n.attrs && n.attrs.gene_id) return String(n.attrs.gene_id);
   const rest = n.id.includes(":") ? n.id.split(":").slice(1).join(":") : n.id;
   return rest || n.id;

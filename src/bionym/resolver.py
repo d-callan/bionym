@@ -411,6 +411,15 @@ class Resolver:
             cid = c.get("canonical_id") or c.get("omaid")
             if not cid:
                 continue
+            # OMA canonical IDs are UniProt accessions, which resolve poorly
+            # via NCBI gene. Fetch cross-references and prefer the SourceID
+            # (often a VEuPathDB locus tag) as the resolvable identifier.
+            resolve_id = cid
+            if c.get("entry_nr"):
+                for xr in self.oma.xrefs(c["entry_nr"]):
+                    if xr.get("source") == "SourceID":
+                        resolve_id = xr["xref"]
+                        break
             node_id = f"gene:{cid}"
             graph.add_node(
                 Node(
@@ -422,6 +431,7 @@ class Resolver:
                         "species": c.get("species"),
                         "tax_id": c.get("tax_id"),
                         "rel_type": c.get("rel_type"),
+                        "resolve_id": resolve_id,
                     },
                 )
             )
