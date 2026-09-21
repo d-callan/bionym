@@ -54,7 +54,7 @@
   <h2>Edges <input class="tfilter" data-for="edges" placeholder="filter…"></h2>
   <div class="tablewrap"><table id="edges"><thead><tr><th>subject</th><th>predicate</th><th>object</th><th>conf</th></tr></thead><tbody></tbody></table></div>
   <h2>Nodes <input class="tfilter" data-for="nodes" placeholder="filter…"></h2>
-  <div class="tablewrap"><table id="nodes"><thead><tr><th>id</th><th>type</th><th>label</th><th>namespace</th></tr></thead><tbody></tbody></table></div>
+  <div class="tablewrap"><table id="nodes"><thead><tr><th>id</th><th>type</th><th>label</th><th>namespace</th><th></th></tr></thead><tbody></tbody></table></div>
 </main>
 <script>
 const COLS = ["IdType","Gene","Organism","Assembly","OrthologGroup","Domain","GOTerm","Pathway","Dataset","Condition"];
@@ -102,6 +102,20 @@ function renderFiltered() {
 
 function link(n) {
   return n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.label||n.id)}</a>` : esc(n.label||n.id);
+}
+
+// Best resolvable identifier for a node — used by the "resolve →" action
+// to seed the next query (e.g. follow an ortholog when the query gene has
+// no downstream data).
+function resolveId(n) {
+  if (n.attrs && n.attrs.gene_id) return String(n.attrs.gene_id);
+  const rest = n.id.includes(":") ? n.id.split(":").slice(1).join(":") : n.id;
+  return rest || n.id;
+}
+function resolveNext(n) {
+  $("#id").value = resolveId(n);
+  $("#f").requestSubmit();
+  window.scrollTo({top: 0, behavior: "smooth"});
 }
 
 // Sortable + filterable table. cols: [{label, val(row), render(row), cls?}]
@@ -174,7 +188,13 @@ function render(g) {
     {label:"type", val:n=>n.type, render:n=>esc(n.type)},
     {label:"label", val:n=>n.label||n.id, render:n=>link(n)},
     {label:"namespace", val:n=>n.id_namespace, render:n=>esc(n.id_namespace)},
+    {label:"", val:n=>"", render:n=>n.type==="Gene" ? `<a href="#" class="resolve-next" data-id="${esc(n.id)}">resolve →</a>` : ""},
   ], 1, 1);
+  // Wire resolve → buttons (delegated so they survive re-sorts/filters).
+  document.querySelector("#nodes tbody").addEventListener("click", e => {
+    const a = e.target.closest(".resolve-next");
+    if (a) { e.preventDefault(); resolveNext(byId[a.dataset.id]); }
+  });
 }
 </script>
 </body>
