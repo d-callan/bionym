@@ -12,11 +12,18 @@ from typing import Any
 
 from .clients.ncbi import NcbiClient
 from .clients.oma import OmaClient
+from .clients.uniprot import GO_EVIDENCE_CONFIDENCE, DEFAULT_GO_CONFIDENCE, UniProtClient
 from .clients.veupathdb import VEuPathDBClient
 from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
 from .jev import JevClient
-from .questions import s0_classify, s1_resolve, s2_assemblies, s3_orthologs
+from .questions import (
+    s0_classify,
+    s1_resolve,
+    s2_assemblies,
+    s3_orthologs,
+    s4_annotate,
+)
 
 log = logging.getLogger(__name__)
 
@@ -28,12 +35,14 @@ class Resolver:
         ncbi: NcbiClient | None = None,
         veupathdb: VEuPathDBClient | None = None,
         oma: OmaClient | None = None,
+        uniprot: UniProtClient | None = None,
         max_candidates: int = 20,
     ) -> None:
         self.jev = jev
         self.ncbi = ncbi or NcbiClient()
         self.veupathdb = veupathdb or VEuPathDBClient()
         self.oma = oma or OmaClient()
+        self.uniprot = uniprot or UniProtClient()
         self.max_candidates = max_candidates
 
     def resolve(self, identifier: str, depth: int = 1) -> KnowledgeGraph:
@@ -66,6 +75,10 @@ class Resolver:
         if depth >= 3 and match:
             self._s3_orthologs(identifier, match, graph)
             graph.metadata["stages"].append("s3_orthologs")
+
+        if depth >= 4 and match:
+            self._s4_annotate(identifier, match, graph)
+            graph.metadata["stages"].append("s4_annotate")
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -426,3 +439,122 @@ class Resolver:
                     evidence=evidence,
                 )
             )
+
+    # -- S4 ----------------------------------------------------------------
+
+    def _s4_annotate(
+        self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
+    ) -> None:
+        symbol = match.get("symbol") or match.get("locus_tag") or identifier
+        records, evidence = self.uniprot.search_gene(symbol, match.get("tax_id"))
+        if not records and symbol != identifier:
+            records, ev2 = self.uniprot.search_gene(identifier, match.get("tax_id"))
+            evidence += ev2
+        if not records:
+            graph.metadata["stages"].append("s4_annotate:no_uniprot")
+            return
+        rec = records[0]
+
+        # same_as edge: deterministic confidence from identifier agreement.
+        acc = rec.get("accession")
+        if acc:
+            up_node = f"uniprot:{acc}"
+            graph.add_node(
+                Node(
+                    id=up_node,
+                    type=NodeType.GENE,
+                    label=rec.get("uniprot_id") or acc,
+                    id_namespace="uniprot",
+                    attrs={
+                        "protein_name": rec.get("protein_name"),
+                        "organism": rec.get("organism"),
+                    },
+                )
+            )
+            name_match = (rec.get("gene_name") or "").lower() == symbol.lower()
+            tax_match = not match.get("tax_id") or rec.get("tax_id") == match.get("tax_id")
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="same_as",
+                    object=up_node,
+                    confidence=0.9 if (name_match and tax_match) else 0.6,
+                    evidence=evidence,
+                )
+            )
+
+        for t in rec.get("go_terms", []):
+            go_id = t.get("id")
+            if not go_id:
+                continue
+            node_id = f"go:{go_id}"
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.GO_TERM,
+                    label=t.get("term") or go_id,
+                    id_namespace="go",
+                    attrs={"aspect": t.get("aspect")},
+                )
+            )
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="has_go_term",
+                    object=node_id,
+                    confidence=GO_EVIDENCE_CONFIDENCE.get(
+                        t.get("evidence", ""), DEFAULT_GO_CONFIDENCE
+                    ),
+                    evidence=evidence,
+                )
+            )
+
+        for kegg_id in rec.get("kegg", []):
+            node_id = f"kegg:{kegg_id}"
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.PATHWAY,
+                    label=kegg_id,
+                    id_namespace="kegg",
+                )
+            )
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="in_pathway",
+                    object=node_id,
+                    confidence=0.8,
+                    evidence=evidence,
+                )
+            )
+
+        for source, domains in (("interpro", rec.get("interpro", [])), ("pfam", rec.get("pfam", []))):
+            for d in domains:
+                dom_id = d.get("id")
+                if not dom_id:
+                    continue
+                node_id = f"domain:{dom_id}"
+                graph.add_node(
+                    Node(
+                        id=node_id,
+                        type=NodeType.DOMAIN,
+                        label=d.get("name") or dom_id,
+                        id_namespace=source,
+                    )
+                )
+                graph.add_edge(
+                    Edge(
+                        subject=identifier,
+                        predicate="has_domain",
+                        object=node_id,
+                        confidence=0.8,
+                        evidence=evidence,
+                    )
+                )
+
+        state = s4_annotate.build_state(match, rec)
+        answers = self.jev.ask(state, s4_annotate.build_questions(), stage="s4_annotate")
+        graph.nodes[identifier].attrs["function_characterization"] = answers[
+            "characterization"
+        ].get("score")

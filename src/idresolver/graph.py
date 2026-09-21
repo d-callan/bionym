@@ -19,6 +19,7 @@ class NodeType(str, Enum):
     ORTHOLOG_GROUP = "OrthologGroup"
     PATHWAY = "Pathway"
     GO_TERM = "GOTerm"
+    DOMAIN = "Domain"
     DATASET = "Dataset"
     CONDITION = "Condition"
     ID_TYPE = "IdType"

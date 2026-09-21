@@ -82,12 +82,37 @@ class FakeOma:
         ], []
 
 
+class FakeUniProt:
+    def search_gene(self, symbol, tax_id=None):
+        return [
+            {
+                "source": "uniprot",
+                "accession": "P38398",
+                "uniprot_id": "BRCA1_HUMAN",
+                "gene_name": "BRCA1",
+                "protein_name": "Breast cancer type 1 susceptibility protein",
+                "organism": "Homo sapiens",
+                "tax_id": 9606,
+                "go_terms": [
+                    {"id": "GO:0003677", "term": "DNA binding", "aspect": "F", "evidence": "IDA"},
+                    {"id": "GO:0006281", "term": "DNA repair", "aspect": "P", "evidence": "IEA"},
+                ],
+                "kegg": ["hsa03440"],
+                "interpro": [{"id": "IPR001357", "name": "BRCT"}],
+                "pfam": [{"id": "PF00533", "name": "BRCT"}],
+                "keywords": ["DNA damage"],
+                "raw": {},
+            }
+        ], []
+
+
 def _resolver():
     return Resolver(
         jev=JevClient(mock=True),
         ncbi=FakeNcbi(),
         veupathdb=FakeVeuPathDB(),
         oma=FakeOma(),
+        uniprot=FakeUniProt(),
     )
 
 
@@ -132,3 +157,17 @@ def test_depth_three_adds_ortholog():
     assert "gene:BRCA1_HUMAN" in g.nodes
     predicates = {e.predicate for e in g.edges}
     assert "ortholog_of" in predicates
+
+
+def test_depth_four_adds_annotation():
+    r = _resolver()
+    g = r.resolve("672", depth=4)
+    assert "uniprot:P38398" in g.nodes
+    assert "go:GO:0003677" in g.nodes
+    assert "kegg:hsa03440" in g.nodes
+    assert "domain:IPR001357" in g.nodes
+    predicates = {e.predicate for e in g.edges}
+    assert {"same_as", "has_go_term", "in_pathway", "has_domain"} <= predicates
+    # IDA evidence should outscore IEA
+    conf = {e.object: e.confidence for e in g.edges if e.predicate == "has_go_term"}
+    assert conf["go:GO:0003677"] > conf["go:GO:0006281"]

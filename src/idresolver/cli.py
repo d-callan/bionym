@@ -36,9 +36,10 @@ def version() -> None:
 def resolve(
     identifier: str = typer.Argument(..., help="Identifier to resolve (v1: gene IDs)."),
     out: Path = typer.Option(Path("graph.json"), "-o", "--out", help="Output JSON path."),
-    depth: int = typer.Option(3, "--depth", help="Stages: 0=classify, 1=+resolve, 2=+assemblies, 3=+orthologs."),
+    depth: int = typer.Option(4, "--depth", help="Stages: 0=classify, 1=+resolve, 2=+assemblies, 3=+orthologs, 4=+annotation."),
     max_candidates: int = typer.Option(20, "--max-candidates"),
     mock_jev: bool = typer.Option(False, "--mock-jev", help="Offline dev: no API key needed."),
+    report: bool = typer.Option(False, "--report", help="Also write an HTML report next to the JSON."),
     verbose: bool = typer.Option(False, "-v", "--verbose"),
 ) -> None:
     load_dotenv()
@@ -62,11 +63,17 @@ def resolve(
     graph = resolver.resolve(identifier, depth=depth)
     graph.to_json(out)
 
-    usage = graph.metadata.get("jev_usage", {}).get("total", {})
+    usage = jev.total_usage()
     typer.echo(
         f"wrote {out}: {len(graph.nodes)} nodes, {len(graph.edges)} edges, "
-        f"jev tokens in={usage.get('input_tokens', 0)} out={usage.get('output_tokens', 0)}"
+        f"jev tokens in={usage['input_tokens']} out={usage['output_tokens']}"
     )
+    if report:
+        from .report import write_report
+
+        report_path = out.with_suffix(".html")
+        write_report(graph, report_path)
+        typer.echo(f"wrote {report_path}")
 
 
 if __name__ == "__main__":
