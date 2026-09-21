@@ -11,6 +11,8 @@
   body { font-family: system-ui, sans-serif; margin: 0; color: var(--ink); background: var(--bg); }
   header { padding: 1.2rem 2rem; border-bottom: 1px solid var(--line); background: #fff; }
   h1 { font-size: 1.3rem; margin: 0 0 .6rem; }
+  .tagline { font-size: .8rem; font-weight: normal; color: var(--muted); margin-left: .6rem; }
+  .tagline a { color: #2b6cb0; }
   form { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
   input[type=text] { padding: .45rem .7rem; border: 1px solid var(--line); border-radius: 6px; font-size: .95rem; width: 22rem; }
   input[type=number] { width: 4.5rem; padding: .45rem .5rem; border: 1px solid var(--line); border-radius: 6px; }
@@ -38,7 +40,7 @@
 </head>
 <body>
 <header>
-  <h1>idresolver</h1>
+  <h1>idresolver <span class="tagline">gene identifiers → confidence-scored knowledge graphs, judged by <a href="https://typesafe.ai" target="_blank" rel="noopener">JEV (TypeSafe.ai)</a></span></h1>
   <form id="f">
     <input type="text" id="id" placeholder="gene ID — e.g. PF3D7_0710100, 672, BRCA1" required>
     <label>depth <input type="number" id="depth" value="6" min="0" max="6"></label>

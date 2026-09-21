@@ -62,6 +62,9 @@ def render_html(graph: KnowledgeGraph) -> str:
  {len(nodes)} nodes, {len(edges)} edges &middot;
  JEV tokens: {usage.get('input_tokens', 0)} in / {usage.get('output_tokens', 0)} out
  ({usage.get('calls', 0)} calls)</p>
+<p class="meta">Confidence scores are judged by
+ <a href="https://typesafe.ai" target="_blank" rel="noopener">JEV (TypeSafe.ai)</a>
+ — every edge carries a model-judged confidence and its evidence.</p>
 
 <h2>Network</h2>
 <svg id="net" width="1100" height="600"></svg>
