@@ -66,8 +66,33 @@ class FakeVeuPathDB:
         return [], []
 
 
+class FakeOma:
+    def orthologs(self, identifier):
+        return [
+            {
+                "source": "oma",
+                "omaid": "HUMAN00001",
+                "canonical_id": "BRCA1_HUMAN",
+                "species": "Mus musculus",
+                "tax_id": 10090,
+                "rel_type": "1:1",
+                "score": 0.9,
+                "raw": {},
+            }
+        ], []
+
+
+def _resolver():
+    return Resolver(
+        jev=JevClient(mock=True),
+        ncbi=FakeNcbi(),
+        veupathdb=FakeVeuPathDB(),
+        oma=FakeOma(),
+    )
+
+
 def test_resolve_numeric_id_mock_jev():
-    r = Resolver(jev=JevClient(mock=True), ncbi=FakeNcbi(), veupathdb=FakeVeuPathDB())
+    r = _resolver()
     g = r.resolve("672", depth=1)
     assert "idtype:ncbi_gene" in g.nodes
     assert "taxon:9606" in g.nodes
@@ -79,23 +104,31 @@ def test_resolve_numeric_id_mock_jev():
 
 
 def test_resolve_veupathdb_id_falls_back_to_ncbi():
-    r = Resolver(jev=JevClient(mock=True), ncbi=FakeNcbi(), veupathdb=FakeVeuPathDB())
+    r = _resolver()
     g = r.resolve("PF3D7_0710100", depth=1)
     assert "idtype:veupathdb" in g.nodes
     assert "taxon:5833" in g.nodes
 
 
 def test_depth_zero_classifies_only():
-    r = Resolver(jev=JevClient(mock=True), ncbi=FakeNcbi(), veupathdb=FakeVeuPathDB())
+    r = _resolver()
     g = r.resolve("672", depth=0)
     assert "idtype:ncbi_gene" in g.nodes
     assert "taxon:9606" not in g.nodes
 
 
 def test_depth_two_adds_related_assembly():
-    r = Resolver(jev=JevClient(mock=True), ncbi=FakeNcbi(), veupathdb=FakeVeuPathDB())
+    r = _resolver()
     g = r.resolve("672", depth=2)
     assert "assembly:GCF_999999999.1" in g.nodes
     predicates = {e.predicate for e in g.edges}
     assert "related_assembly" in predicates
     assert "superseded_by" in predicates
+
+
+def test_depth_three_adds_ortholog():
+    r = _resolver()
+    g = r.resolve("672", depth=3)
+    assert "gene:BRCA1_HUMAN" in g.nodes
+    predicates = {e.predicate for e in g.edges}
+    assert "ortholog_of" in predicates

@@ -11,11 +11,12 @@ import logging
 from typing import Any
 
 from .clients.ncbi import NcbiClient
+from .clients.oma import OmaClient
 from .clients.veupathdb import VEuPathDBClient
 from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
 from .jev import JevClient
-from .questions import s0_classify, s1_resolve, s2_assemblies
+from .questions import s0_classify, s1_resolve, s2_assemblies, s3_orthologs
 
 log = logging.getLogger(__name__)
 
@@ -26,11 +27,13 @@ class Resolver:
         jev: JevClient,
         ncbi: NcbiClient | None = None,
         veupathdb: VEuPathDBClient | None = None,
+        oma: OmaClient | None = None,
         max_candidates: int = 20,
     ) -> None:
         self.jev = jev
         self.ncbi = ncbi or NcbiClient()
         self.veupathdb = veupathdb or VEuPathDBClient()
+        self.oma = oma or OmaClient()
         self.max_candidates = max_candidates
 
     def resolve(self, identifier: str, depth: int = 1) -> KnowledgeGraph:
@@ -59,6 +62,10 @@ class Resolver:
         if depth >= 2 and match:
             self._s2_assemblies(match, graph)
             graph.metadata["stages"].append("s2_assemblies")
+
+        if depth >= 3 and match:
+            self._s3_orthologs(identifier, match, graph)
+            graph.metadata["stages"].append("s3_orthologs")
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -324,3 +331,98 @@ class Resolver:
                         evidence=evidence,
                     )
                 )
+
+    # -- S3 ----------------------------------------------------------------
+
+    @staticmethod
+    def _species_key(name: str | None) -> str:
+        """Genus + species epithet, lowercased — ignores strain/isolate."""
+        return " ".join((name or "").lower().split()[:2])
+
+    def _s3_orthologs(
+        self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
+    ) -> None:
+        candidates, evidence = self.oma.orthologs(identifier)
+        if not candidates:
+            # OMA resolves several namespaces; retry with symbol/locus_tag.
+            alt = match.get("locus_tag") or match.get("symbol")
+            if alt and alt != identifier:
+                candidates, ev2 = self.oma.orthologs(alt)
+                evidence += ev2
+
+        candidates = candidates[: self.max_candidates]
+
+        # Organisms of related assemblies (S2) minus the source organism.
+        source_key = self._species_key(match.get("organism"))
+        related_organisms = sorted(
+            {
+                n.attrs["organism"]
+                for n in graph.nodes.values()
+                if n.type == NodeType.ASSEMBLY
+                and n.attrs.get("organism")
+                and self._species_key(n.attrs["organism"]) != source_key
+            }
+        )
+        covered = {
+            self._species_key(c.get("species")) for c in candidates
+        }
+        uncovered = [
+            o for o in related_organisms if self._species_key(o) not in covered
+        ]
+
+        if not candidates and not uncovered:
+            graph.metadata["stages"].append("s3_orthologs:no_data")
+            return
+
+        state = s3_orthologs.build_state(
+            identifier, match, candidates, uncovered
+        )
+        questions = s3_orthologs.build_questions(candidates, uncovered)
+        answers = self.jev.ask(state, questions, stage="s3_orthologs")
+
+        for i, c in enumerate(candidates):
+            cid = c.get("canonical_id") or c.get("omaid")
+            if not cid:
+                continue
+            node_id = f"gene:{cid}"
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.GENE,
+                    label=cid,
+                    id_namespace="oma",
+                    attrs={
+                        "species": c.get("species"),
+                        "tax_id": c.get("tax_id"),
+                        "rel_type": c.get("rel_type"),
+                    },
+                )
+            )
+            ans = answers.get(f"ortholog_{i}", {})
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="ortholog_of",
+                    object=node_id,
+                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                    jev_question_id=f"ortholog_{i}",
+                    evidence=evidence,
+                )
+            )
+
+        for j, org in enumerate(uncovered):
+            org_node = f"organism:{org}"
+            graph.add_node(
+                Node(id=org_node, type=NodeType.ORGANISM, label=org)
+            )
+            ans = answers.get(f"absent_{j}", {})
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="absent_in",
+                    object=org_node,
+                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                    jev_question_id=f"absent_{j}",
+                    evidence=evidence,
+                )
+            )
