@@ -25,6 +25,7 @@ from .questions import (
     s3_orthologs,
     s4_annotate,
     s5_expression,
+    s6_remap,
 )
 
 log = logging.getLogger(__name__)
@@ -87,6 +88,10 @@ class Resolver:
         if depth >= 5 and match:
             self._s5_expression(identifier, match, graph)
             graph.metadata["stages"].append("s5_expression")
+
+        if depth >= 6 and match:
+            self._s6_remap(identifier, match, graph)
+            graph.metadata["stages"].append("s6_remap")
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -634,3 +639,66 @@ class Resolver:
                         evidence=evidence,
                     )
                 )
+
+    # -- S6 ----------------------------------------------------------------
+
+    def _s6_remap(
+        self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
+    ) -> None:
+        # Assemblies where NCBI annotated this gene (from the S1 report).
+        annotated = match.get("assembly_accessions") or (
+            [match["assembly_accession"]] if match.get("assembly_accession") else []
+        )
+        evidence = [
+            Evidence(
+                source="ncbi_datasets",
+                endpoint="gene report annotations",
+                summary=f"{len(annotated)} annotated assemblies",
+                payload={"annotated": annotated},
+            )
+        ]
+        for acc in annotated:
+            node_id = f"assembly:{acc}"
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.ASSEMBLY,
+                    label=acc,
+                    id_namespace="insdc",
+                )
+            )
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="annotated_in",
+                    object=node_id,
+                    confidence=0.95,
+                    evidence=evidence,
+                )
+            )
+
+        # Related assemblies (S2) with no annotation -> JEV judges presence.
+        unannotated = [
+            {"accession": n.id.removeprefix("assembly:"), **n.attrs}
+            for n in graph.nodes.values()
+            if n.type == NodeType.ASSEMBLY
+            and n.id.removeprefix("assembly:") not in annotated
+        ]
+        if not unannotated:
+            return
+
+        state = s6_remap.build_state(match, annotated, unannotated)
+        questions = s6_remap.build_questions(unannotated)
+        answers = self.jev.ask(state, questions, stage="s6_remap")
+        for i, c in enumerate(unannotated):
+            ans = answers.get(f"present_{i}", {})
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="likely_present",
+                    object=f"assembly:{c['accession']}",
+                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                    jev_question_id=f"present_{i}",
+                    evidence=evidence,
+                )
+            )

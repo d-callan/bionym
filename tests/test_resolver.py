@@ -14,6 +14,7 @@ class FakeNcbi:
                 "tax_id": 9606,
                 "organism": "Homo sapiens",
                 "assembly_accession": "GCF_000001405.40",
+                "assembly_accessions": ["GCF_000001405.40", "GCF_009914755.1"],
                 "genomic_accessions": ["NC_000013.11"],
                 "raw": {},
             }
@@ -215,3 +216,15 @@ def test_depth_five_adds_expression():
     assert "condition:organism part" in g.nodes
     predicates = {e.predicate for e in g.edges}
     assert {"measured_in", "has_factor"} <= predicates
+
+
+def test_depth_six_adds_remap():
+    r = _resolver()
+    g = r.resolve("672", depth=6)
+    predicates = {e.predicate for e in g.edges}
+    # GCF_000001405.40 + GCF_009914755.1 are in the record's annotations
+    assert "annotated_in" in predicates
+    # GCF_999999999.1 (S2 fake) is not annotated -> likely_present
+    assert "likely_present" in predicates
+    lp = [e for e in g.edges if e.predicate == "likely_present"]
+    assert lp[0].object == "assembly:GCF_999999999.1"
