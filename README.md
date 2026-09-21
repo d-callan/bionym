@@ -10,10 +10,11 @@ confidence score and a list of supporting evidence.
 
 ## Status
 
-M1: CLI → `graph.json`. Stages implemented: S0 (ID classification),
-S1 (entity resolution → organism + assembly). Later stages (related
-assemblies, orthologs, annotation, expression, cross-assembly remap) and the
-FastAPI backend + static web frontend are planned — see the repo plan.
+M1+M2 (partial): CLI → `graph.json`. Stages implemented: S0 (ID
+classification), S1 (entity resolution → organism + assembly), S2 (related
+& newer assemblies with species-rank lineage normalization). Later stages
+(orthologs, annotation, expression, cross-assembly remap) and the FastAPI
+backend + static web frontend are planned — see the repo plan.
 
 ## Install
 

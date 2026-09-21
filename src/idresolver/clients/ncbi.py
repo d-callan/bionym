@@ -95,19 +95,26 @@ class NcbiClient:
         return records, [ev, ev2]
 
     def taxon(self, tax_id: int | str) -> tuple[dict[str, Any] | None, list[Evidence]]:
-        """Datasets v2 taxonomy report: rank, lineage, classification."""
-        url = f"{DATASETS}/taxon/{tax_id}"
-        data = self._get(url)
-        reports = data.get("reports", [])
-        ev = Evidence(
-            source="ncbi_datasets",
-            endpoint=url,
-            summary=f"taxon/{tax_id}: {len(reports)} report(s)",
-            payload={"n_reports": len(reports)},
+        """E-utilities efetch db=taxonomy: rank + lineage with ranks/taxids.
+
+        (Datasets v2 taxonomy returns lineage as bare taxids without ranks,
+        which can't drive species-rank normalization; efetch LineageEx can.)
+        """
+        url = f"{EUTILS}/efetch.fcgi"
+        text = self._get(
+            url,
+            params={"db": "taxonomy", "id": str(tax_id), "retmode": "xml"},
+            parse="text",
         )
-        if not reports:
+        ev = Evidence(
+            source="ncbi_eutils",
+            endpoint=url,
+            summary=f"efetch db=taxonomy id={tax_id}",
+            payload={"tax_id": str(tax_id)},
+        )
+        if not text:
             return None, [ev]
-        return self._normalize_taxon_report(reports[0]), [ev]
+        return self._parse_taxon_xml(text), [ev]
 
     def assemblies_for_taxon(
         self, tax_id: int | str
@@ -177,26 +184,37 @@ class NcbiClient:
         }
 
     @staticmethod
-    def _normalize_taxon_report(r: dict[str, Any]) -> dict[str, Any]:
-        tax = r.get("taxonomy") or {}
-        classification = tax.get("classification") or {}
-        species = classification.get("species") or {}
+    def _parse_taxon_xml(text: str) -> dict[str, Any] | None:
+        import xml.etree.ElementTree as ET
+
+        root = ET.fromstring(text)
+        t = root.find(".//Taxon")
+        if t is None:
+            return None
         lineage = [
-            {"tax_id": t.get("id"), "name": t.get("name"), "rank": t.get("rank")}
-            for t in (tax.get("lineage") or [])
+            {
+                "tax_id": int(e.findtext("TaxId") or 0),
+                "name": e.findtext("ScientificName"),
+                "rank": (e.findtext("Rank") or "").lower(),
+            }
+            for e in t.findall(".//LineageEx/Taxon")
         ]
+        rank = (t.findtext("Rank") or "").lower()
+        tax_id = int(t.findtext("TaxId") or 0)
+        name = t.findtext("ScientificName")
+        species = next((e for e in lineage if e["rank"] == "species"), None)
         return {
-            "tax_id": tax.get("id"),
-            "name": tax.get("name"),
-            "rank": tax.get("rank"),
-            "species_tax_id": species.get("id") or (
-                tax.get("id") if tax.get("rank") == "species" else None
+            "tax_id": tax_id,
+            "name": name,
+            "rank": rank,
+            "species_tax_id": (
+                species["tax_id"] if species else (tax_id if rank == "species" else None)
             ),
-            "species_name": species.get("name") or (
-                tax.get("name") if tax.get("rank") == "species" else None
+            "species_name": (
+                species["name"] if species else (name if rank == "species" else None)
             ),
             "lineage": lineage,
-            "raw": r,
+            "raw": {},
         }
 
     @staticmethod
@@ -216,7 +234,12 @@ class NcbiClient:
 
     # -- transport ---------------------------------------------------------
 
-    def _get(self, url: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    def _get(
+        self,
+        url: str,
+        params: dict[str, Any] | None = None,
+        parse: str = "json",
+    ) -> Any:
         params = dict(params or {})
         if self.api_key:
             params["api_key"] = self.api_key
@@ -232,8 +255,8 @@ class NcbiClient:
         resp = httpx.get(url, params=params, timeout=self.timeout)
         if resp.status_code != 200:
             log.warning("NCBI %s -> %s: %s", url, resp.status_code, resp.text[:200])
-            return {}
-        data = resp.json()
+            return {} if parse == "json" else ""
+        data = resp.text if parse == "text" else resp.json()
         if self._cache is not None:
             self._cache[cache_key] = data
         return data

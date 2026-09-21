@@ -35,6 +35,31 @@ class FakeNcbi:
             }
         ], []
 
+    def taxon(self, tax_id):
+        return {
+            "tax_id": tax_id,
+            "name": "Homo sapiens" if tax_id == 9606 else "Plasmodium falciparum",
+            "rank": "species",
+            "species_tax_id": tax_id,
+            "species_name": "x",
+            "lineage": [],
+            "raw": {},
+        }, []
+
+    def assemblies_for_taxon(self, tax_id):
+        return [
+            {
+                "accession": "GCF_999999999.1",
+                "name": "ASM999v1",
+                "organism": "Homo sapiens",
+                "tax_id": tax_id,
+                "level": "Complete Genome",
+                "refseq": True,
+                "submission_date": "2025-01-01",
+                "raw": {},
+            }
+        ], []
+
 
 class FakeVeuPathDB:
     def lookup_gene(self, gene_id):
@@ -65,3 +90,12 @@ def test_depth_zero_classifies_only():
     g = r.resolve("672", depth=0)
     assert "idtype:ncbi_gene" in g.nodes
     assert "taxon:9606" not in g.nodes
+
+
+def test_depth_two_adds_related_assembly():
+    r = Resolver(jev=JevClient(mock=True), ncbi=FakeNcbi(), veupathdb=FakeVeuPathDB())
+    g = r.resolve("672", depth=2)
+    assert "assembly:GCF_999999999.1" in g.nodes
+    predicates = {e.predicate for e in g.edges}
+    assert "related_assembly" in predicates
+    assert "superseded_by" in predicates

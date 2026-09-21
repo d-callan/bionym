@@ -15,7 +15,7 @@ from .clients.veupathdb import VEuPathDBClient
 from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
 from .jev import JevClient
-from .questions import s0_classify, s1_resolve
+from .questions import s0_classify, s1_resolve, s2_assemblies
 
 log = logging.getLogger(__name__)
 
@@ -51,9 +51,14 @@ class Resolver:
         gene_node.id_namespace = namespace
         graph.metadata["stages"].append("s0_classify")
 
+        match = None
         if depth >= 1:
-            self._s1_resolve(identifier, namespace, gene_node, graph)
+            match = self._s1_resolve(identifier, namespace, gene_node, graph)
             graph.metadata["stages"].append("s1_resolve")
+
+        if depth >= 2 and match:
+            self._s2_assemblies(match, graph)
+            graph.metadata["stages"].append("s2_assemblies")
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -225,3 +230,97 @@ class Resolver:
                     evidence=evidence,
                 )
             )
+
+    # -- S2 ----------------------------------------------------------------
+
+    def _s2_assemblies(
+        self, match: dict[str, Any], graph: KnowledgeGraph
+    ) -> None:
+        tax_id = match.get("tax_id")
+        if not tax_id:
+            log.warning("no tax_id on resolved gene; skipping S2")
+            graph.metadata["stages"].append("s2_assemblies:no_taxon")
+            return
+
+        taxon, tax_ev = self.ncbi.taxon(tax_id)
+        if not taxon:
+            graph.metadata["stages"].append("s2_assemblies:no_taxon")
+            return
+
+        # Normalize to species rank; ask JEV only when the lineage makes
+        # the grouping rank ambiguous (subspecies present, or the assembly
+        # taxon sits below species).
+        rank = "species"
+        if s2_assemblies.needs_rank_question(taxon):
+            questions = s2_assemblies.build_rank_question(taxon)
+            if questions:
+                state = s2_assemblies.build_rank_state(taxon)
+                answers = self.jev.ask(state, questions, stage="s2_rank")
+                rank = answers["rank"]["choice"]
+
+        group_taxid = (
+            s2_assemblies.taxid_for_rank(taxon, rank)
+            or taxon.get("species_tax_id")
+            or tax_id
+        )
+        assemblies, asm_ev = self.ncbi.assemblies_for_taxon(group_taxid)
+        candidates = assemblies[: self.max_candidates]
+        if not candidates:
+            graph.metadata["stages"].append("s2_assemblies:no_candidates")
+            return
+
+        source_acc = match.get("assembly_accession")
+        state = s2_assemblies.build_assembly_state(match, candidates)
+        questions = s2_assemblies.build_assembly_questions(
+            candidates, has_source=bool(source_acc)
+        )
+        answers = self.jev.ask(state, questions, stage="s2_assemblies")
+
+        # Related edges hang off the source assembly when known, else the gene.
+        source_node_id = (
+            f"assembly:{source_acc}" if source_acc else graph.metadata["input"]
+        )
+        evidence = tax_ev + asm_ev
+        for i, c in enumerate(candidates):
+            acc = c.get("accession")
+            if not acc or acc == source_acc:
+                continue
+            node_id = f"assembly:{acc}"
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.ASSEMBLY,
+                    label=c.get("name") or acc,
+                    id_namespace="insdc",
+                    attrs={
+                        "organism": c.get("organism"),
+                        "tax_id": c.get("tax_id"),
+                        "level": c.get("level"),
+                        "refseq": c.get("refseq"),
+                        "submission_date": c.get("submission_date"),
+                    },
+                )
+            )
+            rel = answers.get(f"related_{i}", {})
+            graph.add_edge(
+                Edge(
+                    subject=source_node_id,
+                    predicate="related_assembly",
+                    object=node_id,
+                    confidence=rel.get("noul", rel.get("confidence", 0.0)),
+                    jev_question_id=f"related_{i}",
+                    evidence=evidence,
+                )
+            )
+            if source_acc:
+                sup = answers.get(f"supersedes_{i}", {})
+                graph.add_edge(
+                    Edge(
+                        subject=source_node_id,
+                        predicate="superseded_by",
+                        object=node_id,
+                        confidence=sup.get("noul", sup.get("confidence", 0.0)),
+                        jev_question_id=f"supersedes_{i}",
+                        evidence=evidence,
+                    )
+                )
