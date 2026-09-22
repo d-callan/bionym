@@ -201,7 +201,6 @@ class Resolver:
         """
         vpd = match if match.get("source") == "veupathdb" else None
         vpd_ev = evidence
-        confidence = 1.0
         if vpd is None:
             locus_tag = match.get("locus_tag")
             if not locus_tag:
@@ -210,7 +209,6 @@ class Resolver:
             if not records:
                 return
             vpd = records[0]
-            confidence = 0.9  # NCBI's locus_tag assertion, not VEuPathDB's
             match["orthomcl_name"] = vpd.get("orthomcl_name")
 
         vpd_id = vpd.get("gene_id")
@@ -218,30 +216,33 @@ class Resolver:
             return
         match["veupathdb_id"] = vpd_id
         node_id = f"veupathdb:{vpd_id}"
-        graph.add_node(
-            Node(
-                id=node_id,
-                type=NodeType.GENE,
-                label=vpd.get("symbol") or vpd_id,
-                id_namespace="veupathdb",
-                attrs={
-                    "project": vpd.get("project"),
-                    "organism": vpd.get("organism"),
-                    "orthomcl_name": vpd.get("orthomcl_name"),
-                    "aliases": vpd.get("aliases"),
-                    "url": vpd.get("url"),
-                },
+        # For VEuPathDB-sourced matches the anchor node + same_as edge
+        # already exist (created by _materialize_gene with JEV confidence).
+        if node_id not in graph.nodes:
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.GENE,
+                    label=vpd.get("symbol") or vpd_id,
+                    id_namespace="veupathdb",
+                    attrs={
+                        "project": vpd.get("project"),
+                        "organism": vpd.get("organism"),
+                        "orthomcl_name": vpd.get("orthomcl_name"),
+                        "aliases": vpd.get("aliases"),
+                        "url": vpd.get("url"),
+                    },
+                )
             )
-        )
-        graph.add_edge(
-            Edge(
-                subject=identifier,
-                predicate="same_as",
-                object=node_id,
-                confidence=confidence,
-                evidence=vpd_ev,
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="same_as",
+                    object=node_id,
+                    confidence=0.9,  # NCBI's locus_tag assertion, not VEuPathDB's
+                    evidence=vpd_ev,
+                )
             )
-        )
 
         # VEuPathDB curates its own citation list (with titles/authors) —
         # complements the bare pmid links from NCBI elink.
@@ -344,11 +345,10 @@ class Resolver:
             gene_id = match.get("ncbi_gene_id")
         if not gene_id:
             return
-        ncbi_node = f"ncbigene:{gene_id}"
-        # For NCBI-sourced matches the query node IS the gene; attach
-        # products to it directly rather than to a duplicate node.
-        parent = identifier if match.get("source") == "ncbi_datasets" else ncbi_node
-        if parent == ncbi_node and ncbi_node not in graph.nodes:
+        # The ncbigene node always exists now — it's the anchor for
+        # NCBI-sourced matches, bridged in for the rest.
+        parent = f"ncbigene:{gene_id}"
+        if parent not in graph.nodes:
             return
 
         # Bridged matches lack the Datasets report fields — fetch it for
@@ -358,14 +358,19 @@ class Resolver:
         if match.get("source") != "ncbi_datasets":
             reports, rep_ev = self.ncbi.gene_by_id(gene_id)
             if reports:
-                genomic = reports[0].get("genomic_accessions") or []
-                gene_groups = reports[0].get("gene_groups")
+                rep = reports[0]
+                genomic = rep.get("genomic_accessions") or []
+                gene_groups = rep.get("gene_groups")
                 evidence = evidence + rep_ev
                 # enrich the bridged node with report metadata
-                node = graph.nodes.get(ncbi_node)
+                node = graph.nodes.get(parent)
                 if node is not None:
-                    node.attrs["gene_type"] = reports[0].get("gene_type")
+                    node.attrs["gene_type"] = rep.get("gene_type")
                     node.attrs["gene_groups"] = gene_groups
+                # write assembly fields back so S2 can hang related
+                # assemblies off the real source assembly
+                match.setdefault("assembly_accession", rep.get("assembly_accession"))
+                match.setdefault("assembly_accessions", rep.get("assembly_accessions"))
 
         for acc in genomic:
             acc_node = f"nuccore:{acc}"
@@ -439,20 +444,54 @@ class Resolver:
         evidence: list[Evidence],
         graph: KnowledgeGraph,
     ) -> None:
-        gene_node.label = rec.get("symbol") or rec.get("description") or gene_node.id
-        gene_node.attrs.update(
-            {
+        """Create the resolved record node (the anchor) and same_as it.
+
+        The query node stays a pure input: it only gets is_a (S0) and
+        same_as edges — claims that the identifier names a record in an
+        external resource. Everything the record asserts about the gene
+        (organism, assembly, products, datasets…) hangs off the anchor.
+        """
+        if rec.get("source") == "veupathdb":
+            anchor = f"veupathdb:{rec.get('gene_id')}"
+            ns = "veupathdb"
+            attrs = {
                 "gene_id": rec.get("gene_id"),
+                "project": rec.get("project"),
+                "organism": rec.get("organism"),
+                "orthomcl_name": rec.get("orthomcl_name"),
+                "aliases": rec.get("aliases"),
+                "url": rec.get("url"),
+            }
+        else:
+            anchor = f"ncbigene:{rec.get('gene_id')}"
+            ns = "ncbi_gene"
+            attrs = {
+                "gene_id": rec.get("gene_id"),
+                "organism": rec.get("organism"),
                 "description": rec.get("description"),
                 "locus_tag": rec.get("locus_tag"),
-                "source": rec.get("source"),
+                "gene_type": rec.get("gene_type"),
+                "gene_groups": rec.get("gene_groups"),
             }
-        )
+        if not rec.get("gene_id"):
+            anchor = gene_node.id  # degenerate record: anchor on the query
+        rec["anchor"] = anchor
+
+        if anchor != gene_node.id:
+            graph.add_node(
+                Node(
+                    id=anchor,
+                    type=NodeType.GENE,
+                    label=rec.get("symbol") or rec.get("description") or anchor,
+                    id_namespace=ns,
+                    attrs=attrs,
+                )
+            )
         graph.add_edge(
             Edge(
                 subject=gene_node.id,
-                predicate="resolved_to",
-                object=gene_node.id,
+                predicate="same_as",
+                object=anchor,
                 confidence=confidence,
                 probabilities=probabilities,
                 jev_question_id="gene_match",
@@ -472,7 +511,7 @@ class Resolver:
             )
             graph.add_edge(
                 Edge(
-                    subject=gene_node.id,
+                    subject=anchor,
                     predicate="in_organism",
                     object=org_id,
                     confidence=confidence,
@@ -493,7 +532,7 @@ class Resolver:
             )
             graph.add_edge(
                 Edge(
-                    subject=gene_node.id,
+                    subject=anchor,
                     predicate="in_assembly",
                     object=asm_id,
                     confidence=confidence,
@@ -547,9 +586,12 @@ class Resolver:
         )
         answers = self.jev.ask(state, questions, stage="s2_assemblies")
 
-        # Related edges hang off the source assembly when known, else the gene.
+        # Related edges hang off the source assembly when known, else the
+        # resolved gene record (the anchor), never the raw query node.
         source_node_id = (
-            f"assembly:{source_acc}" if source_acc else graph.metadata["input"]
+            f"assembly:{source_acc}"
+            if source_acc
+            else match.get("anchor") or graph.metadata["input"]
         )
         evidence = tax_ev + asm_ev
         for i, c in enumerate(candidates):
@@ -607,21 +649,65 @@ class Resolver:
         self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
     ) -> None:
         candidates, evidence = self.oma.orthologs(identifier)
+        oma_id_used = identifier
         if not candidates:
             # OMA resolves several namespaces; retry with symbol/locus_tag.
             alt = match.get("locus_tag") or match.get("symbol")
             if alt and alt != identifier:
                 candidates, ev2 = self.oma.orthologs(alt)
                 evidence += ev2
+                if candidates:
+                    oma_id_used = alt
 
         candidates = candidates[: self.max_candidates]
+
+        anchor = match.get("anchor") or identifier
+
+        # ortholog_of/absent_in are OMA's claims, so they hang off the
+        # query gene's own OMA entry — not the anchor (which would
+        # attribute OMA data to VEuPathDB/NCBI).
+        oma_subject = anchor
+        entry, pi_ev = self.oma.protein_info(oma_id_used)
+        if entry and entry.get("omaid"):
+            evidence += pi_ev
+            oma_node = f"oma:{entry['omaid']}"
+            graph.add_node(
+                Node(
+                    id=oma_node,
+                    type=NodeType.GENE,
+                    label=entry.get("canonical_id") or entry["omaid"],
+                    id_namespace="oma",
+                    attrs={
+                        "entry_nr": entry.get("entry_nr"),
+                        "species": entry.get("species"),
+                        "tax_id": entry.get("tax_id"),
+                    },
+                )
+            )
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="same_as",
+                    object=oma_node,
+                    confidence=0.9,
+                    evidence=pi_ev,
+                )
+            )
+            oma_subject = oma_node
 
         # Cross-site orthologs: the gene's OrthoMCL group (bridged onto the
         # match in S1) spans all VEuPathDB species, unlike the per-site
         # Orthologs table. Membership is a DB fact -> deterministic edges;
         # whether a member is a true ortholog vs paralog is left to JEV.
         if match.get("orthomcl_name"):
-            self._add_orthomcl_group(identifier, match["orthomcl_name"], graph)
+            # OrthoMCL membership is VEuPathDB data — hang it off the
+            # veupathdb node when one exists, else the anchor.
+            vpd_node = (
+                f"veupathdb:{match['veupathdb_id']}"
+                if match.get("veupathdb_id")
+                else anchor
+            )
+            self._add_orthomcl_group(vpd_node, match["orthomcl_name"], graph)
 
         # Organisms of related assemblies (S2) minus the source organism.
         source_key = self._species_key(match.get("organism"))
@@ -682,7 +768,7 @@ class Resolver:
             ans = answers.get(f"ortholog_{i}", {})
             graph.add_edge(
                 Edge(
-                    subject=identifier,
+                    subject=oma_subject,
                     predicate="ortholog_of",
                     object=node_id,
                     confidence=ans.get("noul", ans.get("confidence", 0.0)),
@@ -699,7 +785,7 @@ class Resolver:
             ans = answers.get(f"absent_{j}", {})
             graph.add_edge(
                 Edge(
-                    subject=identifier,
+                    subject=oma_subject,
                     predicate="absent_in",
                     object=org_node,
                     confidence=ans.get("noul", ans.get("confidence", 0.0)),
@@ -736,10 +822,20 @@ class Resolver:
                 evidence=evidence,
             )
         )
-        # Cap member nodes like other candidate lists; Core members first.
+        # Cap member nodes like other candidate lists. Core members first,
+        # but prefer members whose species matches a related assembly (S2)
+        # — those are the candidate genes for the other assemblies.
+        asm_species = {
+            self._species_key(n.attrs["organism"])
+            for n in graph.nodes.values()
+            if n.type == NodeType.ASSEMBLY and n.attrs.get("organism")
+        }
         members = sorted(
             group.get("members", []),
-            key=lambda m: m.get("core_peripheral") != "Core",
+            key=lambda m: (
+                self._species_key(m.get("organism")) not in asm_species,
+                m.get("core_peripheral") != "Core",
+            ),
         )[: self.max_candidates]
         for m in members:
             fid = m.get("full_id")
@@ -783,11 +879,14 @@ class Resolver:
             graph.metadata["stages"].append("s4_annotate:no_uniprot")
             return
         rec = records[0]
+        anchor = match.get("anchor") or identifier
 
         # same_as edge: deterministic confidence from identifier agreement.
+        # UniProt annotations (GO, domains) hang off the uniprot node —
+        # they're that record's claims about the gene.
         acc = rec.get("accession")
+        up_node = f"uniprot:{acc}" if acc else anchor
         if acc:
-            up_node = f"uniprot:{acc}"
             graph.add_node(
                 Node(
                     id=up_node,
@@ -828,7 +927,7 @@ class Resolver:
             )
             graph.add_edge(
                 Edge(
-                    subject=identifier,
+                    subject=up_node,
                     predicate="has_go_term",
                     object=node_id,
                     confidence=GO_EVIDENCE_CONFIDENCE.get(
@@ -871,9 +970,10 @@ class Resolver:
                         id_namespace="kegg",
                     )
                 )
+                # pathway membership is asserted by the KEGG gene entry
                 graph.add_edge(
                     Edge(
-                        subject=identifier,
+                        subject=node_id,
                         predicate="in_pathway",
                         object=pw_node,
                         confidence=0.9,
@@ -897,7 +997,7 @@ class Resolver:
                 )
                 graph.add_edge(
                     Edge(
-                        subject=identifier,
+                        subject=up_node,
                         predicate="has_domain",
                         object=node_id,
                         confidence=0.8,
@@ -907,7 +1007,7 @@ class Resolver:
 
         state = s4_annotate.build_state(match, rec)
         answers = self.jev.ask(state, s4_annotate.build_questions(), stage="s4_annotate")
-        graph.nodes[identifier].attrs["function_characterization"] = answers[
+        graph.nodes[anchor].attrs["function_characterization"] = answers[
             "characterization"
         ].get("score")
 
@@ -958,7 +1058,7 @@ class Resolver:
             ans = answers.get(f"relevant_{i}", {})
             graph.add_edge(
                 Edge(
-                    subject=identifier,
+                    subject=match.get("anchor") or identifier,
                     predicate="measured_in",
                     object=node_id,
                     confidence=ans.get("noul", ans.get("confidence", 0.0)),
@@ -996,6 +1096,10 @@ class Resolver:
         vpd_id = match.get("veupathdb_id")
         if not vpd_id:
             return 0
+        # VEuPathDB datasets hang off the veupathdb node — its own data.
+        subject = f"veupathdb:{vpd_id}"
+        if subject not in graph.nodes:
+            subject = match.get("anchor") or identifier
         result, evidence = self.veupathdb.gene_datasets(vpd_id)
         datasets = result.get("datasets", [])
         # One bulk call resolves display names, summaries, and citations —
@@ -1024,7 +1128,7 @@ class Resolver:
             )
             graph.add_edge(
                 Edge(
-                    subject=identifier,
+                    subject=subject,
                     predicate="measured_in",
                     object=node_id,
                     confidence=1.0,
@@ -1038,6 +1142,17 @@ class Resolver:
     def _s6_remap(
         self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
     ) -> None:
+        # NCBI annotation data hangs off the ncbigene node when one exists
+        # (anchor for NCBI matches, bridged otherwise), else the anchor.
+        ncbi_uid = (
+            match.get("gene_id")
+            if match.get("source", "").startswith("ncbi")
+            else match.get("ncbi_gene_id")
+        )
+        subject = f"ncbigene:{ncbi_uid}" if ncbi_uid else match.get("anchor")
+        if not subject or subject not in graph.nodes:
+            subject = match.get("anchor") or identifier
+
         # Assemblies where NCBI annotated this gene (from the S1 report).
         annotated = match.get("assembly_accessions") or (
             [match["assembly_accession"]] if match.get("assembly_accession") else []
@@ -1062,7 +1177,7 @@ class Resolver:
             )
             graph.add_edge(
                 Edge(
-                    subject=identifier,
+                    subject=subject,
                     predicate="annotated_in",
                     object=node_id,
                     confidence=0.95,
@@ -1077,21 +1192,74 @@ class Resolver:
             if n.type == NodeType.ASSEMBLY
             and n.id.removeprefix("assembly:") not in annotated
         ]
-        if not unannotated:
-            return
-
-        state = s6_remap.build_state(match, annotated, unannotated)
-        questions = s6_remap.build_questions(unannotated)
-        answers = self.jev.ask(state, questions, stage="s6_remap")
-        for i, c in enumerate(unannotated):
-            ans = answers.get(f"present_{i}", {})
-            graph.add_edge(
-                Edge(
-                    subject=identifier,
-                    predicate="likely_present",
-                    object=f"assembly:{c['accession']}",
-                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
-                    jev_question_id=f"present_{i}",
-                    evidence=evidence,
+        if unannotated:
+            state = s6_remap.build_state(match, annotated, unannotated)
+            questions = s6_remap.build_questions(unannotated)
+            answers = self.jev.ask(state, questions, stage="s6_remap")
+            for i, c in enumerate(unannotated):
+                ans = answers.get(f"present_{i}", {})
+                graph.add_edge(
+                    Edge(
+                        subject=subject,
+                        predicate="likely_present",
+                        object=f"assembly:{c['accession']}",
+                        confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                        jev_question_id=f"present_{i}",
+                        evidence=evidence,
+                    )
                 )
-            )
+
+        self._link_candidate_genes(graph)
+
+    def _link_candidate_genes(self, graph: KnowledgeGraph) -> None:
+        """Join gene nodes to same-species assemblies: has_candidate_gene.
+
+        Ortholog members (OMA gene:*, OrthoMCL omclseq:*) carry a species
+        name; assemblies carry an organism. A species match means that
+        assembly plausibly encodes that member — a *suspected* gene id for
+        the same gene in the other assembly. Species-level inference, so
+        confidence is capped at 0.6 and the evidence records the join key.
+        """
+        assemblies = [
+            n for n in graph.nodes.values()
+            if n.type == NodeType.ASSEMBLY and n.attrs.get("organism")
+        ]
+        if not assemblies:
+            return
+        genes = [
+            n for n in graph.nodes.values()
+            if n.type == NodeType.GENE
+            and n.id_namespace in ("oma", "orthomcl")
+            and (n.attrs.get("species") or n.attrs.get("organism"))
+        ]
+        for asm in assemblies:
+            asm_key = self._species_key(asm.attrs["organism"])
+            for g in genes:
+                g_key = self._species_key(
+                    g.attrs.get("species") or g.attrs.get("organism")
+                )
+                if g_key != asm_key:
+                    continue
+                graph.add_edge(
+                    Edge(
+                        subject=asm.id,
+                        predicate="has_candidate_gene",
+                        object=g.id,
+                        confidence=0.6,
+                        evidence=[
+                            Evidence(
+                                source="bionym",
+                                endpoint="species join",
+                                summary=(
+                                    f"assembly organism {asm.attrs['organism']!r} "
+                                    f"matches gene species {g_key!r}"
+                                ),
+                                payload={
+                                    "assembly": asm.id,
+                                    "gene": g.id,
+                                    "species_key": g_key,
+                                },
+                            )
+                        ],
+                    )
+                )

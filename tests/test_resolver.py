@@ -97,6 +97,17 @@ class FakeVeuPathDB:
 
 
 class FakeOma:
+    def protein_info(self, identifier):
+        return {
+            "source": "oma",
+            "entry_nr": 12345,
+            "omaid": "HUMAN00000",
+            "canonical_id": "BRCA2_HUMAN",
+            "species": "Homo sapiens",
+            "tax_id": 9606,
+            "raw": {},
+        }, _EV
+
     def orthologs(self, identifier):
         return [
             {
@@ -179,7 +190,15 @@ def test_resolve_numeric_id_mock_jev():
     assert "taxon:9606" in g.nodes
     assert "assembly:GCF_000001405.40" in g.nodes
     predicates = {e.predicate for e in g.edges}
-    assert {"is_a", "resolved_to", "in_organism", "in_assembly"} <= predicates
+    assert {"is_a", "same_as", "in_organism", "in_assembly"} <= predicates
+    # query node is a pure input: only is_a + same_as edges
+    q_edges = [e for e in g.edges if e.subject == "672"]
+    assert {e.predicate for e in q_edges} <= {"is_a", "same_as"}
+    # the anchor carries the resource data
+    assert any(
+        e.subject == "ncbigene:672" and e.predicate == "in_organism"
+        for e in g.edges
+    )
     assert all(e.evidence or e.jev_question_id for e in g.edges)
     assert g.metadata["jev_usage"]["total"]["calls"] == 2
 
