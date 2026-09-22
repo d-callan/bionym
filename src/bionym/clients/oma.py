@@ -84,7 +84,9 @@ class OmaClient:
             "entry_nr": e.get("entry_nr"),
             "omaid": e.get("omaid"),
             "canonical_id": e.get("canonicalid"),
-            "species": species.get("name"),
+            # protein entries nest the name under species.species
+            # (species.name is the genome-page form)
+            "species": species.get("name") or species.get("species"),
             "tax_id": species.get("taxon_id") or species.get("taxid"),
             "raw": e,
         }

@@ -8,6 +8,7 @@ the JEV answers.
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any
 
 from .clients.expression import ExpressionAtlasClient
@@ -177,6 +178,18 @@ class Resolver:
             match = candidates[int(pick)]
             confidence = ans.get("confidence", 0.0)
             probabilities = ans.get("probabilities", {})
+
+        # esummary hits lack report fields (locus_tag, assembly_accessions,
+        # gene_groups) that the VEuPathDB bridge and S6 need — merge the
+        # full Datasets record once here so every downstream consumer sees
+        # them. `source` stays ncbi_eutils: the hit came from esearch.
+        if match.get("source") == "ncbi_eutils" and match.get("gene_id"):
+            reports, rep_ev = self.ncbi.gene_by_id(match["gene_id"])
+            evidence += rep_ev
+            if reports:
+                for k, v in reports[0].items():
+                    if k != "source" and match.get(k) is None:
+                        match[k] = v
 
         self._materialize_gene(gene_node, match, confidence, probabilities, evidence, graph)
         self._bridge_veupathdb(gene_node.id, match, evidence, graph)
@@ -353,9 +366,11 @@ class Resolver:
 
         # Bridged matches lack the Datasets report fields — fetch it for
         # genomic accessions (NC_*) and gene_groups (NCBI Ortholog).
+        # locus_tag presence marks a match that already carries report
+        # fields (ncbi_datasets, or an eutils hit upgraded in S1).
         genomic = match.get("genomic_accessions") or []
         gene_groups = match.get("gene_groups")
-        if match.get("source") != "ncbi_datasets":
+        if match.get("locus_tag") is None:
             reports, rep_ev = self.ncbi.gene_by_id(gene_id)
             if reports:
                 rep = reports[0]
@@ -651,13 +666,36 @@ class Resolver:
         candidates, evidence = self.oma.orthologs(identifier)
         oma_id_used = identifier
         if not candidates:
-            # OMA resolves several namespaces; retry with symbol/locus_tag.
-            alt = match.get("locus_tag") or match.get("symbol")
-            if alt and alt != identifier:
+            # OMA's native index is UniProt accessions — retry with the
+            # record's UniProt aliases (reviewed SWISSPROT first), then
+            # locus_tag/symbol. Capped: each retry is an API call and a
+            # missing entry fails slow (read timeout).
+            # Alias shape varies by source: VEuPathDB gives
+            # {db, alias, type} dicts; NCBI gives plain strings.
+            pairs = [
+                (a.get("db") or "", a.get("alias"))
+                if isinstance(a, dict)
+                else ("", a)
+                for a in match.get("aliases") or []
+            ]
+            retries = (
+                [v for db, v in pairs if db == "Uniprot/SWISSPROT"]
+                + [
+                    v
+                    for db, v in pairs
+                    if db.startswith("Uniprot/") and db != "Uniprot/SWISSPROT"
+                ]
+                + [match.get("locus_tag"), match.get("symbol")]
+                + [v for db, v in pairs if not db.startswith("Uniprot/")]
+            )
+            for alt in list(
+                dict.fromkeys(r for r in retries if r and r != identifier)
+            )[:4]:
                 candidates, ev2 = self.oma.orthologs(alt)
                 evidence += ev2
                 if candidates:
                     oma_id_used = alt
+                    break
 
         candidates = candidates[: self.max_candidates]
 
@@ -776,6 +814,7 @@ class Resolver:
                     evidence=evidence,
                 )
             )
+            self._link_to_ncbi(graph, node_id, resolve_id, c.get("tax_id"))
 
         for j, org in enumerate(uncovered):
             org_node = f"organism:{org}"
@@ -793,6 +832,51 @@ class Resolver:
                     evidence=evidence,
                 )
             )
+
+    def _link_to_ncbi(
+        self,
+        graph: KnowledgeGraph,
+        gene_node: str,
+        resolve_id: str,
+        tax_id: Any,
+    ) -> None:
+        """Resolve an OMA ortholog to its NCBI Gene page.
+
+        resolve_id is the SourceID xref (often a locus tag), which
+        db=gene indexes well. A verified hit gives the ncbigene node —
+        S6 then attaches real annotated_in assembly edges to it.
+        """
+        records, ev = self.ncbi.find_gene(resolve_id)
+        if not records:
+            return
+        hit = next(
+            (r for r in records if tax_id and str(r.get("tax_id")) == str(tax_id)),
+            records[0],
+        )
+        confidence = 0.9 if tax_id and str(hit.get("tax_id")) == str(tax_id) else 0.6
+        node_id = f"ncbigene:{hit['gene_id']}"
+        graph.add_node(
+            Node(
+                id=node_id,
+                type=NodeType.GENE,
+                label=hit.get("symbol") or hit["gene_id"],
+                id_namespace="ncbi_gene",
+                attrs={
+                    "gene_id": hit.get("gene_id"),
+                    "organism": hit.get("organism"),
+                    "description": hit.get("description"),
+                },
+            )
+        )
+        graph.add_edge(
+            Edge(
+                subject=gene_node,
+                predicate="same_as",
+                object=node_id,
+                confidence=confidence,
+                evidence=ev,
+            )
+        )
 
     def _add_orthomcl_group(
         self, identifier: str, group_name: str, graph: KnowledgeGraph
@@ -845,13 +929,14 @@ class Resolver:
             graph.add_node(
                 Node(
                     id=node_id,
-                    type=NodeType.GENE,
+                    type=NodeType.PROTEIN,
                     label=fid,
                     id_namespace="orthomcl",
                     attrs={
                         "organism": m.get("organism"),
                         "description": m.get("description"),
                         "core_peripheral": m.get("core_peripheral"),
+                        "url": m.get("url"),
                     },
                 )
             )
@@ -864,6 +949,59 @@ class Resolver:
                     evidence=evidence,
                 )
             )
+            self._link_omclseq_to_veupathdb(graph, node_id, fid)
+
+    def _link_omclseq_to_veupathdb(
+        self, graph: KnowledgeGraph, omclseq_node: str, full_id: str
+    ) -> None:
+        """Resolve an OrthoMCL member to its VEuPathDB gene page.
+
+        full_id is a transcript/protein-level id (e.g. PF3D7_1444800-T1,
+        AAEL005766-PB); stripping the suffix gives the gene PK, which
+        lookup_gene verifies against the WDK record — a real linkout,
+        not an inference. GenBank/piped accessions aren't VEuPathDB ids.
+        """
+        if "|" in full_id or re.match(r"^[A-Z]{2,4}\d{4,}\.\d+$", full_id):
+            return
+        # full_id is sequence-level: PF3D7_1444800-T1, PCOAH_00046700-t30_1-p1,
+        # PKA1H_120042300.1-p1, AAEL005766-PB. Try the dash-stripped form
+        # first (keeps dotted gene ids like Tb927.10.12345 intact), then the
+        # raw id, then the dot-stripped form for .N-pN suffixes.
+        candidates = dict.fromkeys(
+            (full_id.split("-")[0], full_id, full_id.split(".")[0])
+        )
+        for cand in candidates:
+            records, ev = self.veupathdb.lookup_gene(cand)
+            if not records:
+                continue
+            rec = records[0]
+            vpd_node = f"veupathdb:{rec['gene_id']}"
+            graph.add_node(
+                Node(
+                    id=vpd_node,
+                    type=NodeType.GENE,
+                    label=rec.get("symbol") or rec["gene_id"],
+                    id_namespace="veupathdb",
+                    attrs={
+                        "project": rec.get("project"),
+                        "organism": rec.get("organism"),
+                        "url": rec.get("url"),
+                    },
+                )
+            )
+            graph.add_edge(
+                Edge(
+                    subject=omclseq_node,
+                    predicate="same_as",
+                    object=vpd_node,
+                    confidence=0.9,  # suffix strip verified by the lookup hit
+                    evidence=ev,
+                )
+            )
+            # the member gene's locus tag resolves in db=gene — bridge to
+            # ncbigene so S6 can attach verified annotated_in edges
+            self._link_to_ncbi(graph, vpd_node, rec["gene_id"], rec.get("tax_id"))
+            return
 
     # -- S4 ----------------------------------------------------------------
 
@@ -1185,31 +1323,185 @@ class Resolver:
                 )
             )
 
-        # Related assemblies (S2) with no annotation -> JEV judges presence.
+        # Ortholog ncbigene nodes get their real annotated_in edges first —
+        # they are the verification for presence in related assemblies.
+        self._annotate_ortholog_assemblies(graph)
+        self._link_shared_orthologs(graph)
+
+        # Related assemblies (S2, same taxon group) where the query gene
+        # itself is not annotated. The gene record is assembly-specific, so
+        # the honest claim is about an *ortholog* being present — verified
+        # when a resolved ortholog's ncbigene is annotated_in that assembly.
+        ortholog_asm = {
+            e.object: e.subject
+            for e in graph.edges
+            if e.predicate == "annotated_in" and e.subject != subject
+        }
+        # GCA_/GCF_ pairs are the same assembly in two namespaces — match on
+        # the accession core so a RefSeq-annotated ortholog also verifies
+        # its GenBank twin.
+        ortholog_cores = {
+            k.split("_", 1)[-1]: v for k, v in ortholog_asm.items()
+        }
+        related_ids = {
+            e.object for e in graph.edges if e.predicate == "related_assembly"
+        }
         unannotated = [
-            {"accession": n.id.removeprefix("assembly:"), **n.attrs}
+            n
             for n in graph.nodes.values()
-            if n.type == NodeType.ASSEMBLY
+            if n.id in related_ids
             and n.id.removeprefix("assembly:") not in annotated
         ]
-        if unannotated:
-            state = s6_remap.build_state(match, annotated, unannotated)
-            questions = s6_remap.build_questions(unannotated)
+        verified = [
+            n
+            for n in unannotated
+            if n.id in ortholog_asm
+            or n.id.split("_", 1)[-1] in ortholog_cores
+        ]
+        unverified = [n for n in unannotated if n not in verified]
+
+        for n in verified:
+            orth = ortholog_asm.get(n.id) or ortholog_cores[
+                n.id.split("_", 1)[-1]
+            ]
+            graph.add_edge(
+                Edge(
+                    subject=subject,
+                    predicate="ortholog_present",
+                    object=n.id,
+                    confidence=0.9,
+                    evidence=[
+                        Evidence(
+                            source="derived",
+                            endpoint="ortholog annotated_in",
+                            summary=f"{orth} annotated in {n.id}",
+                            payload={"ortholog": orth},
+                        )
+                    ],
+                )
+            )
+
+        if unverified:
+            # No resolved ortholog verifies presence — JEV judges whether a
+            # member of the gene's orthogroup is likely there anyway. The
+            # subject is the family-level node (orthogroup, else the OMA
+            # entry), not the assembly-specific gene record.
+            family = next(
+                (
+                    n.id
+                    for n in graph.nodes.values()
+                    if n.id.startswith(("orthogroup:", "oma:"))
+                ),
+                subject,
+            )
+            cands = [
+                {"accession": n.id.removeprefix("assembly:"), **n.attrs}
+                for n in unverified
+            ]
+            state = s6_remap.build_state(match, annotated, cands)
+            questions = s6_remap.build_questions(cands)
             answers = self.jev.ask(state, questions, stage="s6_remap")
-            for i, c in enumerate(unannotated):
+            for i, c in enumerate(cands):
                 ans = answers.get(f"present_{i}", {})
                 graph.add_edge(
                     Edge(
-                        subject=subject,
+                        subject=family,
                         predicate="likely_present",
                         object=f"assembly:{c['accession']}",
                         confidence=ans.get("noul", ans.get("confidence", 0.0)),
                         jev_question_id=f"present_{i}",
-                        evidence=evidence,
+                        evidence=[
+                            Evidence(
+                                source="jev",
+                                endpoint="s6_remap",
+                                summary=(
+                                    "JEV judged orthogroup-member presence "
+                                    f"in {c['accession']} from assembly "
+                                    "metadata (no ortholog verified)"
+                                ),
+                                payload={"assembly": c, "answer": ans},
+                            )
+                        ],
                     )
                 )
 
         self._link_candidate_genes(graph)
+
+    def _annotate_ortholog_assemblies(self, graph: KnowledgeGraph) -> None:
+        """Real assembly links for orthologs resolved to NCBI Gene.
+
+        OMA orthologs that bridged to an ncbigene node (S3) get
+        annotated_in edges to the assemblies in that gene's Datasets
+        report — actual NCBI annotation evidence, replacing the
+        species-name guess for those members.
+        """
+        for e in list(graph.edges):
+            if (
+                e.predicate != "same_as"
+                or not e.object.startswith("ncbigene:")
+                or e.subject == graph.metadata["input"]
+            ):
+                continue
+            uid = e.object.split(":", 1)[1]
+            reports, ev = self.ncbi.gene_by_id(uid)
+            if not reports:
+                continue
+            rep = reports[0]
+            for acc in rep.get("assembly_accessions") or []:
+                asm_id = f"assembly:{acc}"
+                graph.add_node(
+                    Node(
+                        id=asm_id,
+                        type=NodeType.ASSEMBLY,
+                        label=acc,
+                        id_namespace="insdc",
+                        attrs={"organism": rep.get("organism")},
+                    )
+                )
+                graph.add_edge(
+                    Edge(
+                        subject=e.object,
+                        predicate="annotated_in",
+                        object=asm_id,
+                        confidence=0.95,
+                        evidence=ev,
+                    )
+                )
+
+    def _link_shared_orthologs(self, graph: KnowledgeGraph) -> None:
+        """Link OMA and OrthoMCL members that resolve to the same record.
+
+        When an omclseq member and an OMA gene both carry same_as to the
+        same veupathdb/ncbigene node, the two ortholog sources corroborate
+        each other — surface that as a direct same_as between the members.
+        """
+        by_target: dict[str, list[str]] = {}
+        for e in graph.edges:
+            if e.predicate == "same_as" and e.subject.startswith(
+                ("omclseq:", "gene:")
+            ):
+                by_target.setdefault(e.object, []).append(e.subject)
+        for target, members in by_target.items():
+            if len(members) < 2:
+                continue
+            ev = [
+                Evidence(
+                    source="derived",
+                    endpoint="shared ortholog resolution",
+                    summary=f"both resolve to {target}",
+                    payload={"target": target, "members": members},
+                )
+            ]
+            for m in members[1:]:
+                graph.add_edge(
+                    Edge(
+                        subject=members[0],
+                        predicate="same_as",
+                        object=m,
+                        confidence=0.9,
+                        evidence=ev,
+                    )
+                )
 
     def _link_candidate_genes(self, graph: KnowledgeGraph) -> None:
         """Join gene nodes to same-species assemblies: has_candidate_gene.
@@ -1226,10 +1518,24 @@ class Resolver:
         ]
         if not assemblies:
             return
+        # Only gene-level nodes join — omclseq members are proteins and
+        # drop out here. Excluded: the query's own records (input's same_as
+        # objects) and members with a verified ncbigene link (they get real
+        # annotated_in edges instead of this species-level guess).
+        skip = {
+            e.subject
+            for e in graph.edges
+            if e.predicate == "same_as" and e.object.startswith("ncbigene:")
+        } | {
+            e.object
+            for e in graph.edges
+            if e.predicate == "same_as" and e.subject == graph.metadata["input"]
+        }
         genes = [
             n for n in graph.nodes.values()
             if n.type == NodeType.GENE
-            and n.id_namespace in ("oma", "orthomcl")
+            and n.id_namespace in ("oma", "veupathdb")
+            and n.id not in skip
             and (n.attrs.get("species") or n.attrs.get("organism"))
         ]
         for asm in assemblies:

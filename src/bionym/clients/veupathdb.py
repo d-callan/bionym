@@ -5,8 +5,11 @@ registered-user key. Empirical facts that differ from older assumptions:
 
 - The gene-ID lookup search urlSegment is
   ``single_record_question_GeneRecordClasses_GeneRecordClass`` with parameter
-  ``primaryKeys`` = ``"<source_id>,<ProjectId>"`` (a comma-separated string,
-  not a JSON array). ``GenesByGeneId`` does not exist on current sites.
+  ``primaryKeys``. On the per-project sites the PK is
+  ``"<source_id>,<ProjectId>"``; on the veupathdb.org umbrella it is just
+  ``<source_id>`` and covers every project — so all gene lookups go to the
+  umbrella and the record's ``project_id`` attribute names the owning
+  project. ``GenesByGeneId`` does not exist on current sites.
 - ``reportConfig.attributeFormat`` must be ``"text"`` or ``"display"``;
   ``"table"`` is rejected by request-schema validation.
 - ``pagination`` belongs inside ``reportConfig`` (not top level, not
@@ -33,28 +36,7 @@ from ..evidence import Evidence
 
 log = logging.getLogger(__name__)
 
-# Prefix -> project site. VEuPathDB gene ID conventions are heterogeneous;
-# this covers the common eukaryotic-pathogen projects. Extend as needed.
-PREFIX_PROJECTS: list[tuple[str, str]] = [
-    ("PF3D7_", "plasmodb"), ("PVA", "plasmodb"), ("PBANKA_", "plasmodb"),
-    ("PVX_", "plasmodb"), ("PKNH_", "plasmodb"), ("PY17X_", "plasmodb"),
-    ("PO", "plasmodb"), ("PC", "plasmodb"),
-    ("TGME49_", "toxodb"), ("TGGT1_", "toxodb"),
-    ("Tb927", "tritrypdb"), ("Tb", "tritrypdb"), ("Lm", "tritrypdb"),
-    ("LmjF", "tritrypdb"), ("Tbr", "tritrypdb"), ("Tc", "tritrypdb"),
-    ("Cgd", "cryptodb"), ("cgd", "cryptodb"), ("Chro", "cryptodb"),
-    ("EC", "microsporidiadb"),
-    ("B9_", "piroplasmadb"), ("BBOV", "piroplasmadb"),
-    ("NCLIV", "piroplasmadb"),
-    ("EHI_", "amoebadb"), ("EDI_", "amoebadb"),
-    ("GL50803_", "giardiadb"), ("GLP", "giardiadb"),
-    ("CRE", "fungidb"), ("CNAG_", "fungidb"),
-]
-
-# Fallback order when no prefix matches.
-DEFAULT_PROJECTS = ["plasmodb", "toxodb", "cryptodb"]
-
-# project slug -> (site host, WDK project_id used in record primary keys).
+# project slug -> (site host, WDK project_id reported on gene records).
 # All sites accept /a as the webapp path; it auto-resolves to the project's
 # real context (plasmo, toxo, tritrypdb, ...).
 PROJECTS: dict[str, tuple[str, str]] = {
@@ -69,7 +51,17 @@ PROJECTS: dict[str, tuple[str, str]] = {
     "microsporidiadb": ("microsporidiadb.org", "MicrosporidiaDB"),
 }
 
+# WDK project_id -> project slug (reverse of PROJECTS).
+PROJECT_BY_ID = {pid: slug for slug, (_, pid) in PROJECTS.items()}
+
 GENE_ID_SEARCH = "single_record_question_GeneRecordClasses_GeneRecordClass"
+
+# The veupathdb.org umbrella's gene record class spans every project and
+# keys on source_id alone — one lookup, no site routing.
+GENE_SEARCH_URL = (
+    "https://veupathdb.org/a/service/record-types/gene/searches/"
+    f"{GENE_ID_SEARCH}/reports/standard"
+)
 DATASET_ID_SEARCH = "single_record_question_DatasetRecordClasses_DatasetRecordClass"
 
 # orthomcl.org runs the same WDK service API; group records key on the
@@ -114,10 +106,10 @@ class VEuPathDBClient:
         record, project, evidence = self._fetch_gene_record(
             gene_id, DEFAULT_ATTRIBUTES, tables=["Alias"]
         )
-        if record is None or project is None:
+        if record is None:
             return [], evidence
         attrs = record.get("attributes", {})
-        host = PROJECTS[project][0]
+        host = PROJECTS[project][0] if project else "veupathdb.org"
         link = attrs.get("link") or ""
         return [
             {
@@ -167,9 +159,9 @@ class VEuPathDBClient:
             ["primary_key"],
             tables=["TranscriptionSummary", "ExpressionGraphsDataTable"],
         )
-        if record is None or project is None:
+        if record is None:
             return {}, evidence
-        host = PROJECTS[project][0]
+        host = PROJECTS[project][0] if project else "veupathdb.org"
         tables = record.get("tables", {})
         # ExpressionGraphsDataTable rows are per-sample measurements, so
         # sample names aggregate per dataset for free — they encode the
@@ -400,55 +392,45 @@ class VEuPathDBClient:
             return [], None, evidence
         return record.get("tables", {}).get(table, []), project, evidence
 
-    @staticmethod
-    def _candidate_projects(gene_id: str) -> list[str]:
-        for prefix, project in PREFIX_PROJECTS:
-            if gene_id.startswith(prefix):
-                return [project]
-        return DEFAULT_PROJECTS
-
     def _fetch_gene_record(
         self,
         gene_id: str,
         attributes: list[str],
         tables: list[str] | None = None,
     ) -> tuple[dict[str, Any] | None, str | None, list[Evidence]]:
-        """POST the single-record gene search on each candidate project.
+        """POST the single-record gene search on the veupathdb.org umbrella.
 
-        Returns (record|None, project slug|None, evidence). A gene that
-        doesn't exist on a project yields HTTP 200 with isValid=false and
-        no "records" key, so presence of records is the hit test.
+        Returns (record|None, project slug|None, evidence). The umbrella
+        covers all projects, so there is no site routing — the record's
+        ``project_id`` attribute identifies the owning project. A miss
+        yields HTTP 200 with isValid=false and no "records" key.
         """
-        evidence: list[Evidence] = []
-        for project in self._candidate_projects(gene_id):
-            host, project_id = PROJECTS[project]
-            url = (
-                f"https://{host}/a/service/record-types/gene/searches/"
-                f"{GENE_ID_SEARCH}/reports/standard"
+        attrs = list(dict.fromkeys([*attributes, "project_id"]))
+        body = {
+            "searchConfig": {"parameters": {"primaryKeys": gene_id}},
+            "reportConfig": {
+                "attributes": attrs,
+                "tables": list(tables or []),
+                "attributeFormat": "text",
+            },
+        }
+        data = self._post(GENE_SEARCH_URL, body)
+        records = data.get("records") or []
+        evidence = [
+            Evidence(
+                source="veupathdb",
+                endpoint=GENE_SEARCH_URL,
+                summary=f"veupathdb gene lookup {gene_id!r}",
+                payload={"hits": len(records)},
             )
-            body = {
-                "searchConfig": {
-                    "parameters": {"primaryKeys": f"{gene_id},{project_id}"},
-                },
-                "reportConfig": {
-                    "attributes": list(attributes),
-                    "tables": list(tables or []),
-                    "attributeFormat": "text",
-                },
-            }
-            data = self._post(url, body)
-            records = data.get("records") or []
-            evidence.append(
-                Evidence(
-                    source="veupathdb",
-                    endpoint=url,
-                    summary=f"{project} gene lookup {gene_id!r}",
-                    payload={"project": project, "hits": len(records)},
-                )
-            )
-            if records:
-                return records[0], project, evidence
-        return None, None, evidence
+        ]
+        if not records:
+            return None, None, evidence
+        rec = records[0]
+        project = PROJECT_BY_ID.get(
+            rec.get("attributes", {}).get("project_id")
+        )
+        return rec, project, evidence
 
     def _post(self, url: str, body: dict[str, Any]) -> dict[str, Any]:
         cache_key = url + "|" + json.dumps(body, sort_keys=True)

@@ -43,6 +43,10 @@ class Node(BaseModel):
         Single source of truth — flows to CLI JSON, API, web UI and HTML
         report automatically via model_dump.
         """
+        # an explicit url recorded on the node wins (e.g. VEuPathDB
+        # project-specific gene pages, OrthoMCL sequence_link)
+        if self.attrs.get("url"):
+            return self.attrs["url"]
         ns, nid = self.id_namespace, self.id
         if ":" in nid:
             prefix, _, rest = nid.partition(":")

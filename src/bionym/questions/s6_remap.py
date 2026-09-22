@@ -45,10 +45,11 @@ def build_questions(unannotated: list[dict[str, Any]]) -> dict:
             "instructions": (
                 f"`unannotated_related[{i}]` is an assembly of the same "
                 "organism as `source_gene`, but NCBI did not annotate the "
-                "gene on it. Is the gene likely present in this assembly "
-                "anyway? Weigh assembly level and completeness — a gene may "
-                "be absent from annotation due to a partial assembly or "
-                "annotation pipeline gaps rather than true biological absence."
+                "gene on it. Is an ortholog of the gene (a member of its "
+                "orthogroup) likely present in this assembly anyway? Weigh "
+                "assembly level and completeness — a gene may be absent "
+                "from annotation due to a partial assembly or annotation "
+                "pipeline gaps rather than true biological absence."
             ),
         }
         for i in range(len(unannotated))

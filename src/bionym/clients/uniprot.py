@@ -18,6 +18,7 @@ from ..evidence import Evidence
 log = logging.getLogger(__name__)
 
 BASE = "https://rest.uniprot.org/uniprotkb/search"
+ENTRY = "https://rest.uniprot.org/uniprotkb"
 
 # GO evidence code -> confidence. Deterministic provenance scoring: these
 # annotations are already curated assertions, so confidence reflects the
@@ -63,6 +64,25 @@ class UniProtClient:
         )
         return records, [ev]
 
+    def entry_by_accession(
+        self, accession: str
+    ) -> tuple[dict[str, Any] | None, list[Evidence]]:
+        """Fetch a single UniProtKB entry by accession (e.g. A0A8A4TR43).
+
+        Used to bridge OMA orthologs (whose canonical ids are UniProt
+        accessions) to NCBI Gene via the entry's GeneID cross-reference.
+        """
+        data = self._get(f"{ENTRY}/{accession}", {"format": "json"})
+        ev = Evidence(
+            source="uniprot",
+            endpoint=f"{ENTRY}/{accession}",
+            summary=f"uniprotkb accession {accession}",
+            payload={"found": bool(data)},
+        )
+        if not data or not data.get("primaryAccession"):
+            return None, [ev]
+        return self._normalize_entry(data), [ev]
+
     # -- internals ---------------------------------------------------------
 
     @staticmethod
@@ -70,10 +90,13 @@ class UniProtClient:
         xrefs = e.get("uniProtKBCrossReferences") or []
         go_terms = []
         kegg, interpro, pfam = [], [], []
+        gene_id = None
         for x in xrefs:
             db = x.get("database")
             props = {p["key"]: p["value"] for p in x.get("properties", [])}
-            if db == "GO":
+            if db == "GeneID":
+                gene_id = x.get("id")
+            elif db == "GO":
                 term = props.get("GoTerm", "")
                 go_terms.append(
                     {
@@ -108,6 +131,7 @@ class UniProtClient:
             "organism": organism.get("scientificName"),
             "tax_id": organism.get("taxonId"),
             "go_terms": go_terms,
+            "gene_id": gene_id,
             "kegg": kegg,
             "interpro": interpro,
             "pfam": pfam,

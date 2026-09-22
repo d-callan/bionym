@@ -124,6 +124,9 @@ class FakeOma:
 
 
 class FakeUniProt:
+    def entry_by_accession(self, accession):
+        return None, _EV
+
     def search_gene(self, symbol, tax_id=None):
         return [
             {
