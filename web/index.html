@@ -34,6 +34,19 @@
   .colhead { font-size: 11px; font-weight: 600; fill: var(--muted); }
   .conf { font-variant-numeric: tabular-nums; }
   .tfilter { font-size: .8rem; padding: .2rem .5rem; border: 1px solid var(--line); border-radius: 5px; font-weight: normal; }
+  h2 label { font-weight: normal; margin-left: .8rem; }
+  #layout { font-size: .8rem; padding: .15rem .3rem; }
+  #resetzoom, #zin, #zout { font-size: .75rem; padding: .2rem .6rem; margin-left: .5rem; background: #edf2f7; color: var(--ink); border: 1px solid var(--line); }
+  #zin, #zout { width: 1.8rem; }
+  #legend { display: flex; flex-wrap: wrap; gap: .4rem 1rem; padding: .4rem .2rem; font-size: .75rem; color: var(--muted); }
+  #legend .leg { display: inline-flex; align-items: center; gap: .3rem; }
+  #legend .leg i { width: .7rem; height: .7rem; border-radius: 50%; display: inline-block; }
+  .nodeg.dim { opacity: .12; }
+  .link.link-dim { stroke-opacity: .04; }
+  .link.link-hi { stroke-opacity: .95; stroke: #2b6cb0; }
+  .hint { font-size: .72rem; font-weight: normal; color: var(--muted); margin-left: .6rem; }
+  svg#net { cursor: grab; }
+  svg#net:active { cursor: grabbing; }
   th { cursor: pointer; user-select: none; }
   th:hover { background: #e2e8f0; }
 </style>
@@ -49,8 +62,20 @@
 </header>
 <div id="status">Enter an identifier to resolve.</div>
 <main>
-  <h2>Network</h2>
-  <svg id="net" viewBox="0 0 1100 600" preserveAspectRatio="xMidYMid meet"></svg>
+  <h2>Network
+    <label>layout
+      <select id="layout">
+        <option value="columns">multi-partite</option>
+        <option value="force">force-directed</option>
+      </select>
+    </label>
+    <button id="zout" type="button" title="zoom out">−</button>
+    <button id="zin" type="button" title="zoom in">+</button>
+    <button id="resetzoom" type="button">reset view</button>
+    <span class="hint">scroll to zoom · drag to pan · hover a node to highlight its neighborhood</span>
+  </h2>
+  <svg id="net" viewBox="0 0 1400 700" preserveAspectRatio="xMidYMid meet"></svg>
+  <div id="legend"></div>
   <h2>Edges <input class="tfilter" data-for="edges" placeholder="filter…"></h2>
   <div class="tablewrap"><table id="edges"><thead><tr><th>subject</th><th>predicate</th><th>object</th><th>conf</th></tr></thead><tbody></tbody></table></div>
   <h2>Nodes <input class="tfilter" data-for="nodes" placeholder="filter…"></h2>
@@ -76,6 +101,7 @@ $("#f").addEventListener("submit", async e => {
     const r = await fetch(`${BACKEND}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${DEPTH}`);
     if (!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || r.statusText);
     GRAPH = await r.json();
+    d3.select("#net").call(zoom.transform, d3.zoomIdentity);  // new query resets view
     renderFiltered();
     const u = (GRAPH.metadata.jev_usage||{}).total||{};
     status.textContent = `${Object.keys(GRAPH.nodes).length} nodes, ${GRAPH.edges.length} edges · JEV ${u.input_tokens||0}in/${u.output_tokens||0}out · stages: ${(GRAPH.metadata.stages||[]).join(", ")}`;
@@ -146,38 +172,108 @@ function sortable(tableId, rows, cols, initKey = null, initDir = 1) {
   draw();
 }
 
-function render(g) {
-  const nodes = Object.values(g.nodes), edges = g.edges;
-  const svg = d3.select("#net"); svg.selectAll("*").remove();
-  const W = 1100, H = 600;
+// Pan/zoom transform on the viewport <g>; persists across re-renders
+// (e.g. min-conf slider) but resets on a new query.
+const zoom = d3.zoom().scaleExtent([0.2, 6]).on("zoom", e => {
+  d3.select("#net .viewport").attr("transform", e.transform);
+});
+$("#resetzoom").addEventListener("click", () =>
+  d3.select("#net").transition().duration(300).call(zoom.transform, d3.zoomIdentity));
+$("#zin").addEventListener("click", () =>
+  d3.select("#net").transition().duration(200).call(zoom.scaleBy, 1.4));
+$("#zout").addEventListener("click", () =>
+  d3.select("#net").transition().duration(200).call(zoom.scaleBy, 1/1.4));
+$("#layout").addEventListener("change", () => { if (GRAPH) renderFiltered(); });
+
+// Node positions: {id: {x, y}}. "columns" = multi-partite by type;
+// "force" = synchronous d3.forceSimulation (cloned data — forceLink
+// mutates links, which would corrupt the edges table).
+function layout(nodes, edges, mode, W, H) {
+  if (mode === "force") {
+    const simNodes = nodes.map(n => ({...n}));
+    const simLinks = edges.map(e => ({source: e.subject, target: e.object}));
+    const sim = d3.forceSimulation(simNodes)
+      .force("link", d3.forceLink(simLinks).id(d => d.id).distance(70))
+      .force("charge", d3.forceManyBody().strength(-180))
+      .force("center", d3.forceCenter(W/2, H/2))
+      .force("collide", d3.forceCollide(16))
+      .stop();
+    for (let i = 0; i < 300; i++) sim.tick();
+    return [Object.fromEntries(simNodes.map(n => [n.id, {x: n.x, y: n.y}])), []];
+  }
   const byType = d3.group(nodes, d => d.type);
   // known types in COLS order, then any unknown types appended so a
   // new NodeType can never leave nodes unpositioned (pos[d.id] crash)
   const cols = COLS.filter(t => byType.has(t))
     .concat([...byType.keys()].filter(t => !COLS.includes(t)));
-  const x = d3.scalePoint(cols, [70, W-70]);
+  const x = d3.scalePoint(cols, [90, W-90]);
   const pos = {};
   cols.forEach(t => {
     const ns = byType.get(t);
     const y = d3.scalePoint(d3.range(ns.length), [45, H-30]);
     ns.forEach((n,i) => pos[n.id] = {x:x(t), y:y(i)});
   });
-  svg.selectAll(".colhead").data(cols).join("text").attr("class","colhead")
-    .attr("x", d=>x(d)).attr("y", 20).attr("text-anchor","middle").text(d=>d);
-  svg.selectAll(".link").data(edges).join("path").attr("class","link")
+  return [pos, cols];
+}
+
+const ellipsize = (s, n=26) => s.length > n ? s.slice(0, n-1) + "…" : s;
+
+function render(g) {
+  const nodes = Object.values(g.nodes), edges = g.edges;
+  const svg = d3.select("#net"); svg.selectAll("*").remove();
+  const W = 1400, H = 700;
+  const mode = $("#layout").value;
+  const [pos, cols] = layout(nodes, edges, mode, W, H);
+
+  // everything lives in .viewport so d3.zoom pans/zooms the whole scene
+  const vp = svg.append("g").attr("class", "viewport");
+  svg.call(zoom);
+  // re-apply the persisted transform to the fresh viewport (re-renders
+  // from the min-conf slider keep the user's pan/zoom)
+  vp.attr("transform", d3.zoomTransform(svg.node()));
+
+  if (mode === "columns") {
+    const x = d3.scalePoint(cols, [90, W-90]);
+    vp.selectAll(".colhead").data(cols).join("text").attr("class","colhead")
+      .attr("x", d=>x(d)).attr("y", 20).attr("text-anchor","middle").text(d=>d);
+  }
+  vp.selectAll(".link").data(edges).join("path").attr("class","link")
     .attr("d", e => { const s=pos[e.subject], t=pos[e.object]; if(!s||!t) return "";
       const mx=(s.x+t.x)/2; return `M${s.x},${s.y} C${mx},${s.y} ${mx},${t.y} ${t.x},${t.y}`; })
     .attr("stroke","#718096").attr("stroke-opacity", e=>0.12+0.88*e.confidence)
     .attr("stroke-width", e=>0.5+2.5*e.confidence);
-  const nodeG = svg.selectAll(".nodeg").data(nodes).join("g").attr("class","nodeg")
+  // hover a node: emphasize it + directly-connected nodes/edges, dim rest
+  const neighbors = new Map();
+  edges.forEach(e => {
+    (neighbors.get(e.subject) || neighbors.set(e.subject, new Set()).get(e.subject)).add(e.object);
+    (neighbors.get(e.object) || neighbors.set(e.object, new Set()).get(e.object)).add(e.subject);
+  });
+  const linkSel = vp.selectAll(".link");
+  const nodeG = vp.selectAll(".nodeg").data(nodes).join("g").attr("class","nodeg")
     .attr("transform", d=>`translate(${pos[d.id].x},${pos[d.id].y})`)
     .style("cursor", d=>d.url?"pointer":"default")
-    .on("click", (e,d)=>{ if(d.url) window.open(d.url,"_blank"); });
+    .on("click", (e,d)=>{ if(d.url) window.open(d.url,"_blank"); })
+    .on("mouseenter", (e,d) => {
+      const nb = neighbors.get(d.id) || new Set();
+      nodeG.classed("dim", n => n.id !== d.id && !nb.has(n.id));
+      linkSel.classed("link-dim", l => l.subject !== d.id && l.object !== d.id)
+             .classed("link-hi", l => l.subject === d.id || l.object === d.id);
+    })
+    .on("mouseleave", () => {
+      nodeG.classed("dim", false);
+      linkSel.classed("link-dim", false).classed("link-hi", false);
+    });
   nodeG.append("circle").attr("class","node").attr("r",5)
     .attr("fill", d=>COLORS[d.type]||"#999");
   nodeG.append("text").attr("class","nodelabel").attr("x",7).attr("y",3)
-    .text(d=>(d.label||d.id).slice(0,22));
-  nodeG.append("title").text(d=>`${d.id} (${d.type})${d.url?" — click to open":""}`);
+    .text(d=>ellipsize(d.label||d.id));
+  nodeG.append("title").text(d=>`${d.label||d.id}\n${d.id} (${d.type})${d.url?"\nclick to open":""}`);
+
+  // legend: colors for the types actually present
+  const typesPresent = [...new Set(nodes.map(n => n.type))];
+  document.getElementById("legend").innerHTML = typesPresent
+    .map(t => `<span class="leg"><i style="background:${COLORS[t]||"#999"}"></i>${esc(t)}</span>`)
+    .join("");
 
   const byId = Object.fromEntries(nodes.map(n=>[n.id,n]));
   const cell = id => byId[id] ? link(byId[id]) : esc(id);
