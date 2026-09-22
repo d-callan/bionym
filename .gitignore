@@ -10,3 +10,4 @@ dist/
 .ruff_cache/
 graph.json
 report.html
+REVIEW.md
