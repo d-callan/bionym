@@ -11,6 +11,7 @@ import logging
 from typing import Any
 
 from .clients.expression import ExpressionAtlasClient
+from .clients.kegg import KeggClient
 from .clients.ncbi import NcbiClient
 from .clients.oma import OmaClient
 from .clients.uniprot import GO_EVIDENCE_CONFIDENCE, DEFAULT_GO_CONFIDENCE, UniProtClient
@@ -40,6 +41,7 @@ class Resolver:
         oma: OmaClient | None = None,
         uniprot: UniProtClient | None = None,
         gxa: ExpressionAtlasClient | None = None,
+        kegg: KeggClient | None = None,
         max_candidates: int = 20,
     ) -> None:
         self.jev = jev
@@ -48,6 +50,7 @@ class Resolver:
         self.oma = oma or OmaClient()
         self.uniprot = uniprot or UniProtClient()
         self.gxa = gxa or ExpressionAtlasClient()
+        self.kegg = kegg or KeggClient()
         self.max_candidates = max_candidates
 
     def resolve(self, identifier: str, depth: int = 1) -> KnowledgeGraph:
@@ -176,7 +179,241 @@ class Resolver:
             probabilities = ans.get("probabilities", {})
 
         self._materialize_gene(gene_node, match, confidence, probabilities, evidence, graph)
+        self._bridge_veupathdb(gene_node.id, match, evidence, graph)
+        self._bridge_ncbi(gene_node.id, match, graph)
+        self._enrich_ncbi_gene(gene_node.id, match, evidence, graph)
         return match
+
+    def _bridge_veupathdb(
+        self,
+        identifier: str,
+        match: dict[str, Any],
+        evidence: list[Evidence],
+        graph: KnowledgeGraph,
+    ) -> None:
+        """Link the resolved gene to its canonical VEuPathDB record.
+
+        VEuPathDB primary keys are locus tags: previous IDs and aliases
+        resolve transparently through the PK lookup, but NCBI GeneIDs do
+        not — so NCBI-sourced matches bridge via the report's locus_tag.
+        VEuPathDB fields (orthomcl_name, veupathdb_id) are merged into
+        `match` so later stages (S3 orthologs, S5 expression) can use them.
+        """
+        vpd = match if match.get("source") == "veupathdb" else None
+        vpd_ev = evidence
+        confidence = 1.0
+        if vpd is None:
+            locus_tag = match.get("locus_tag")
+            if not locus_tag:
+                return
+            records, vpd_ev = self.veupathdb.lookup_gene(locus_tag)
+            if not records:
+                return
+            vpd = records[0]
+            confidence = 0.9  # NCBI's locus_tag assertion, not VEuPathDB's
+            match["orthomcl_name"] = vpd.get("orthomcl_name")
+
+        vpd_id = vpd.get("gene_id")
+        if not vpd_id:
+            return
+        match["veupathdb_id"] = vpd_id
+        node_id = f"veupathdb:{vpd_id}"
+        graph.add_node(
+            Node(
+                id=node_id,
+                type=NodeType.GENE,
+                label=vpd.get("symbol") or vpd_id,
+                id_namespace="veupathdb",
+                attrs={
+                    "project": vpd.get("project"),
+                    "organism": vpd.get("organism"),
+                    "orthomcl_name": vpd.get("orthomcl_name"),
+                    "aliases": vpd.get("aliases"),
+                    "url": vpd.get("url"),
+                },
+            )
+        )
+        graph.add_edge(
+            Edge(
+                subject=identifier,
+                predicate="same_as",
+                object=node_id,
+                confidence=confidence,
+                evidence=vpd_ev,
+            )
+        )
+
+        # VEuPathDB curates its own citation list (with titles/authors) —
+        # complements the bare pmid links from NCBI elink.
+        citations, cite_ev = self.veupathdb.gene_pubmed(vpd_id)
+        for c in citations:
+            pmid = c.get("pubmed_id")
+            if not pmid:
+                continue
+            pm_node = f"pubmed:{pmid}"
+            graph.add_node(
+                Node(
+                    id=pm_node,
+                    type=NodeType.PUBLICATION,
+                    label=c.get("title") or f"PMID {pmid}",
+                    id_namespace="pubmed",
+                    attrs={"authors": c.get("authors"), "doi": c.get("doi")},
+                )
+            )
+            graph.add_edge(
+                Edge(
+                    subject=node_id,
+                    predicate="cited_in",
+                    object=pm_node,
+                    confidence=1.0,
+                    evidence=cite_ev,
+                )
+            )
+
+    def _bridge_ncbi(
+        self,
+        identifier: str,
+        match: dict[str, Any],
+        graph: KnowledgeGraph,
+    ) -> None:
+        """Link a non-NCBI match back to its NCBI Gene record.
+
+        NCBI indexes VEuPathDB locus tags in db=gene, so esearch on the
+        canonical id finds the GeneID. Prefers a hit whose tax_id matches
+        the resolved organism; falls back to the top hit at lower
+        confidence. No-op when the match already came from NCBI (the query
+        node is the NCBI gene) or no locus-tag-like id is available.
+        """
+        if match.get("source") in ("ncbi_datasets", "ncbi_eutils"):
+            return
+        query = match.get("veupathdb_id") or match.get("locus_tag")
+        if not query:
+            return
+        records, evidence = self.ncbi.find_gene(query)
+        if not records:
+            return
+        tax_id = match.get("tax_id")
+        hit = next(
+            (r for r in records if tax_id and str(r.get("tax_id")) == str(tax_id)),
+            records[0],
+        )
+        confidence = 0.9 if tax_id and str(hit.get("tax_id")) == str(tax_id) else 0.6
+        match["ncbi_gene_id"] = hit["gene_id"]
+        node_id = f"ncbigene:{hit['gene_id']}"
+        graph.add_node(
+            Node(
+                id=node_id,
+                type=NodeType.GENE,
+                label=hit.get("symbol") or hit["gene_id"],
+                id_namespace="ncbi_gene",
+                attrs={
+                    "gene_id": hit.get("gene_id"),
+                    "organism": hit.get("organism"),
+                    "description": hit.get("description"),
+                },
+            )
+        )
+        graph.add_edge(
+            Edge(
+                subject=identifier,
+                predicate="same_as",
+                object=node_id,
+                confidence=confidence,
+                evidence=evidence,
+            )
+        )
+
+    def _enrich_ncbi_gene(
+        self,
+        identifier: str,
+        match: dict[str, Any],
+        evidence: list[Evidence],
+        graph: KnowledgeGraph,
+    ) -> None:
+        """Expand the NCBI gene record into product/citation/sequence nodes.
+
+        Runs for both NCBI-sourced matches and bridged ones — the same_as
+        targets are entry points to each resource's full record. All edges
+        are DB facts (accessions, elink assertions) -> deterministic conf.
+        """
+        # match["gene_id"] is the uid only for NCBI-sourced matches;
+        # bridged ones get ncbi_gene_id from _bridge_ncbi.
+        if match.get("source", "").startswith("ncbi"):
+            gene_id = match.get("gene_id")
+        else:
+            gene_id = match.get("ncbi_gene_id")
+        if not gene_id:
+            return
+        ncbi_node = f"ncbigene:{gene_id}"
+        # For NCBI-sourced matches the query node IS the gene; attach
+        # products to it directly rather than to a duplicate node.
+        parent = identifier if match.get("source") == "ncbi_datasets" else ncbi_node
+        if parent == ncbi_node and ncbi_node not in graph.nodes:
+            return
+
+        # Bridged matches lack the Datasets report fields — fetch it for
+        # genomic accessions (NC_*) and gene_groups (NCBI Ortholog).
+        genomic = match.get("genomic_accessions") or []
+        gene_groups = match.get("gene_groups")
+        if match.get("source") != "ncbi_datasets":
+            reports, rep_ev = self.ncbi.gene_by_id(gene_id)
+            if reports:
+                genomic = reports[0].get("genomic_accessions") or []
+                gene_groups = reports[0].get("gene_groups")
+                evidence = evidence + rep_ev
+                # enrich the bridged node with report metadata
+                node = graph.nodes.get(ncbi_node)
+                if node is not None:
+                    node.attrs["gene_type"] = reports[0].get("gene_type")
+                    node.attrs["gene_groups"] = gene_groups
+
+        for acc in genomic:
+            acc_node = f"nuccore:{acc}"
+            graph.add_node(
+                Node(id=acc_node, type=NodeType.TRANSCRIPT, label=acc,
+                     id_namespace="ncbi_nuccore", attrs={"kind": "genomic"})
+            )
+            graph.add_edge(
+                Edge(subject=parent, predicate="located_on", object=acc_node,
+                     confidence=1.0, evidence=evidence)
+            )
+
+        products, prod_ev = self.ncbi.gene_products(gene_id)
+        for acc in products.get("transcripts", []):
+            acc_node = f"nuccore:{acc}"
+            graph.add_node(
+                Node(id=acc_node, type=NodeType.TRANSCRIPT, label=acc,
+                     id_namespace="ncbi_nuccore", attrs={"kind": "transcript"})
+            )
+            graph.add_edge(
+                Edge(subject=parent, predicate="has_transcript", object=acc_node,
+                     confidence=1.0, evidence=prod_ev)
+            )
+        for acc in products.get("proteins", []):
+            acc_node = f"protein:{acc}"
+            graph.add_node(
+                Node(id=acc_node, type=NodeType.PROTEIN, label=acc,
+                     id_namespace="ncbi_protein")
+            )
+            graph.add_edge(
+                Edge(subject=parent, predicate="has_protein", object=acc_node,
+                     confidence=1.0, evidence=prod_ev)
+            )
+
+        links, pm_ev = self.ncbi.gene_pubmed(gene_id)
+        for link in links:
+            pmid = link.get("pubmed_id")
+            if not pmid:
+                continue
+            pm_node = f"pubmed:{pmid}"
+            graph.add_node(
+                Node(id=pm_node, type=NodeType.PUBLICATION, label=f"PMID {pmid}",
+                     id_namespace="pubmed", attrs={"kind": link.get("kind")})
+            )
+            graph.add_edge(
+                Edge(subject=parent, predicate="cited_in", object=pm_node,
+                     confidence=1.0, evidence=pm_ev)
+            )
 
     def _fetch_candidates(
         self, identifier: str, namespace: str
@@ -379,6 +616,13 @@ class Resolver:
 
         candidates = candidates[: self.max_candidates]
 
+        # Cross-site orthologs: the gene's OrthoMCL group (bridged onto the
+        # match in S1) spans all VEuPathDB species, unlike the per-site
+        # Orthologs table. Membership is a DB fact -> deterministic edges;
+        # whether a member is a true ortholog vs paralog is left to JEV.
+        if match.get("orthomcl_name"):
+            self._add_orthomcl_group(identifier, match["orthomcl_name"], graph)
+
         # Organisms of related assemblies (S2) minus the source organism.
         source_key = self._species_key(match.get("organism"))
         related_organisms = sorted(
@@ -464,6 +708,67 @@ class Resolver:
                 )
             )
 
+    def _add_orthomcl_group(
+        self, identifier: str, group_name: str, graph: KnowledgeGraph
+    ) -> None:
+        group, evidence = self.veupathdb.orthomcl_group(group_name)
+        if not group:
+            return
+        og_node = f"orthogroup:{group_name}"
+        graph.add_node(
+            Node(
+                id=og_node,
+                type=NodeType.ORTHOLOG_GROUP,
+                label=group_name,
+                id_namespace="orthomcl",
+                attrs={
+                    "group_type": group.get("group_type"),
+                    "number_of_members": group.get("number_of_members"),
+                },
+            )
+        )
+        graph.add_edge(
+            Edge(
+                subject=identifier,
+                predicate="in_orthogroup",
+                object=og_node,
+                confidence=1.0,
+                evidence=evidence,
+            )
+        )
+        # Cap member nodes like other candidate lists; Core members first.
+        members = sorted(
+            group.get("members", []),
+            key=lambda m: m.get("core_peripheral") != "Core",
+        )[: self.max_candidates]
+        for m in members:
+            fid = m.get("full_id")
+            if not fid:
+                continue
+            node_id = f"omclseq:{fid}"
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.GENE,
+                    label=fid,
+                    id_namespace="orthomcl",
+                    attrs={
+                        "organism": m.get("organism"),
+                        "description": m.get("description"),
+                        "core_peripheral": m.get("core_peripheral"),
+                    },
+                )
+            )
+            graph.add_edge(
+                Edge(
+                    subject=og_node,
+                    predicate="has_member",
+                    object=node_id,
+                    confidence=1.0,
+                    evidence=evidence,
+                )
+            )
+
     # -- S4 ----------------------------------------------------------------
 
     def _s4_annotate(
@@ -533,12 +838,15 @@ class Resolver:
                 )
             )
 
+        # UniProt KEGG xrefs are KEGG GENES entries (org:locus-tag, e.g.
+        # pfa:PF3D7_0710100), not pathways — represent as same_as gene
+        # nodes, then resolve actual pathway membership via the KEGG API.
         for kegg_id in rec.get("kegg", []):
             node_id = f"kegg:{kegg_id}"
             graph.add_node(
                 Node(
                     id=node_id,
-                    type=NodeType.PATHWAY,
+                    type=NodeType.GENE,
                     label=kegg_id,
                     id_namespace="kegg",
                 )
@@ -546,12 +854,32 @@ class Resolver:
             graph.add_edge(
                 Edge(
                     subject=identifier,
-                    predicate="in_pathway",
+                    predicate="same_as",
                     object=node_id,
-                    confidence=0.8,
+                    confidence=0.9,
                     evidence=evidence,
                 )
             )
+            pathways, pw_ev = self.kegg.pathways_for_gene(kegg_id)
+            for pw in pathways:
+                pw_node = f"kegg:{pw['pathway_id']}"
+                graph.add_node(
+                    Node(
+                        id=pw_node,
+                        type=NodeType.PATHWAY,
+                        label=pw.get("name") or pw["pathway_id"],
+                        id_namespace="kegg",
+                    )
+                )
+                graph.add_edge(
+                    Edge(
+                        subject=identifier,
+                        predicate="in_pathway",
+                        object=pw_node,
+                        confidence=0.9,
+                        evidence=pw_ev,
+                    )
+                )
 
         for source, domains in (("interpro", rec.get("interpro", [])), ("pfam", rec.get("pfam", []))):
             for d in domains:
@@ -591,6 +919,8 @@ class Resolver:
         symbol = match.get("symbol") or match.get("locus_tag") or identifier
         organism = match.get("organism")
 
+        n_vpd = self._add_veupathdb_datasets(identifier, match, graph)
+
         geo, geo_ev = self.ncbi.geo_datasets_for_gene(symbol, organism)
         gxa, gxa_ev = self.gxa.experiments_for_gene(symbol, organism)
         evidence = geo_ev + gxa_ev
@@ -599,7 +929,8 @@ class Resolver:
         # other; JEV scores every candidate for relevance.
         candidates = geo[: self.max_candidates] + gxa[: self.max_candidates]
         if not candidates:
-            graph.metadata["stages"].append("s5_expression:no_data")
+            if not n_vpd:
+                graph.metadata["stages"].append("s5_expression:no_data")
             return
 
         state = s5_expression.build_state(identifier, match, candidates)
@@ -650,6 +981,57 @@ class Resolver:
                         evidence=evidence,
                     )
                 )
+
+    def _add_veupathdb_datasets(
+        self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
+    ) -> int:
+        """VEuPathDB transcriptomics datasets that measured this gene.
+
+        ExpressionGraphsDataTable rows are per-sample measurements of the
+        gene itself — membership is a DB fact, so edges are deterministic
+        (unlike the fuzzy GEO/GXA candidates, which JEV scores). Uses the
+        canonical veupathdb_id bridged onto the match in S1. Returns the
+        number of dataset nodes added.
+        """
+        vpd_id = match.get("veupathdb_id")
+        if not vpd_id:
+            return 0
+        result, evidence = self.veupathdb.gene_datasets(vpd_id)
+        datasets = result.get("datasets", [])
+        # One bulk call resolves display names, summaries, and citations —
+        # the metadata JEV would need to judge condition relevance.
+        meta = self.veupathdb.dataset_records(
+            [d["dataset_id"] for d in datasets], result.get("project", "plasmodb")
+        )
+        for d in datasets:
+            dsid = d["dataset_id"]
+            m = meta.get(dsid, {})
+            node_id = f"dataset:{dsid}"
+            graph.add_node(
+                Node(
+                    id=node_id,
+                    type=NodeType.DATASET,
+                    label=m.get("display_name") or dsid,
+                    id_namespace="veupathdb",
+                    attrs={
+                        "project": result.get("project"),
+                        "type": m.get("type"),
+                        "summary": m.get("summary"),
+                        "pmid": m.get("pmid"),
+                        "sample_names": d.get("sample_names"),
+                    },
+                )
+            )
+            graph.add_edge(
+                Edge(
+                    subject=identifier,
+                    predicate="measured_in",
+                    object=node_id,
+                    confidence=1.0,
+                    evidence=evidence,
+                )
+            )
+        return len(datasets)
 
     # -- S6 ----------------------------------------------------------------
 

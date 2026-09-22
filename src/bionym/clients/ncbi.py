@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import time
 from typing import Any
 
@@ -107,6 +108,72 @@ class NcbiClient:
             payload={"uids": result.get("uids", [])},
         )
         return records, evidence + [ev2]
+
+    def gene_products(
+        self, gene_id: str
+    ) -> tuple[dict[str, Any], list[Evidence]]:
+        """Transcript/protein accessions from the gene_table report.
+
+        efetch rettype=gene_table is plain text; accessions are pulled
+        from the 'mRNA XM_...' / 'protein ... XP_...' lines. Returns
+        ({transcripts, proteins}, evidence).
+        """
+        url = f"{EUTILS}/efetch.fcgi"
+        text = self._get(
+            url,
+            params={
+                "db": "gene",
+                "id": str(gene_id),
+                "rettype": "gene_table",
+                "retmode": "text",
+            },
+            parse="text",
+        )
+        ev = Evidence(
+            source="ncbi_eutils",
+            endpoint=url,
+            summary=f"efetch db=gene rettype=gene_table id={gene_id}",
+            payload={"gene_id": str(gene_id)},
+        )
+        transcripts = re.findall(r"\bmRNA\s+([A-Z]{2}_\d+\.\d+)", text)
+        # protein lines carry a free-text name before the accession:
+        # "protein fructose-bisphosphate aldolase XP_001348599.1, ..."
+        proteins = re.findall(r"\bprotein\s+[^\n]*?\b([A-Z]{2}_\d+\.\d+)", text)
+        return {
+            "transcripts": sorted(set(transcripts)),
+            "proteins": sorted(set(proteins)),
+        }, [ev]
+
+    def gene_pubmed(
+        self, gene_id: str
+    ) -> tuple[list[dict[str, Any]], list[Evidence]]:
+        """PubMed IDs linked from the Gene record (elink gene->pubmed).
+
+        Collects both 'gene_pubmed' (general refs) and 'gene_pubmed_rif'
+        (GeneRIF-bearing articles). Returns ([{pubmed_id, kind}], evidence).
+        """
+        url = f"{EUTILS}/elink.fcgi"
+        data = self._get(
+            url,
+            params={
+                "dbfrom": "gene",
+                "db": "pubmed",
+                "id": str(gene_id),
+                "retmode": "json",
+            },
+        )
+        links = []
+        for ls in (data.get("linksets") or [{}])[0].get("linksetdbs") or []:
+            kind = ls.get("linkname", "")
+            for pmid in ls.get("links", []):
+                links.append({"pubmed_id": pmid, "kind": kind})
+        ev = Evidence(
+            source="ncbi_eutils",
+            endpoint=url,
+            summary=f"elink gene->pubmed id={gene_id}: {len(links)} link(s)",
+            payload={"gene_id": str(gene_id), "n": len(links)},
+        )
+        return links, [ev]
 
     def taxon(self, tax_id: int | str) -> tuple[dict[str, Any] | None, list[Evidence]]:
         """E-utilities efetch db=taxonomy: rank + lineage with ranks/taxids.
@@ -225,6 +292,12 @@ class NcbiClient:
             "assembly_accession": assemblies[0] if assemblies else None,
             "assembly_accessions": assemblies,
             "genomic_accessions": genomic,
+            "gene_type": g.get("type"),
+            "transcript_count": g.get("transcript_count"),
+            "protein_count": g.get("protein_count"),
+            "chromosomes": g.get("chromosomes"),
+            "orientation": g.get("orientation"),
+            "gene_groups": g.get("gene_groups"),
             "raw": r,
         }
 

@@ -57,8 +57,8 @@
   <div class="tablewrap"><table id="nodes"><thead><tr><th>id</th><th>type</th><th>label</th><th>namespace</th><th></th></tr></thead><tbody></tbody></table></div>
 </main>
 <script>
-const COLS = ["IdType","Gene","Organism","Assembly","OrthologGroup","Domain","GOTerm","Pathway","Dataset","Condition"];
-const COLORS = {IdType:"#8d99ae",Gene:"#2b6cb0",Organism:"#2f855a",Assembly:"#b7791f",OrthologGroup:"#6b46c1",Domain:"#c05621",GOTerm:"#2c7a7b",Pathway:"#97266d",Dataset:"#4a5568",Condition:"#9b2c2c"};
+const COLS = ["IdType","Gene","Organism","Assembly","OrthologGroup","Transcript","Protein","Domain","GOTerm","Pathway","Dataset","Condition","Publication"];
+const COLORS = {IdType:"#8d99ae",Gene:"#2b6cb0",Organism:"#2f855a",Assembly:"#b7791f",OrthologGroup:"#6b46c1",Transcript:"#2b8a3e",Protein:"#087f5b",Domain:"#c05621",GOTerm:"#2c7a7b",Pathway:"#97266d",Dataset:"#4a5568",Condition:"#9b2c2c",Publication:"#5f3dc4"};
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 let GRAPH = null;
@@ -151,7 +151,10 @@ function render(g) {
   const svg = d3.select("#net"); svg.selectAll("*").remove();
   const W = 1100, H = 600;
   const byType = d3.group(nodes, d => d.type);
-  const cols = COLS.filter(t => byType.has(t));
+  // known types in COLS order, then any unknown types appended so a
+  // new NodeType can never leave nodes unpositioned (pos[d.id] crash)
+  const cols = COLS.filter(t => byType.has(t))
+    .concat([...byType.keys()].filter(t => !COLS.includes(t)));
   const x = d3.scalePoint(cols, [70, W-70]);
   const pos = {};
   cols.forEach(t => {

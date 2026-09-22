@@ -23,6 +23,9 @@ class NodeType(str, Enum):
     DATASET = "Dataset"
     CONDITION = "Condition"
     ID_TYPE = "IdType"
+    TRANSCRIPT = "Transcript"
+    PROTEIN = "Protein"
+    PUBLICATION = "Publication"
 
 
 class Node(BaseModel):
@@ -52,6 +55,8 @@ class Node(BaseModel):
                 return f"https://omabrowser.org/oma/info/{rest}"
             if ns == "veupathdb":
                 return f"https://veupathdb.org/veupathdb/app/record/gene/{rest}"
+            if ns == "kegg":
+                return f"https://www.kegg.jp/entry/{rest}"
             gene_id = self.attrs.get("gene_id") or (rest if rest.isdigit() else None)
             if gene_id:
                 return f"https://www.ncbi.nlm.nih.gov/gene/{gene_id}"
@@ -68,10 +73,22 @@ class Node(BaseModel):
             if ns == "pfam":
                 return f"https://www.ebi.ac.uk/interpro/entry/pfam/{rest}"
             return f"https://www.ebi.ac.uk/interpro/entry/InterPro/{rest}"
+        if prefix == "orthogroup":
+            return f"https://orthomcl.org/orthomcl/app/record/group/{rest}"
+        if prefix == "omclseq":
+            return f"https://orthomcl.org/orthomcl/app/record/sequence/{rest}"
         if prefix == "dataset":
+            if ns == "veupathdb":
+                return f"https://veupathdb.org/veupathdb/app/record/dataset/{rest}"
             if rest.startswith("E-"):
                 return f"https://www.ebi.ac.uk/gxa/experiments/{rest}"
             return f"https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc={rest}"
+        if prefix == "nuccore":
+            return f"https://www.ncbi.nlm.nih.gov/nuccore/{rest}"
+        if prefix == "protein":
+            return f"https://www.ncbi.nlm.nih.gov/protein/{rest}"
+        if prefix == "pubmed":
+            return f"https://pubmed.ncbi.nlm.nih.gov/{rest}/"
         return None
 
 

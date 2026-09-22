@@ -1,5 +1,9 @@
+from bionym.evidence import Evidence
+from bionym.graph import NodeType
 from bionym.jev import JevClient
 from bionym.resolver import Resolver
+
+_EV = [Evidence(source="fake", endpoint="fake://x", summary="fake", payload={})]
 
 
 class FakeNcbi:
@@ -18,7 +22,7 @@ class FakeNcbi:
                 "genomic_accessions": ["NC_000013.11"],
                 "raw": {},
             }
-        ], []
+        ], _EV
 
     def find_gene(self, term):
         return [
@@ -60,6 +64,15 @@ class FakeNcbi:
                 "raw": {},
             }
         ], []
+
+    def gene_products(self, gene_id):
+        return {
+            "transcripts": ["XM_001348563.4"],
+            "proteins": ["XP_001348599.1"],
+        }, _EV
+
+    def gene_pubmed(self, gene_id):
+        return [{"pubmed_id": "26289816", "kind": "gene_pubmed"}], _EV
 
     def geo_datasets_for_gene(self, symbol, organism=None):
         return [
@@ -114,12 +127,19 @@ class FakeUniProt:
                     {"id": "GO:0003677", "term": "DNA binding", "aspect": "F", "evidence": "IDA"},
                     {"id": "GO:0006281", "term": "DNA repair", "aspect": "P", "evidence": "IEA"},
                 ],
-                "kegg": ["hsa03440"],
+                "kegg": ["hsa:672"],
                 "interpro": [{"id": "IPR001357", "name": "BRCT"}],
                 "pfam": [{"id": "PF00533", "name": "BRCT"}],
                 "keywords": ["DNA damage"],
                 "raw": {},
             }
+        ], []
+
+
+class FakeKegg:
+    def pathways_for_gene(self, kegg_gene_id):
+        return [
+            {"pathway_id": "hsa03440", "name": "Homologous recombination"},
         ], []
 
 
@@ -148,6 +168,7 @@ def _resolver():
         oma=FakeOma(),
         uniprot=FakeUniProt(),
         gxa=FakeGxa(),
+        kegg=FakeKegg(),
     )
 
 
@@ -199,7 +220,9 @@ def test_depth_four_adds_annotation():
     g = r.resolve("672", depth=4)
     assert "uniprot:P38398" in g.nodes
     assert "go:GO:0003677" in g.nodes
+    assert "kegg:hsa:672" in g.nodes
     assert "kegg:hsa03440" in g.nodes
+    assert g.nodes["kegg:hsa03440"].type == NodeType.PATHWAY
     assert "domain:IPR001357" in g.nodes
     predicates = {e.predicate for e in g.edges}
     assert {"same_as", "has_go_term", "in_pathway", "has_domain"} <= predicates
