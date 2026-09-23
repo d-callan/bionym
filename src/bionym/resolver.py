@@ -8,7 +8,6 @@ the JEV answers.
 from __future__ import annotations
 
 import logging
-import re
 from typing import Any
 
 from .clients.expression import ExpressionAtlasClient
@@ -967,10 +966,9 @@ class Resolver:
         full_id is a transcript/protein-level id (e.g. PF3D7_1444800-T1,
         AAEL005766-PB); stripping the suffix gives the gene PK, which
         lookup_gene verifies against the WDK record — a real linkout,
-        not an inference. GenBank/piped accessions aren't VEuPathDB ids.
+        not an inference. Non-VEuPathDB ids (GenBank, piped) simply miss
+        the lookup.
         """
-        if "|" in full_id or re.match(r"^[A-Z]{2,4}\d{4,}\.\d+$", full_id):
-            return
         # full_id is sequence-level: PF3D7_1444800-T1, PCOAH_00046700-t30_1-p1,
         # PKA1H_120042300.1-p1, AAEL005766-PB. Try the dash-stripped form
         # first (keeps dotted gene ids like Tb927.10.12345 intact), then the
@@ -1415,8 +1413,9 @@ class Resolver:
             family = next(
                 (
                     n.id
+                    for prefix in ("orthogroup:", "oma:")
                     for n in graph.nodes.values()
-                    if n.id.startswith(("orthogroup:", "oma:"))
+                    if n.id.startswith(prefix)
                 ),
                 subject,
             )
