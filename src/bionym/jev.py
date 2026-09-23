@@ -15,6 +15,7 @@ import hashlib
 import json
 import logging
 import os
+import time
 from typing import Any
 
 import httpx
@@ -127,17 +128,43 @@ class JevClient:
             cached = self._cache[key]
             return cached["answers"], cached["usage"]
 
-        resp = httpx.post(
-            API_URL,
-            headers={
-                "Authorization": f"Bearer {self._api_key}",
-                "Content-Type": "application/json",
-            },
-            json=body,
-            timeout=self.timeout,
-        )
-        if resp.status_code != 200:
-            raise JevError(f"JEV API error {resp.status_code}: {resp.text[:500]}")
+        # Transient upstream failures (5xx, 429, timeouts) get a short
+        # retry — one bad moment shouldn't kill a minutes-long resolve.
+        # 4xx (e.g. max_tokens_exceeded) raises immediately: ask() handles it.
+        resp = None
+        for attempt in range(3):
+            try:
+                resp = httpx.post(
+                    API_URL,
+                    headers={
+                        "Authorization": f"Bearer {self._api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json=body,
+                    timeout=self.timeout,
+                )
+            except httpx.TimeoutException:
+                if attempt == 2:
+                    raise JevError("JEV API timed out after 3 attempts")
+                time.sleep(2 * (attempt + 1))
+                continue
+            if resp.status_code == 200:
+                break
+            if resp.status_code < 500 and resp.status_code != 429:
+                raise JevError(
+                    f"JEV API error {resp.status_code}: {resp.text[:500]}"
+                )
+            if attempt < 2:
+                log.warning(
+                    "JEV API %s — retrying (attempt %d)",
+                    resp.status_code,
+                    attempt + 2,
+                )
+                time.sleep(2 * (attempt + 1))
+        else:
+            raise JevError(
+                f"JEV API error {resp.status_code}: {resp.text[:500]}"
+            )
         data = resp.json()
         answers, usage = data.get("answers", {}), data.get("usage", {})
         if self._cache is not None:
