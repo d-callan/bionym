@@ -20,7 +20,7 @@ from .clients.uniprot import GO_EVIDENCE_CONFIDENCE, DEFAULT_GO_CONFIDENCE, UniP
 from .clients.veupathdb import VEuPathDBClient
 from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
-from .jev import JevClient
+from .jev import JevClient, JevError
 from .llm import LlmClient
 from . import proposals
 from .species import same_species, species_key
@@ -1765,31 +1765,46 @@ class Resolver:
                 )
         if not pairs:
             return
-        state = s6_remap.build_candidate_state(pairs)
-        questions = s6_remap.build_candidate_questions(pairs)
-        answers = self.jev.ask(state, questions, stage="s6_candidates")
-        for i, p in enumerate(pairs):
-            ans = answers.get(f"candidate_{i}", {})
-            graph.add_edge(
-                Edge(
-                    subject=p["assembly"],
-                    predicate="has_candidate_gene",
-                    object=p["gene"],
-                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
-                    jev_question_id=f"candidate_{i}",
-                    evidence=[
-                        Evidence(
-                            source="bionym",
-                            endpoint="species join",
-                            summary=(
-                                f"assembly organism {p['assembly_organism']!r} "
-                                f"matches gene species {p['gene_species']!r}"
-                            ),
-                            payload={
-                                "assembly": p["assembly"],
-                                "gene": p["gene"],
-                            },
-                        )
-                    ],
+        # One ask per chunk: a deep graph can produce hundreds of pairs and
+        # a single ask overflows JEV's max_tokens. A failed chunk is skipped
+        # rather than killing the resolve — these are speculative edges.
+        for start in range(0, len(pairs), 50):
+            chunk = pairs[start : start + 50]
+            try:
+                answers = self.jev.ask(
+                    s6_remap.build_candidate_state(chunk),
+                    s6_remap.build_candidate_questions(chunk),
+                    stage="s6_candidates",
                 )
+            except JevError as e:
+                log.warning("s6_candidates chunk %d failed: %s", start, e)
+                continue
+            for i, p in enumerate(chunk):
+                self._add_candidate_edge(graph, p, answers.get(f"candidate_{i}", {}), start + i)
+
+    def _add_candidate_edge(
+        self, graph: KnowledgeGraph, p: dict[str, Any], ans: dict[str, Any], idx: int
+    ) -> None:
+        graph.add_edge(
+            Edge(
+                subject=p["assembly"],
+                predicate="has_candidate_gene",
+                object=p["gene"],
+                confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                jev_question_id=f"candidate_{idx}",
+                evidence=[
+                    Evidence(
+                        source="bionym",
+                        endpoint="species join",
+                        summary=(
+                            f"assembly organism {p['assembly_organism']!r} "
+                            f"matches gene species {p['gene_species']!r}"
+                        ),
+                        payload={
+                            "assembly": p["assembly"],
+                            "gene": p["gene"],
+                        },
+                    )
+                ],
             )
+        )
