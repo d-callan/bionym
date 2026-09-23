@@ -32,9 +32,9 @@ _INSTRUCTIONS = {
         "stage, strain, tissue)."
     ),
     "publication": (
-        "List every distinct claim or finding this publication title "
-        "explicitly states or clearly implies about the gene, its "
-        "function, or its organism."
+        "List every distinct claim or finding this publication's title "
+        "and abstract explicitly state or clearly imply about the gene, "
+        "its function, or its organism."
     ),
 }
 

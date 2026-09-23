@@ -75,6 +75,17 @@ class FakeNcbi:
     def gene_pubmed(self, gene_id):
         return [{"pubmed_id": "26289816", "kind": "gene_pubmed"}], _EV
 
+    def pubmed_details(self, pmids):
+        return {
+            "26289816": {
+                "title": "BRCA1 loss alters the DNA damage response",
+                "abstract": "BRCA1 is required for homologous recombination.",
+                "journal": "Nature",
+                "authors": ["Smith J"],
+                "year": "2016",
+            }
+        }, _EV
+
     def geo_datasets_for_gene(self, symbol, organism=None):
         return [
             {

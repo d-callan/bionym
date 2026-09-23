@@ -175,6 +175,40 @@ class NcbiClient:
         )
         return links, [ev]
 
+    def pubmed_details(
+        self, pmids: list[str]
+    ) -> tuple[dict[str, dict[str, Any]], list[Evidence]]:
+        """Title/abstract/journal/authors/year for PMIDs (efetch db=pubmed).
+
+        Batched in chunks of 200 — efetch accepts comma-separated ids and
+        full PubmedArticle XML is large. Returns ({pmid: {...}}, evidence).
+        """
+        url = f"{EUTILS}/efetch.fcgi"
+        out: dict[str, dict[str, Any]] = {}
+        evs = []
+        for i in range(0, len(pmids), 200):
+            chunk = pmids[i : i + 200]
+            text = self._get(
+                url,
+                params={
+                    "db": "pubmed",
+                    "id": ",".join(chunk),
+                    "retmode": "xml",
+                },
+                parse="text",
+            )
+            evs.append(
+                Evidence(
+                    source="ncbi_eutils",
+                    endpoint=url,
+                    summary=f"efetch db=pubmed: {len(chunk)} pmid(s)",
+                    payload={"pmids": chunk},
+                )
+            )
+            if text:
+                out.update(self._parse_pubmed_xml(text))
+        return out, evs
+
     def taxon(self, tax_id: int | str) -> tuple[dict[str, Any] | None, list[Evidence]]:
         """E-utilities efetch db=taxonomy: rank + lineage with ranks/taxids.
 
@@ -334,6 +368,49 @@ class NcbiClient:
             "summary": r.get("summary"),
             "raw": {},
         }
+
+    @staticmethod
+    def _parse_pubmed_xml(text: str) -> dict[str, dict[str, Any]]:
+        """PubmedArticleSet -> {pmid: {title, abstract, journal, authors, year}}."""
+        import xml.etree.ElementTree as ET
+
+        try:
+            root = ET.fromstring(text)
+        except ET.ParseError:
+            return {}
+        out = {}
+        for art in root.findall(".//PubmedArticle"):
+            med = art.find("MedlineCitation")
+            if med is None:
+                continue
+            pmid = med.findtext("PMID")
+            article = med.find("Article")
+            if not pmid or article is None:
+                continue
+            title_el = article.find("ArticleTitle")
+            # itertext: titles can embed <i>/<sub> tags
+            title = (
+                "".join(title_el.itertext()).strip() if title_el is not None else None
+            )
+            abstract = " ".join(
+                "".join(a.itertext()).strip()
+                for a in article.findall(".//Abstract/AbstractText")
+            ).strip() or None
+            authors = [
+                " ".join(
+                    p for p in (a.findtext("LastName"), a.findtext("Initials")) if p
+                )
+                for a in article.findall(".//AuthorList/Author")
+            ]
+            out[pmid] = {
+                "title": title,
+                "abstract": abstract,
+                "journal": article.findtext(".//Journal/Title"),
+                "authors": [a for a in authors if a],
+                "year": article.findtext(".//JournalIssue/PubDate/Year")
+                or article.findtext(".//JournalIssue/PubDate/MedlineDate"),
+            }
+        return out
 
     @staticmethod
     def _parse_taxon_xml(text: str) -> dict[str, Any] | None:

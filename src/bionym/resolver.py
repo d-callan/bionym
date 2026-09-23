@@ -1557,6 +1557,32 @@ class Resolver:
 
     # -- LLM proposals ------------------------------------------------------
 
+    def _enrich_publications(self, graph: KnowledgeGraph) -> None:
+        """Fill title/abstract/journal/authors/year on pubmed: nodes.
+
+        NCBI elink gives bare PMIDs and VEuPathDB citations give titles but
+        no abstracts — one batched efetch enriches both uniformly so the
+        proposal sweep (and triage) has real text to work with.
+        """
+        nodes = [
+            n for n in graph.nodes.values() if n.type == NodeType.PUBLICATION
+        ]
+        pmids = [n.id.split(":", 1)[1] for n in nodes if ":" in n.id]
+        if not pmids:
+            return
+        details, _ = self.ncbi.pubmed_details(pmids)
+        for n in nodes:
+            d = details.get(n.id.split(":", 1)[1])
+            if not d:
+                continue
+            if d.get("title") and (
+                not n.label or n.label.startswith("PMID ")
+            ):
+                n.label = d["title"]
+            for k in ("abstract", "journal", "authors", "year"):
+                if d.get(k) and not n.attrs.get(k):
+                    n.attrs[k] = d[k]
+
     def _propose_claims(
         self, graph: KnowledgeGraph, match: dict[str, Any]
     ) -> None:
@@ -1573,8 +1599,10 @@ class Resolver:
         """
         if not self.llm.enabled:
             return
-        # Datasets carry title/summary/sample names; publications carry a
-        # title (abstracts aren't fetched yet).
+        self._enrich_publications(graph)
+        # Datasets carry title/summary/sample names; publications carry
+        # title + abstract (enriched above — bare PMIDs have no text to
+        # propose from).
         items: list[dict[str, Any]] = []
         for n in graph.nodes.values():
             if n.type == NodeType.DATASET:
@@ -1588,10 +1616,16 @@ class Resolver:
                     items.append(
                         {"node": n.id, "kind": "dataset", "text": text}
                     )
-            elif n.type == NodeType.PUBLICATION and n.label:
-                items.append(
-                    {"node": n.id, "kind": "publication", "text": n.label}
+            elif n.type == NodeType.PUBLICATION:
+                text = "\n".join(
+                    p
+                    for p in (n.label, n.attrs.get("abstract") or "")
+                    if p
                 )
+                if text.strip():
+                    items.append(
+                        {"node": n.id, "kind": "publication", "text": text}
+                    )
         if not items:
             return
 
