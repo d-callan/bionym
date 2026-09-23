@@ -200,7 +200,7 @@ def test_cli_resolve_mock(tmp_path):
     from typer.testing import CliRunner
     from bionym.cli import app
     out = tmp_path / "g.json"
-    r = CliRunner().invoke(app, ["resolve", "672", "-o", str(out), "--mock-jev", "--depth", "1"])
+    r = CliRunner().invoke(app, ["resolve", "672", "-o", str(out), "--mock-jev", "--mock-llm", "--depth", "1"])
     assert r.exit_code == 0, r.output
     assert out.exists()
     import json
