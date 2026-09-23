@@ -99,8 +99,28 @@ class FakeNcbi:
                 "pubmed_ids": [],
                 "summary": "",
                 "raw": {},
-            }
+            },
+            {
+                "source": "geo",
+                "accession": "GDS9999",
+                "title": "Curated BRCA2 dataset",
+                "taxon": "Homo sapiens",
+                "n_samples": 10,
+                "gds_type": "Expression profiling by array",
+                "tech_type": "in situ oligonucleotide",
+                "pubmed_ids": [],
+                "summary": "",
+                "raw": {},
+            },
         ], []
+
+    def geo_dataset_values(self, accession, symbol):
+        if not accession.startswith("GDS"):
+            return [], []
+        return [
+            {"sample": "control", "value": 2.0, "percentile": 10.0},
+            {"sample": "treated", "value": 8.5, "percentile": 95.0},
+        ], _EV
 
 
 class FakeVeuPathDB:
@@ -243,6 +263,12 @@ class FakeGxa:
             }
         ], []
 
+    def experiment_gene_values(self, accession, symbol, differential=False):
+        return [
+            {"sample": "liver", "value": 45.0, "percentile": 90.0},
+            {"sample": "brain", "value": 3.0, "percentile": 15.0},
+        ], _EV
+
 
 def _resolver():
     return Resolver(
@@ -312,6 +338,14 @@ def test_dataset_values_produce_data_claims():
     )
     assert edge.object == "claim:mock proposal"
     assert edge.evidence[0].payload["n_rows"] == 2
+    # GEO GDS + GXA datasets lazy-fetch values and get the same treatment;
+    # the GSE series is skipped (series-matrix layout, not fetched)
+    reports_from = {
+        e.subject for e in g.edges if e.predicate == "reports"
+    }
+    assert "dataset:GDS9999" in reports_from
+    assert "dataset:E-MTAB-0000" in reports_from
+    assert "dataset:GSE12345" not in reports_from
 
 
 def test_serialize_rows_sorts_caps_tolerates():

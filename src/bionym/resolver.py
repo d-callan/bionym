@@ -1861,10 +1861,17 @@ class Resolver:
         data. Claims land as claim: nodes — they're findings, not
         condition labels."""
         values = match.get("dataset_values") or {}
+        symbol = match.get("symbol") or match.get("locus_tag")
         for it in keep:
             if it["kind"] != "dataset":
                 continue
-            rows = values.get(it["node"].split(":", 1)[1])
+            dsid = it["node"].split(":", 1)[1]
+            rows = values.get(dsid)
+            if rows is None and symbol:
+                rows, _ = self._fetch_dataset_values(
+                    graph.nodes.get(it["node"]), dsid, symbol
+                )
+                values[dsid] = rows
             if not rows:
                 continue
             node = graph.nodes.get(it["node"])
@@ -1908,6 +1915,26 @@ class Resolver:
                     ),
                     extra_payload={"n_rows": len(rows)},
                 )
+
+    def _fetch_dataset_values(
+        self, node: Node | None, dsid: str, symbol: str
+    ) -> tuple[list[dict[str, Any]], list[Evidence]]:
+        """Lazy per-gene value fetch for non-VEuPathDB datasets: curated
+        GEO DataSets via FTP SOFT, GXA experiments via per-experiment
+        TSVs. GSE series are skipped (series-matrix layout, long tail)."""
+        ns = node.id_namespace if node else ""
+        if ns == "geo" and dsid.startswith("GDS"):
+            return self.ncbi.geo_dataset_values(dsid, symbol)
+        if ns == "expression_atlas":
+            differential = (
+                (node.attrs.get("type") or "").lower() == "differential"
+                if node
+                else False
+            )
+            return self.gxa.experiment_gene_values(
+                dsid, symbol, differential=differential
+            )
+        return [], []
 
     def _link_candidate_genes(self, graph: KnowledgeGraph) -> None:
         """Join gene nodes to same-species assemblies: has_candidate_gene.

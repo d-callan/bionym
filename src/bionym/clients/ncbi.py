@@ -7,6 +7,7 @@ Covers the M1 needs (gene resolution, taxon lineage) plus
 
 from __future__ import annotations
 
+import gzip
 import logging
 import os
 import re
@@ -297,6 +298,51 @@ class NcbiClient:
         )
         return records, [ev, ev2]
 
+    def geo_dataset_values(
+        self, accession: str, symbol: str
+    ) -> tuple[list[dict[str, Any]], list[Evidence]]:
+        """Per-sample values for a gene in a curated GEO DataSet (GDS*).
+
+        Reads the SOFT file from NCBI's FTP mirror — acc.cgi is
+        captcha-walled for programmatic use. Rows are {sample, value,
+        percentile} where percentile is the within-gene rank across
+        samples (NOT the within-sample percentile VEuPathDB reports).
+        GSE series are skipped: their series-matrix layout differs and
+        they're the long tail.
+        """
+        if not accession.startswith("GDS"):
+            return [], []
+        # GDS6177 -> datasets/GDS6nnn/GDS6177/soft/GDS6177.soft.gz
+        prefix = accession[:-3] + "nnn"
+        url = (
+            "https://ftp.ncbi.nlm.nih.gov/geo/datasets/"
+            f"{prefix}/{accession}/soft/{accession}.soft.gz"
+        )
+        try:
+            resp = httpx.get(
+                url, timeout=self.timeout, follow_redirects=True
+            )
+            if resp.status_code != 200:
+                return [], []
+            text = gzip.decompress(resp.content).decode("utf-8", "replace")
+        except Exception as e:
+            log.warning("GEO SOFT %s failed: %s", accession, e)
+            return [], []
+        rows = _parse_gds_soft(text, symbol)
+        ev = Evidence(
+            source="geo",
+            endpoint=url,
+            summary=(
+                f"SOFT {accession}: {len(rows)} sample values for {symbol}"
+            ),
+            payload={
+                "accession": accession,
+                "symbol": symbol,
+                "n": len(rows),
+            },
+        )
+        return rows, [ev]
+
     # -- normalizers -------------------------------------------------------
 
     @staticmethod
@@ -489,3 +535,68 @@ class NcbiClient:
         if self._cache is not None:
             self._cache[cache_key] = data
         return data
+
+
+def _parse_gds_soft(text: str, symbol: str) -> list[dict[str, Any]]:
+    """Pull one gene's per-sample values out of a GDS SOFT file.
+
+    Structure: ``^SUBSET`` blocks map GSM ids to condition descriptions;
+    ``!dataset_table_begin`` starts the ID_REF x GSM value matrix. A gene
+    can span multiple probe rows — values are averaged per sample.
+    """
+    gsm_label: dict[str, str] = {}
+    cur_desc = None
+    in_table = False
+    header: list[str] = []
+    gcol = 1
+    gsm_idx: list[int] = []
+    gene_rows: list[list[str]] = []
+    sym = symbol.lower()
+    for line in text.splitlines():
+        if line.startswith("!subset_description"):
+            cur_desc = line.split("=", 1)[1].strip()
+        elif line.startswith("!subset_sample_id") and cur_desc:
+            for gsm in line.split("=", 1)[1].split(","):
+                gsm_label.setdefault(gsm.strip(), cur_desc)
+        elif line.startswith("!dataset_table_begin"):
+            in_table = True
+        elif line.startswith("!dataset_table_end"):
+            break
+        elif in_table:
+            cols = line.split("\t")
+            if not header:
+                header = cols
+                try:
+                    gcol = header.index("IDENTIFIER")
+                except ValueError:
+                    gcol = 1  # conventional position after ID_REF
+                gsm_idx = [
+                    i for i, h in enumerate(header) if h.startswith("GSM")
+                ]
+                continue
+            if gcol < len(cols) and cols[gcol].strip().lower() == sym:
+                gene_rows.append(cols)
+    if not gene_rows or not gsm_idx:
+        return []
+    out = []
+    for i in gsm_idx:
+        vals = []
+        for r in gene_rows:
+            try:
+                vals.append(float(r[i]))
+            except (IndexError, ValueError):
+                continue
+        if vals:
+            out.append(
+                {
+                    "sample": gsm_label.get(header[i], header[i]),
+                    "value": round(sum(vals) / len(vals), 3),
+                }
+            )
+    n = len(out)
+    if n > 1:
+        for rank, i in enumerate(
+            sorted(range(n), key=lambda j: out[j]["value"])
+        ):
+            out[i]["percentile"] = round(100 * rank / (n - 1), 1)
+    return out

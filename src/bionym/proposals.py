@@ -246,20 +246,33 @@ _DATA_SYSTEM = (
 def serialize_rows(
     rows: list[dict[str, Any]], max_rows: int = DATA_ROWS_MAX
 ) -> str:
-    """Per-sample rows -> 'sample | value | percentile' text, highest
-    percentile first so the signal leads."""
+    """Per-sample rows -> 'sample | <cols>' text, strongest signal first.
 
-    def _pct(r: dict[str, Any]) -> float:
+    Columns are whichever of value/percentile/p_value the rows carry —
+    differential rows (GXA analytics) have p_value and no percentile.
+    Ranking: percentile desc when present, else |value| desc so the
+    biggest fold-changes lead."""
+
+    def _rank(r: dict[str, Any]) -> float:
         try:
-            return float(r.get("percentile") or 0)
+            if r.get("percentile") is not None:
+                return float(r["percentile"])
+            return abs(float(r.get("value") or 0))
         except (TypeError, ValueError):
             return 0.0
 
-    ordered = sorted(rows, key=_pct, reverse=True)
-    lines = ["sample | value | percentile"]
+    ordered = sorted(rows, key=_rank, reverse=True)
+    keys = [
+        k
+        for k in ("value", "percentile", "p_value")
+        if any(r.get(k) is not None for r in ordered)
+    ]
+    lines = ["sample | " + " | ".join(keys)]
     for r in ordered[:max_rows]:
         lines.append(
-            f"{r.get('sample')} | {r.get('value')} | {r.get('percentile')}"
+            str(r.get("sample"))
+            + " | "
+            + " | ".join(str(r.get(k)) for k in keys)
         )
     if len(ordered) > max_rows:
         lines.append(f"... {len(ordered) - max_rows} more rows")
