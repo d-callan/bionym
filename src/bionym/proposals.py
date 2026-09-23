@@ -121,19 +121,34 @@ def build_triage_state(
     }
 
 
+# Triage criteria differ by kind: a dataset's value is that the gene was
+# *measured* under its conditions (the measured_in edge already links it),
+# so the question is whether the text names extractable conditions — not
+# whether it discusses the gene. A publication's value is whether it
+# actually discusses the gene.
+_TRIAGE_INSTRUCTIONS = {
+    "dataset": (
+        "Does `items[{i}]`'s text describe experimental conditions, "
+        "contrasts, or sample groups (treatments, doses, timepoints, "
+        "life-cycle stages, strains, tissues) that could be enumerated? "
+        "Score by the criteria levels."
+    ),
+    "publication": (
+        "How likely is `items[{i}]`'s text to contain information about "
+        "what `source_gene` does, its function, or the conditions under "
+        "which it is expressed? Score by the criteria levels."
+    ),
+}
+
+
 def build_triage_questions(items: list[dict[str, Any]]) -> dict:
     return {
         f"triage_{i}": {
             "type": "score",
-            "instructions": (
-                f"How likely is `items[{i}]`'s text to contain information "
-                "about what `source_gene` does, its function, or the "
-                "conditions under which it is expressed? Score by the "
-                "criteria levels."
-            ),
+            "instructions": _TRIAGE_INSTRUCTIONS[it["kind"]].format(i=i),
             "criteria": TRIAGE_LEVELS,
         }
-        for i in range(len(items))
+        for i, it in enumerate(items)
     }
 
 

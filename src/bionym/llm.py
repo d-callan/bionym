@@ -100,6 +100,9 @@ class LlmClient:
                 "output_tokens": usage.get("completion_tokens", 0),
             }
         )
-        if self._cache is not None:
+        # Don't cache empty responses: a transient null content (reasoning
+        # models occasionally return one) would otherwise poison the cache
+        # and suppress retries forever.
+        if self._cache is not None and content:
             self._cache[key] = content
         return content
