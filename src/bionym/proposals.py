@@ -56,17 +56,34 @@ def build_prompt(kind: str, text: str) -> tuple[str, str]:
     return SYSTEM, user
 
 
+def _extract_json(content: str) -> dict | None:
+    """Find the first decodable JSON object holding a 'proposals' list.
+
+    Models sometimes wrap the payload in stray braces, markdown fences, or
+    preamble text (observed: GLM emitting `{"{"proposals": ...}`), so a
+    strict json.loads on the whole string is too brittle.
+    """
+    decoder = json.JSONDecoder()
+    for i, ch in enumerate(content):
+        if ch != "{":
+            continue
+        try:
+            data, _ = decoder.raw_decode(content, i)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(data, dict) and isinstance(data.get("proposals"), list):
+            return data
+    return None
+
+
 def parse(content: str) -> list[dict[str, str]]:
     """Validate the JSON response -> [{claim, quote}]. Drops anything
     malformed rather than failing the whole batch."""
-    try:
-        data = json.loads(content)
-    except (json.JSONDecodeError, TypeError):
-        log.warning("LLM returned non-JSON: %.200s", content)
+    data = _extract_json(content or "")
+    if data is None:
+        log.warning("LLM returned no parseable proposals object: %.200s", content)
         return []
-    proposals = data.get("proposals") if isinstance(data, dict) else None
-    if not isinstance(proposals, list):
-        return []
+    proposals = data["proposals"]
     out = []
     for p in proposals[:MAX_PROPOSALS]:
         if isinstance(p, dict) and isinstance(p.get("claim"), str) and p["claim"].strip():
