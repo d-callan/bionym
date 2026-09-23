@@ -814,6 +814,15 @@ class Resolver:
             graph.metadata["stages"].append("s3_orthologs:no_data")
             return
 
+        # OMA returns every ortholog across all species — hundreds for a
+        # well-conserved gene, which makes the state alone exceed JEV's
+        # context (question-splitting can't help). Keep the strongest
+        # candidates; `covered`/`uncovered` above already used the full
+        # list, so absence claims stay correct.
+        candidates = sorted(
+            candidates, key=lambda c: c.get("score") or 0, reverse=True
+        )[:100]
+
         state = s3_orthologs.build_state(
             identifier, match, candidates, uncovered
         )
