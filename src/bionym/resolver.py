@@ -1268,13 +1268,8 @@ class Resolver:
         datasets = result.get("datasets", [])
         # One bulk call resolves display names, summaries, and citations —
         # the metadata JEV would need to judge condition relevance.
-        project = result.get("project")
-        meta = (
-            self.veupathdb.dataset_records(
-                [d["dataset_id"] for d in datasets], project
-            )
-            if project
-            else {}
+        meta = self.veupathdb.dataset_records(
+            [d["dataset_id"] for d in datasets]
         )
         for d in datasets:
             dsid = d["dataset_id"]

@@ -64,6 +64,18 @@ GENE_SEARCH_URL = (
 )
 DATASET_ID_SEARCH = "single_record_question_DatasetRecordClasses_DatasetRecordClass"
 
+# The umbrella's dataset record type also spans every project (verified
+# live 2026-09: DatasetsById resolves DS_* ids on veupathdb.org), so
+# dataset lookups need no site routing either.
+DATASET_SEARCH_URL = (
+    "https://veupathdb.org/a/service/record-types/dataset/searches/"
+    f"{DATASET_ID_SEARCH}/reports/standard"
+)
+DATASETS_BY_ID_URL = (
+    "https://veupathdb.org/a/service/record-types/dataset/searches/"
+    "DatasetsById/reports/standard"
+)
+
 # orthomcl.org runs the same WDK service API; group records key on the
 # group name that gene records expose as the `orthomcl_name` attribute.
 ORTHOMCL_GROUP_URL = (
@@ -309,19 +321,12 @@ class VEuPathDBClient:
         ]
         return {**rec.get("attributes", {}), "members": members}, evidence
 
-    def dataset_record(
-        self, dataset_id: str, project: str
-    ) -> dict[str, Any] | None:
+    def dataset_record(self, dataset_id: str) -> dict[str, Any] | None:
         """Resolve a DS_* dataset id to its record (display_name, pmids, ...).
 
         The dataset record type has a single-column primary key, so
         ``primaryKeys`` is just the dataset id — no project_id suffix.
         """
-        host = PROJECTS[project][0]
-        url = (
-            f"https://{host}/a/service/record-types/dataset/searches/"
-            f"{DATASET_ID_SEARCH}/reports/standard"
-        )
         body = {
             "searchConfig": {"parameters": {"primaryKeys": dataset_id}},
             "reportConfig": {
@@ -333,11 +338,11 @@ class VEuPathDBClient:
                 "attributeFormat": "text",
             },
         }
-        records = self._post(url, body).get("records") or []
+        records = self._post(DATASET_SEARCH_URL, body).get("records") or []
         return records[0] if records else None
 
     def dataset_records(
-        self, dataset_ids: list[str], project: str
+        self, dataset_ids: list[str]
     ) -> dict[str, dict[str, Any]]:
         """Bulk-fetch dataset records via DatasetsById (one POST for all ids).
 
@@ -347,11 +352,6 @@ class VEuPathDBClient:
         """
         if not dataset_ids:
             return {}
-        host = PROJECTS[project][0]
-        url = (
-            f"https://{host}/a/service/record-types/dataset/searches/"
-            "DatasetsById/reports/standard"
-        )
         body = {
             "searchConfig": {"parameters": {"dataset_id": json.dumps(dataset_ids)}},
             "reportConfig": {
@@ -364,7 +364,7 @@ class VEuPathDBClient:
             },
         }
         out = {}
-        for rec in self._post(url, body).get("records") or []:
+        for rec in self._post(DATASETS_BY_ID_URL, body).get("records") or []:
             attrs = rec.get("attributes", {})
             pubs = rec.get("tables", {}).get("Publications", [])
             # dataset records' primary_key is the display name; the DS_*
