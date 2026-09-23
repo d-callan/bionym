@@ -179,10 +179,18 @@ class VEuPathDBClient:
         # sample names aggregate per dataset for free — they encode the
         # conditions assayed (e.g. "Steady_state ring 0h - unique").
         samples_by_ds: dict[str, set[str]] = {}
+        values_by_ds: dict[str, list[dict[str, Any]]] = {}
         for row in tables.get("ExpressionGraphsDataTable", []):
             dsid, sname = row.get("dataset_id"), row.get("sample_name")
             if dsid and sname:
                 samples_by_ds.setdefault(dsid, set()).add(sname)
+                values_by_ds.setdefault(dsid, []).append(
+                    {
+                        "sample": sname,
+                        "value": row.get("value"),
+                        "percentile": row.get("percentile_channel1"),
+                    }
+                )
         names = sorted(
             {
                 row.get("display_name")
@@ -197,6 +205,7 @@ class VEuPathDBClient:
                     "dataset_id": dsid,
                     "url": f"https://{host}/a/app/record/dataset/{dsid}",
                     "sample_names": sorted(samples_by_ds.get(dsid, ())),
+                    "values": values_by_ds.get(dsid, []),
                 }
                 for dsid in sorted(samples_by_ds)
             ],

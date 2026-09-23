@@ -223,3 +223,99 @@ def parse_normalized(content: str, n: int) -> list[str] | None:
     if len(labels) != n or any(l is None for l in labels):
         return None
     return labels
+
+
+# -- dataset data claims ----------------------------------------------------
+#
+# For datasets with fetched per-gene measurements (VEuPathDB
+# ExpressionGraphsDataTable today), the same propose-then-score loop turns
+# the numbers into claims: the LLM summarizes biologically relevant claims
+# with the dataset's own metadata as context, JEV verifies each against
+# the serialized data. The graph stays claim-shaped — no raw-data model.
+
+# Rows sent to the LLM/JEV per dataset — enough to see the expression
+# range without blowing the prompt.
+DATA_ROWS_MAX = 60
+
+_DATA_SYSTEM = (
+    "You summarize per-gene measurements from a functional genomics "
+    "dataset as biological claims. Output JSON only, no commentary."
+)
+
+
+def serialize_rows(
+    rows: list[dict[str, Any]], max_rows: int = DATA_ROWS_MAX
+) -> str:
+    """Per-sample rows -> 'sample | value | percentile' text, highest
+    percentile first so the signal leads."""
+
+    def _pct(r: dict[str, Any]) -> float:
+        try:
+            return float(r.get("percentile") or 0)
+        except (TypeError, ValueError):
+            return 0.0
+
+    ordered = sorted(rows, key=_pct, reverse=True)
+    lines = ["sample | value | percentile"]
+    for r in ordered[:max_rows]:
+        lines.append(
+            f"{r.get('sample')} | {r.get('value')} | {r.get('percentile')}"
+        )
+    if len(ordered) > max_rows:
+        lines.append(f"... {len(ordered) - max_rows} more rows")
+    return "\n".join(lines)
+
+
+def build_data_prompt(
+    meta: dict[str, Any], data_text: str
+) -> tuple[str, str]:
+    """(system, user): propose biological claims from per-gene data.
+
+    The dataset's own metadata is included — raw values are
+    uninterpretable without knowing what the contrast is.
+    """
+    user = (
+        "Below is a dataset's metadata and this gene's per-sample "
+        "measurements in it. Propose concise biological claims about THIS "
+        "gene that the data supports — e.g. conditions or stages where it "
+        "is highly or lowly expressed, or notable contrasts. Each claim "
+        "must cite the supporting sample(s)/value(s) in 'quote'.\n\n"
+        f"{_SCHEMA}\n\n"
+        f"Dataset: {meta.get('label')}\n"
+        f"Summary: {meta.get('summary') or 'n/a'}\n\n"
+        f"Data:\n---\n{data_text}\n---"
+    )
+    return _DATA_SYSTEM, user
+
+
+def build_data_state(
+    meta: dict[str, Any], data_text: str, proposals: list[dict[str, Any]]
+) -> dict:
+    """JEV state: dataset context + serialized data + proposals."""
+    return {
+        "dataset": {
+            "name": meta.get("label"),
+            "summary": meta.get("summary"),
+        },
+        "data": data_text,
+        "proposals": [
+            {"node": p["node"], "claim": p["claim"], "quote": p.get("quote")}
+            for p in proposals
+        ],
+    }
+
+
+def build_data_questions(proposals: list[dict[str, Any]]) -> dict:
+    return {
+        f"prop_{i}": {
+            "type": "noul",
+            "instructions": (
+                f"`proposals[{i}]` was machine-extracted from the "
+                "per-sample measurements in `data` for this gene. Does "
+                "the data support this claim? Judge the numbers, not "
+                "plausibility — reject claims whose stated direction or "
+                "magnitude the values don't support."
+            ),
+        }
+        for i, p in enumerate(proposals)
+    }

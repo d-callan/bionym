@@ -37,6 +37,25 @@ from .questions import (
 log = logging.getLogger(__name__)
 
 
+def _dataset_kind(type_text: str | None) -> str:
+    """Normalize a source dataset-type string to expression/variant/other.
+
+    GEO gdsType ("Expression profiling by array", "Genome variation
+    profiling by SNP array", ...) and GXA experimentType (Baseline /
+    Differential) are free-text-ish; this is a routing hint for the
+    data-claims pass, not a precise ontology.
+    """
+    t = (type_text or "").lower()
+    if any(k in t for k in ("variation", "snp", "genotyp")):
+        return "variant"
+    if any(
+        k in t
+        for k in ("expression", "rna", "transcript", "baseline", "differential")
+    ):
+        return "expression"
+    return "other"
+
+
 class Resolver:
     def __init__(
         self,
@@ -1281,6 +1300,9 @@ class Resolver:
                     id_namespace=c.get("source", ""),
                     attrs={
                         "type": c.get("type") or c.get("gds_type"),
+                        "kind": _dataset_kind(
+                            c.get("type") or c.get("gds_type")
+                        ),
                         "species": c.get("species") or c.get("taxon"),
                         "n_samples": c.get("n_samples") or c.get("n_assays"),
                     },
@@ -1333,6 +1355,11 @@ class Resolver:
             subject = match.get("anchor") or identifier
         result, evidence = self.veupathdb.gene_datasets(vpd_id)
         datasets = result.get("datasets", [])
+        # Per-sample value rows ride the match dict to the proposal pass —
+        # they're fetched here anyway and the graph stays claim-shaped.
+        match["dataset_values"] = {
+            d["dataset_id"]: d.get("values") or [] for d in datasets
+        }
         # One bulk call resolves display names, summaries, and citations —
         # the metadata JEV would need to judge condition relevance.
         meta = self.veupathdb.dataset_records(
@@ -1351,6 +1378,9 @@ class Resolver:
                     attrs={
                         "project": result.get("project"),
                         "type": m.get("type"),
+                        # ExpressionGraphsDataTable is expression data by
+                        # construction.
+                        "kind": "expression",
                         "summary": m.get("summary"),
                         "pmid": m.get("pmid"),
                         "sample_names": d.get("sample_names"),
@@ -1759,37 +1789,124 @@ class Resolver:
             answers = self.jev.ask(state, questions, stage="proposals")
             for i, p in enumerate(props):
                 ans = answers.get(f"prop_{i}", {})
-                confidence = ans.get("noul", ans.get("confidence", 0.0))
                 if it["kind"] == "dataset":
-                    obj = f"condition:{p['claim'].lower()}"
                     ntype, predicate = NodeType.CONDITION, "has_condition"
                 else:
-                    obj = f"claim:{p['claim'].lower()}"
                     ntype, predicate = NodeType.CLAIM, "reports"
-                graph.add_node(Node(id=obj, type=ntype, label=p["claim"]))
-                graph.add_edge(
-                    Edge(
-                        subject=it["node"],
-                        predicate=predicate,
-                        object=obj,
-                        confidence=confidence,
-                        jev_question_id=f"prop_{i}",
-                        evidence=[
-                            Evidence(
-                                source="llm_proposal",
-                                endpoint=self.llm.model or "mock",
-                                summary=(
-                                    f"LLM-proposed claim for {it['node']}, "
-                                    "JEV-verified against source text"
-                                ),
-                                payload={
-                                    "claim": p["claim"],
-                                    "quote": p.get("quote"),
-                                    "answer": ans,
-                                },
-                            )
-                        ],
+                self._add_proposal_edge(
+                    graph,
+                    it,
+                    p,
+                    i,
+                    ans,
+                    ntype,
+                    predicate,
+                    summary=(
+                        f"LLM-proposed claim for {it['node']}, "
+                        "JEV-verified against source text"
+                    ),
+                )
+
+        self._propose_data_claims(graph, match, keep)
+
+    def _add_proposal_edge(
+        self,
+        graph: KnowledgeGraph,
+        it: dict[str, Any],
+        p: dict[str, Any],
+        i: int,
+        ans: dict[str, Any],
+        ntype: NodeType,
+        predicate: str,
+        summary: str,
+        extra_payload: dict[str, Any] | None = None,
+    ) -> None:
+        """Add the claim/condition node + edge for one JEV-scored proposal."""
+        prefix = "condition" if ntype == NodeType.CONDITION else "claim"
+        obj = f"{prefix}:{p['claim'].lower()}"
+        graph.add_node(Node(id=obj, type=ntype, label=p["claim"]))
+        graph.add_edge(
+            Edge(
+                subject=it["node"],
+                predicate=predicate,
+                object=obj,
+                confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                jev_question_id=f"prop_{i}",
+                evidence=[
+                    Evidence(
+                        source="llm_proposal",
+                        endpoint=self.llm.model or "mock",
+                        summary=summary,
+                        payload={
+                            "claim": p["claim"],
+                            "quote": p.get("quote"),
+                            "answer": ans,
+                            **(extra_payload or {}),
+                        },
                     )
+                ],
+            )
+        )
+
+    def _propose_data_claims(
+        self,
+        graph: KnowledgeGraph,
+        match: dict[str, Any],
+        keep: list[dict[str, Any]],
+    ) -> None:
+        """Second proposal pass over triaged datasets that have fetched
+        per-gene measurements (VEuPathDB ExpressionGraphs today): the LLM
+        summarizes the numbers into biological claims with the dataset's
+        own metadata as context, JEV verifies each against the serialized
+        data. Claims land as claim: nodes — they're findings, not
+        condition labels."""
+        values = match.get("dataset_values") or {}
+        for it in keep:
+            if it["kind"] != "dataset":
+                continue
+            rows = values.get(it["node"].split(":", 1)[1])
+            if not rows:
+                continue
+            node = graph.nodes.get(it["node"])
+            meta = {
+                "label": node.label if node else it["node"],
+                "summary": node.attrs.get("summary") if node else None,
+            }
+            data_text = proposals.serialize_rows(rows)
+            try:
+                content = self.llm.complete(
+                    *proposals.build_data_prompt(meta, data_text)
+                )
+            except Exception as e:  # proposals are best-effort
+                log.warning(
+                    "LLM data proposal failed for %s: %s", it["node"], e
+                )
+                continue
+            props = [
+                {"node": it["node"], "kind": "dataset", **p}
+                for p in proposals.parse(content)
+            ]
+            if not props:
+                continue
+            answers = self.jev.ask(
+                proposals.build_data_state(meta, data_text, props),
+                proposals.build_data_questions(props),
+                stage="data_proposals",
+            )
+            for i, p in enumerate(props):
+                self._add_proposal_edge(
+                    graph,
+                    it,
+                    p,
+                    i,
+                    answers.get(f"prop_{i}", {}),
+                    NodeType.CLAIM,
+                    "reports",
+                    summary=(
+                        f"LLM data claim for {it['node']}, JEV-verified "
+                        "against per-sample values"
+                    ),
+                    extra_payload={"n_rows": len(rows)},
                 )
 
     def _link_candidate_genes(self, graph: KnowledgeGraph) -> None:

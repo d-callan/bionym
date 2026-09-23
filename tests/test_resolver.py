@@ -133,6 +133,38 @@ class FakeVeuPathDB:
     def gene_pubmed(self, gene_id):
         return [], _EV
 
+    def gene_datasets(self, gene_id):
+        return {
+            "project": "plasmodb",
+            "datasets": [
+                {
+                    "dataset_id": "DS_TEST",
+                    "url": "https://plasmodb.org/x",
+                    "sample_names": ["ring", "trophozoite"],
+                    "values": [
+                        {"sample": "ring", "value": "10.0", "percentile": "12.0"},
+                        {
+                            "sample": "trophozoite",
+                            "value": "900.0",
+                            "percentile": "99.1",
+                        },
+                    ],
+                }
+            ],
+            "dataset_names": ["Test dataset"],
+        }, _EV
+
+    def dataset_records(self, dataset_ids):
+        return {
+            dsid: {
+                "display_name": "Test dataset",
+                "type": "rna seq",
+                "summary": "test",
+                "pmid": None,
+            }
+            for dsid in dataset_ids
+        }
+
 
 class FakeOma:
     def protein_info(self, identifier):
@@ -264,6 +296,40 @@ def test_veupathdb_aliases_become_idtype_nodes():
     assert {e.object for e in edges} == {"alias:Q8I5A7", "alias:PFF0740w"}
     assert all(e.subject == "veupathdb:PF3D7_1477700" for e in edges)
     assert all(e.confidence == 1.0 for e in edges)
+
+
+def test_dataset_values_produce_data_claims():
+    r = _resolver()
+    g = r.resolve("PF3D7_1477700", depth=5)
+    assert "dataset:DS_TEST" in g.nodes
+    assert g.nodes["dataset:DS_TEST"].attrs["kind"] == "expression"
+    # the mock LLM's canned proposal becomes a claim node off the dataset
+    # via the data-claims pass (text pass would make a condition: node)
+    edge = next(
+        e
+        for e in g.edges
+        if e.subject == "dataset:DS_TEST" and e.predicate == "reports"
+    )
+    assert edge.object == "claim:mock proposal"
+    assert edge.evidence[0].payload["n_rows"] == 2
+
+
+def test_serialize_rows_sorts_caps_tolerates():
+    from bionym import proposals
+
+    rows = [
+        {"sample": "low", "value": "1", "percentile": "5.0"},
+        {"sample": "high", "value": "9", "percentile": "99.0"},
+        {"sample": "bad", "value": "x", "percentile": None},
+    ]
+    lines = proposals.serialize_rows(rows).split("\n")
+    assert lines[0] == "sample | value | percentile"
+    assert "high" in lines[1]  # highest percentile first
+    many = [
+        {"sample": f"s{i}", "value": "1", "percentile": "1"}
+        for i in range(proposals.DATA_ROWS_MAX + 10)
+    ]
+    assert "more rows" in proposals.serialize_rows(many)
 
 
 def test_depth_zero_classifies_only():
