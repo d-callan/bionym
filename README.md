@@ -97,6 +97,13 @@ returned graph body.
 - JEV questions are Python-templated only — no LLM generates questions or
   candidate options. `criteria` always come from API result sets; every
   Choice question has a `none`/`other` escape. JEV judges, never enumerates.
+- The one exception: *claims*. Free-text biological claims can't be
+  enumerated from an API result set, so the proposal passes (text claims,
+  data claims, summary) let the LLM propose candidates — the only place it
+  generates content. The asymmetry holds: every proposal is verified by JEV
+  against the serialized source (dataset metadata, per-sample values, or
+  the graph itself) before it lands. The LLM proposes, JEV disposes — it
+  never scores its own output.
 - Every edge must carry ≥1 `Evidence` record (source, endpoint, timestamp,
   payload) so "why" is always answerable.
 - Unbounded API result sets are capped before JEV/LLM stages so a single
