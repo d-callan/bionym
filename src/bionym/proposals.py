@@ -28,8 +28,14 @@ _INSTRUCTIONS = {
     "dataset": (
         "List every distinct experimental condition, contrast, or sample "
         "group this dataset description explicitly states or clearly "
-        "implies (e.g. a compound treatment, dose, timepoint, life-cycle "
-        "stage, strain, tissue)."
+        "implies (e.g. a compound treatment, dose, tissue, strain "
+        "comparison). Rules: only biologically informative conditions — "
+        "never the organism itself (already implied by context), never "
+        "technical artifacts (read orientation, unique reads, sequencing "
+        "metrics). Aggregate series into one condition: 'time series "
+        "post infection' not '7 hpi' and '16 hpi' separately; 'life "
+        "cycle stages' not individual stages. Strain/sample counts are "
+        "fine ('5 strains investigated')."
     ),
     "publication": (
         "List every distinct claim or finding this publication's title "
@@ -56,8 +62,8 @@ def build_prompt(kind: str, text: str) -> tuple[str, str]:
     return SYSTEM, user
 
 
-def _extract_json(content: str) -> dict | None:
-    """Find the first decodable JSON object holding a 'proposals' list.
+def _extract_json(content: str, key: str = "proposals") -> dict | None:
+    """Find the first decodable JSON object holding a `key` list.
 
     Models sometimes wrap the payload in stray braces, markdown fences, or
     preamble text (observed: GLM emitting `{"{"proposals": ...}`), so a
@@ -71,7 +77,7 @@ def _extract_json(content: str) -> dict | None:
             data, _ = decoder.raw_decode(content, i)
         except json.JSONDecodeError:
             continue
-        if isinstance(data, dict) and isinstance(data.get("proposals"), list):
+        if isinstance(data, dict) and isinstance(data.get(key), list):
             return data
     return None
 
@@ -177,3 +183,40 @@ def build_questions(proposals: list[dict[str, Any]]) -> dict:
         }
         for i, p in enumerate(proposals)
     }
+
+
+# -- condition normalization ------------------------------------------------
+
+_NORMALIZE_SYSTEM = (
+    "You normalize biomedical condition labels for consistency. "
+    "Output JSON only, no commentary."
+)
+
+
+def build_normalize_prompt(claims: list[str]) -> tuple[str, str]:
+    """(system, user) to map each claim to a canonical condition label."""
+    user = (
+        "Below is a list of experimental conditions extracted from dataset "
+        "descriptions. Rewrite each as a short canonical label so that "
+        "equivalent conditions share identical wording (e.g. 'time series "
+        "post infection' and 'post-infection timeseries' -> 'time series "
+        "post infection'). Keep each label faithful to its original — "
+        "normalize wording, not meaning. Return JSON: {\"normalized\": "
+        "[\"<label>\", ...]} with exactly one label per input, same order."
+        f"\n\nConditions:\n{json.dumps(claims)}"
+    )
+    return _NORMALIZE_SYSTEM, user
+
+
+def parse_normalized(content: str, n: int) -> list[str] | None:
+    """Parse the normalization response -> list of n labels, or None."""
+    data = _extract_json(content or "", key="normalized")
+    if data is None:
+        return None
+    labels = [
+        " ".join(str(x).split()) if str(x).strip() else None
+        for x in data["normalized"][:n]
+    ]
+    if len(labels) != n or any(l is None for l in labels):
+        return None
+    return labels

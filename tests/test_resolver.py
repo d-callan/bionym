@@ -302,6 +302,18 @@ def test_llm_proposals_add_gated_claims():
     assert reports[0].evidence[0].source == "llm_proposal"
 
 
+def test_parse_normalized():
+    from bionym import proposals
+    ok = '{"normalized": ["time series post infection", "  drug  treatment "]}'
+    assert proposals.parse_normalized(ok, 2) == [
+        "time series post infection", "drug treatment",
+    ]
+    # wrong length / missing key / garbage -> None (caller falls back)
+    assert proposals.parse_normalized('{"normalized": ["only one"]}', 2) is None
+    assert proposals.parse_normalized('{"proposals": []}', 1) is None
+    assert proposals.parse_normalized("not json", 1) is None
+
+
 def test_filter_by_confidence_and_url():
     from bionym.graph import KnowledgeGraph, Node, NodeType, Edge
     g = KnowledgeGraph(metadata={"query": "Q"})

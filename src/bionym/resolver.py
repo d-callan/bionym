@@ -1666,6 +1666,29 @@ class Resolver:
         with ThreadPoolExecutor(max_workers=self.proposal_concurrency) as ex:
             per_node = list(ex.map(_propose, keep))
 
+        # One normalization pass over all dataset claims: equivalent
+        # conditions get identical labels, so they collapse to a single
+        # condition: node instead of 'timeseries post infection' vs
+        # 'post infection timeseries' duplicates. Best-effort — on failure
+        # the raw claims stand.
+        flat = [
+            p for props in per_node for p in props if p["kind"] == "dataset"
+        ]
+        if flat:
+            try:
+                system, user = proposals.build_normalize_prompt(
+                    [p["claim"] for p in flat]
+                )
+                labels = proposals.parse_normalized(
+                    self.llm.complete(system, user), len(flat)
+                )
+            except Exception as e:
+                log.warning("condition normalization failed: %s", e)
+                labels = None
+            if labels:
+                for p, label in zip(flat, labels):
+                    p["claim"] = label
+
         for it, props in zip(keep, per_node):
             if not props:
                 continue
