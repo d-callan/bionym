@@ -1,6 +1,7 @@
 from bionym.evidence import Evidence
 from bionym.graph import NodeType
 from bionym.jev import JevClient
+from bionym.llm import LlmClient
 from bionym.resolver import Resolver
 
 _EV = [Evidence(source="fake", endpoint="fake://x", summary="fake", payload={})]
@@ -183,6 +184,7 @@ def _resolver():
         uniprot=FakeUniProt(),
         gxa=FakeGxa(),
         kegg=FakeKegg(),
+        llm=LlmClient(mock=True),
     )
 
 
@@ -203,7 +205,8 @@ def test_resolve_numeric_id_mock_jev():
         for e in g.edges
     )
     assert all(e.evidence or e.jev_question_id for e in g.edges)
-    assert g.metadata["jev_usage"]["total"]["calls"] == 2
+    # s0_classify + s1_resolve + proposals (pubmed node exists at depth 1)
+    assert g.metadata["jev_usage"]["total"]["calls"] == 3
 
 
 def test_resolve_veupathdb_id_falls_back_to_ncbi():
@@ -273,6 +276,19 @@ def test_depth_six_adds_remap():
     assert "likely_present" in predicates
     lp = [e for e in g.edges if e.predicate == "likely_present"]
     assert lp[0].object == "assembly:GCF_999999999.1"
+
+
+def test_llm_proposals_add_gated_claims():
+    r = _resolver()
+    g = r.resolve("672", depth=1)
+    # mock LLM proposes one claim per text-bearing node; mock JEV scores 0.5
+    reports = [e for e in g.edges if e.predicate == "reports"]
+    assert reports
+    assert reports[0].subject == "pubmed:26289816"
+    assert reports[0].object == "claim:mock proposal"
+    assert reports[0].confidence == 0.5
+    assert reports[0].jev_question_id.startswith("prop_")
+    assert reports[0].evidence[0].source == "llm_proposal"
 
 
 def test_filter_by_confidence_and_url():

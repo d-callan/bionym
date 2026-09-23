@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from .clients.ncbi import NcbiClient
 from .clients.veupathdb import VEuPathDBClient
 from .jev import JevClient, JevError
+from .llm import LlmClient
 from .resolver import Resolver
 
 app = typer.Typer(
@@ -39,6 +40,7 @@ def resolve(
     depth: int = typer.Option(6, "--depth", help="Stages: 0=classify, 1=+resolve, 2=+assemblies, 3=+orthologs, 4=+annotation, 5=+expression, 6=+remap."),
     min_confidence: float = typer.Option(0.0, "--min-confidence", help="Drop edges below this confidence (and orphan nodes)."),
     mock_jev: bool = typer.Option(False, "--mock-jev", help="Offline dev: no API key needed."),
+    mock_llm: bool = typer.Option(False, "--mock-llm", help="Offline dev: canned LLM proposals."),
     report: bool = typer.Option(False, "--report", help="Also write an HTML report next to the JSON."),
     verbose: bool = typer.Option(False, "-v", "--verbose"),
 ) -> None:
@@ -58,6 +60,7 @@ def resolve(
         jev=jev,
         ncbi=NcbiClient(cache_dir=cache),
         veupathdb=VEuPathDBClient(cache_dir=cache),
+        llm=LlmClient(mock=mock_llm, cache_dir=cache),
     )
     graph = resolver.resolve(identifier, depth=depth)
     graph.filter_by_confidence(min_confidence)

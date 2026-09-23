@@ -22,6 +22,7 @@ class NodeType(str, Enum):
     DOMAIN = "Domain"
     DATASET = "Dataset"
     CONDITION = "Condition"
+    CLAIM = "Claim"
     ID_TYPE = "IdType"
     TRANSCRIPT = "Transcript"
     PROTEIN = "Protein"

@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from bionym.clients.ncbi import NcbiClient
 from bionym.clients.veupathdb import VEuPathDBClient
 from bionym.jev import JevClient
+from bionym.llm import LlmClient
 from bionym.resolver import Resolver
 
 load_dotenv()
@@ -40,6 +41,7 @@ def _resolver(mock_jev: bool = False) -> Resolver:
         jev=JevClient(mock=mock_jev, cache_dir=_cache_dir),
         ncbi=NcbiClient(cache_dir=_cache_dir),
         veupathdb=VEuPathDBClient(cache_dir=_cache_dir),
+        llm=LlmClient(mock=mock_jev, cache_dir=_cache_dir),
     )
 
 

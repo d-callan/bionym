@@ -19,6 +19,8 @@ from .clients.veupathdb import VEuPathDBClient
 from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
 from .jev import JevClient
+from .llm import LlmClient
+from . import proposals
 from .species import same_species, species_key
 from .questions import (
     s0_classify,
@@ -43,8 +45,10 @@ class Resolver:
         uniprot: UniProtClient | None = None,
         gxa: ExpressionAtlasClient | None = None,
         kegg: KeggClient | None = None,
+        llm: LlmClient | None = None,
     ) -> None:
         self.jev = jev
+        self.llm = llm or LlmClient()
         self.ncbi = ncbi or NcbiClient()
         self.veupathdb = veupathdb or VEuPathDBClient()
         self.oma = oma or OmaClient()
@@ -95,6 +99,9 @@ class Resolver:
         if depth >= 6 and match:
             self._s6_remap(identifier, match, graph)
             graph.metadata["stages"].append("s6_remap")
+
+        if match:
+            self._propose_claims(graph)
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -1530,6 +1537,92 @@ class Resolver:
                         evidence=ev,
                     )
                 )
+
+    # -- LLM proposals ------------------------------------------------------
+
+    def _propose_claims(self, graph: KnowledgeGraph) -> None:
+        """LLM enumerates claims from dataset/publication text; JEV gates.
+
+        The only place the LLM is called: it proposes candidate claims a
+        dataset description or publication title could support, and JEV
+        scores each against the source text. Proposals are hypotheses —
+        evidence is marked source='llm_proposal' so downstream consumers
+        can tell scored speculation from fetched records.
+        """
+        if not self.llm.enabled:
+            return
+        # node_id -> (kind, text). Datasets carry title/summary/factors;
+        # publications carry a title (abstracts aren't fetched yet).
+        texts: dict[str, tuple[str, str]] = {}
+        for n in graph.nodes.values():
+            if n.type == NodeType.DATASET:
+                parts = [
+                    n.label,
+                    n.attrs.get("summary") or "",
+                    "; ".join(n.attrs.get("sample_names") or []),
+                ]
+                text = "\n".join(p for p in parts if p)
+                if text.strip():
+                    texts[n.id] = ("dataset", text)
+            elif n.type == NodeType.PUBLICATION and n.label:
+                texts[n.id] = ("publication", n.label)
+        if not texts:
+            return
+
+        proposals_all: list[dict[str, Any]] = []
+        for node_id, (kind, text) in texts.items():
+            system, user = proposals.build_prompt(kind, text)
+            try:
+                content = self.llm.complete(system, user)
+            except Exception as e:  # proposals are best-effort
+                log.warning("LLM proposal failed for %s: %s", node_id, e)
+                continue
+            for p in proposals.parse(content):
+                proposals_all.append({"node": node_id, "kind": kind, **p})
+        if not proposals_all:
+            return
+
+        state = proposals.build_state(
+            {nid: t for nid, (_, t) in texts.items()}, proposals_all
+        )
+        questions = proposals.build_questions(proposals_all)
+        answers = self.jev.ask(state, questions, stage="proposals")
+        for i, p in enumerate(proposals_all):
+            ans = answers.get(f"prop_{i}", {})
+            confidence = ans.get("noul", ans.get("confidence", 0.0))
+            if p["kind"] == "dataset":
+                node_id = f"condition:{p['claim'].lower()}"
+                ntype, predicate = NodeType.CONDITION, "has_condition"
+            else:
+                node_id = f"claim:{p['claim'].lower()}"
+                ntype, predicate = NodeType.CLAIM, "reports"
+            graph.add_node(
+                Node(id=node_id, type=ntype, label=p["claim"])
+            )
+            graph.add_edge(
+                Edge(
+                    subject=p["node"],
+                    predicate=predicate,
+                    object=node_id,
+                    confidence=confidence,
+                    jev_question_id=f"prop_{i}",
+                    evidence=[
+                        Evidence(
+                            source="llm_proposal",
+                            endpoint=self.llm.model or "mock",
+                            summary=(
+                                f"LLM-proposed claim for {p['node']}, "
+                                "JEV-verified against source text"
+                            ),
+                            payload={
+                                "claim": p["claim"],
+                                "quote": p.get("quote"),
+                                "answer": ans,
+                            },
+                        )
+                    ],
+                )
+            )
 
     def _link_candidate_genes(self, graph: KnowledgeGraph) -> None:
         """Join gene nodes to same-species assemblies: has_candidate_gene.
