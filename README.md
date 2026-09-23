@@ -45,6 +45,13 @@ cp .env.example .env   # then edit
 - `NCBI_API_KEY` — optional, raises NCBI rate limit 3/s → 10/s.
 - `VEUPATHDB_API_KEY` — optional, enables VEuPathDB lookups (release 71+).
 - `BIONYM_CACHE_DIR` — optional response/JEV cache.
+- `LLM_API_KEY` + `LLM_MODEL` — optional, enables the proposal passes
+  (claims, summary). Any OpenAI-compatible endpoint; `LLM_BASE_URL`
+  defaults to OpenRouter. Disabled when unset — the resolver runs fine
+  without them, you just get no proposed claims or summary.
+- `BIONYM_PROPOSAL_MIN_SCORE` (default 0.5) — JEV triage score a
+  dataset/publication needs before the LLM spends a call on it.
+- `BIONYM_PROPOSAL_CONCURRENCY` (default 8) — max simultaneous LLM calls.
 
 ## Usage
 
