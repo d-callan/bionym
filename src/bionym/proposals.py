@@ -79,6 +79,47 @@ def parse(content: str) -> list[dict[str, str]]:
     return out
 
 
+# Triage: one JEV call scores every candidate node's likely value before
+# any LLM calls are spent. Texts are truncated — triage only needs the
+# gist, and full summaries for ~40 datasets overflow JEV's context.
+TRIAGE_LEVELS = ["irrelevant", "unlikely", "likely", "very_likely"]
+TRIAGE_TEXT_CHARS = 600
+# Bound on the text sent to the LLM itself (summaries can be huge).
+PROMPT_TEXT_CHARS = 8000
+
+
+def build_triage_state(
+    source_gene: dict[str, Any], items: list[dict[str, Any]]
+) -> dict:
+    return {
+        "source_gene": {
+            "symbol": source_gene.get("symbol"),
+            "description": source_gene.get("description"),
+            "organism": source_gene.get("organism"),
+        },
+        "items": [
+            {"node": it["node"], "kind": it["kind"], "text": it["text"]}
+            for it in items
+        ],
+    }
+
+
+def build_triage_questions(items: list[dict[str, Any]]) -> dict:
+    return {
+        f"triage_{i}": {
+            "type": "score",
+            "instructions": (
+                f"How likely is `items[{i}]`'s text to contain information "
+                "about what `source_gene` does, its function, or the "
+                "conditions under which it is expressed? Score by the "
+                "criteria levels."
+            ),
+            "criteria": TRIAGE_LEVELS,
+        }
+        for i in range(len(items))
+    }
+
+
 def build_state(texts: dict[str, str], proposals: list[dict[str, Any]]) -> dict:
     """JEV state: source texts + the proposals to verify against them."""
     return {

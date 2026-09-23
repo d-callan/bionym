@@ -8,6 +8,8 @@ the JEV answers.
 from __future__ import annotations
 
 import logging
+import os
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from .clients.expression import ExpressionAtlasClient
@@ -46,9 +48,24 @@ class Resolver:
         gxa: ExpressionAtlasClient | None = None,
         kegg: KeggClient | None = None,
         llm: LlmClient | None = None,
+        proposal_min_score: float | None = None,
+        proposal_concurrency: int | None = None,
     ) -> None:
         self.jev = jev
         self.llm = llm or LlmClient()
+        # Triage gate: minimum normalized JEV relevance score (0-1) a
+        # dataset/publication needs before the LLM spends a call on it.
+        self.proposal_min_score = (
+            proposal_min_score
+            if proposal_min_score is not None
+            else float(os.environ.get("BIONYM_PROPOSAL_MIN_SCORE", "0.5"))
+        )
+        # Max simultaneous LLM proposal calls.
+        self.proposal_concurrency = (
+            proposal_concurrency
+            if proposal_concurrency is not None
+            else int(os.environ.get("BIONYM_PROPOSAL_CONCURRENCY", "8"))
+        )
         self.ncbi = ncbi or NcbiClient()
         self.veupathdb = veupathdb or VEuPathDBClient()
         self.oma = oma or OmaClient()
@@ -101,7 +118,7 @@ class Resolver:
             graph.metadata["stages"].append("s6_remap")
 
         if match:
-            self._propose_claims(graph)
+            self._propose_claims(graph, match)
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -1540,20 +1557,25 @@ class Resolver:
 
     # -- LLM proposals ------------------------------------------------------
 
-    def _propose_claims(self, graph: KnowledgeGraph) -> None:
+    def _propose_claims(
+        self, graph: KnowledgeGraph, match: dict[str, Any]
+    ) -> None:
         """LLM enumerates claims from dataset/publication text; JEV gates.
 
-        The only place the LLM is called: it proposes candidate claims a
-        dataset description or publication title could support, and JEV
-        scores each against the source text. Proposals are hypotheses —
-        evidence is marked source='llm_proposal' so downstream consumers
-        can tell scored speculation from fetched records.
+        The only place the LLM is called. Two JEV layers around it: a
+        triage pass scores every candidate node's likely value in one
+        batched ask (truncated texts — full summaries overflow JEV's
+        context), then the LLM proposes claims only for nodes over
+        `proposal_min_score`, and a per-node JEV ask verifies each claim
+        against its own source text. Evidence is marked
+        source='llm_proposal' so downstream consumers can tell scored
+        speculation from fetched records.
         """
         if not self.llm.enabled:
             return
-        # node_id -> (kind, text). Datasets carry title/summary/factors;
-        # publications carry a title (abstracts aren't fetched yet).
-        texts: dict[str, tuple[str, str]] = {}
+        # Datasets carry title/summary/sample names; publications carry a
+        # title (abstracts aren't fetched yet).
+        items: list[dict[str, Any]] = []
         for n in graph.nodes.values():
             if n.type == NodeType.DATASET:
                 parts = [
@@ -1563,66 +1585,94 @@ class Resolver:
                 ]
                 text = "\n".join(p for p in parts if p)
                 if text.strip():
-                    texts[n.id] = ("dataset", text)
+                    items.append(
+                        {"node": n.id, "kind": "dataset", "text": text}
+                    )
             elif n.type == NodeType.PUBLICATION and n.label:
-                texts[n.id] = ("publication", n.label)
-        if not texts:
+                items.append(
+                    {"node": n.id, "kind": "publication", "text": n.label}
+                )
+        if not items:
             return
 
-        proposals_all: list[dict[str, Any]] = []
-        for node_id, (kind, text) in texts.items():
-            system, user = proposals.build_prompt(kind, text)
+        triage_items = [
+            {**it, "text": it["text"][: proposals.TRIAGE_TEXT_CHARS]}
+            for it in items
+        ]
+        triage_ans = self.jev.ask(
+            proposals.build_triage_state(match, triage_items),
+            proposals.build_triage_questions(triage_items),
+            stage="proposals_triage",
+        )
+        n_levels = len(proposals.TRIAGE_LEVELS)
+        keep = [
+            it
+            for i, it in enumerate(items)
+            if triage_ans.get(f"triage_{i}", {}).get("score", 0)
+            / max(n_levels - 1, 1)
+            >= self.proposal_min_score
+        ]
+        if not keep:
+            return
+
+        def _propose(it: dict[str, Any]) -> list[dict[str, Any]]:
+            system, user = proposals.build_prompt(
+                it["kind"], it["text"][: proposals.PROMPT_TEXT_CHARS]
+            )
             try:
                 content = self.llm.complete(system, user)
             except Exception as e:  # proposals are best-effort
-                log.warning("LLM proposal failed for %s: %s", node_id, e)
-                continue
-            for p in proposals.parse(content):
-                proposals_all.append({"node": node_id, "kind": kind, **p})
-        if not proposals_all:
-            return
+                log.warning("LLM proposal failed for %s: %s", it["node"], e)
+                return []
+            return [
+                {"node": it["node"], "kind": it["kind"], **p}
+                for p in proposals.parse(content)
+            ]
 
-        state = proposals.build_state(
-            {nid: t for nid, (_, t) in texts.items()}, proposals_all
-        )
-        questions = proposals.build_questions(proposals_all)
-        answers = self.jev.ask(state, questions, stage="proposals")
-        for i, p in enumerate(proposals_all):
-            ans = answers.get(f"prop_{i}", {})
-            confidence = ans.get("noul", ans.get("confidence", 0.0))
-            if p["kind"] == "dataset":
-                node_id = f"condition:{p['claim'].lower()}"
-                ntype, predicate = NodeType.CONDITION, "has_condition"
-            else:
-                node_id = f"claim:{p['claim'].lower()}"
-                ntype, predicate = NodeType.CLAIM, "reports"
-            graph.add_node(
-                Node(id=node_id, type=ntype, label=p["claim"])
-            )
-            graph.add_edge(
-                Edge(
-                    subject=p["node"],
-                    predicate=predicate,
-                    object=node_id,
-                    confidence=confidence,
-                    jev_question_id=f"prop_{i}",
-                    evidence=[
-                        Evidence(
-                            source="llm_proposal",
-                            endpoint=self.llm.model or "mock",
-                            summary=(
-                                f"LLM-proposed claim for {p['node']}, "
-                                "JEV-verified against source text"
-                            ),
-                            payload={
-                                "claim": p["claim"],
-                                "quote": p.get("quote"),
-                                "answer": ans,
-                            },
-                        )
-                    ],
+        with ThreadPoolExecutor(max_workers=self.proposal_concurrency) as ex:
+            per_node = list(ex.map(_propose, keep))
+
+        for it, props in zip(keep, per_node):
+            if not props:
+                continue
+            text = it["text"][: proposals.PROMPT_TEXT_CHARS]
+            state = proposals.build_state({it["node"]: text}, props)
+            questions = proposals.build_questions(props)
+            answers = self.jev.ask(state, questions, stage="proposals")
+            for i, p in enumerate(props):
+                ans = answers.get(f"prop_{i}", {})
+                confidence = ans.get("noul", ans.get("confidence", 0.0))
+                if it["kind"] == "dataset":
+                    obj = f"condition:{p['claim'].lower()}"
+                    ntype, predicate = NodeType.CONDITION, "has_condition"
+                else:
+                    obj = f"claim:{p['claim'].lower()}"
+                    ntype, predicate = NodeType.CLAIM, "reports"
+                graph.add_node(Node(id=obj, type=ntype, label=p["claim"]))
+                graph.add_edge(
+                    Edge(
+                        subject=it["node"],
+                        predicate=predicate,
+                        object=obj,
+                        confidence=confidence,
+                        jev_question_id=f"prop_{i}",
+                        evidence=[
+                            Evidence(
+                                source="llm_proposal",
+                                endpoint=self.llm.model or "mock",
+                                summary=(
+                                    f"LLM-proposed claim for {it['node']}, "
+                                    "JEV-verified against source text"
+                                ),
+                                payload={
+                                    "claim": p["claim"],
+                                    "quote": p.get("quote"),
+                                    "answer": ans,
+                                },
+                            )
+                        ],
+                    )
                 )
-            )
 
     def _link_candidate_genes(self, graph: KnowledgeGraph) -> None:
         """Join gene nodes to same-species assemblies: has_candidate_gene.

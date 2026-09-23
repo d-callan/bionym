@@ -205,8 +205,8 @@ def test_resolve_numeric_id_mock_jev():
         for e in g.edges
     )
     assert all(e.evidence or e.jev_question_id for e in g.edges)
-    # s0_classify + s1_resolve + proposals (pubmed node exists at depth 1)
-    assert g.metadata["jev_usage"]["total"]["calls"] == 3
+    # s0 + s1 + proposals_triage + proposals (pubmed node exists at depth 1)
+    assert g.metadata["jev_usage"]["total"]["calls"] == 4
 
 
 def test_resolve_veupathdb_id_falls_back_to_ncbi():
