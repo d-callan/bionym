@@ -348,6 +348,18 @@ def test_dataset_values_produce_data_claims():
     assert "dataset:GSE12345" not in reports_from
 
 
+def test_summarize_populates_metadata():
+    r = _resolver()
+    g = r.resolve("672", depth=1, summarize=True)
+    summary = g.metadata.get("summary")
+    assert summary
+    assert summary[0]["claim"] == "mock proposal"
+    assert summary[0]["confidence"] == 0.5
+    # off by default
+    g2 = r.resolve("672", depth=1)
+    assert "summary" not in g2.metadata
+
+
 def test_serialize_rows_sorts_caps_tolerates():
     from bionym import proposals
 

@@ -92,7 +92,9 @@ class Resolver:
         self.gxa = gxa or ExpressionAtlasClient()
         self.kegg = kegg or KeggClient()
 
-    def resolve(self, identifier: str, depth: int = 1) -> KnowledgeGraph:
+    def resolve(
+        self, identifier: str, depth: int = 1, summarize: bool = False
+    ) -> KnowledgeGraph:
         graph = KnowledgeGraph(
             metadata={
                 "input": identifier,
@@ -138,6 +140,8 @@ class Resolver:
 
         if match:
             self._propose_claims(graph, match)
+            if summarize:
+                self._summarize(graph, match)
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -1915,6 +1919,45 @@ class Resolver:
                     ),
                     extra_payload={"n_rows": len(rows)},
                 )
+
+    def _summarize(
+        self, graph: KnowledgeGraph, match: dict[str, Any]
+    ) -> None:
+        """LLM synthesizes typed summary claims over the graph; JEV
+        verifies each against the serialized edges. Lands in
+        graph.metadata['summary'] — a list of {claim, quote,
+        confidence}. Gaps ('no known function') are valid claims."""
+        if not self.llm.enabled:
+            return
+        graph_text = proposals.serialize_graph(graph)
+        if not graph_text.strip():
+            return
+        try:
+            content = self.llm.complete(
+                *proposals.build_summary_prompt(match, graph_text)
+            )
+        except Exception as e:  # summary is best-effort
+            log.warning("LLM summary failed: %s", e)
+            return
+        props = proposals.parse(content)
+        if not props:
+            return
+        answers = self.jev.ask(
+            proposals.build_summary_state(match, graph_text, props),
+            proposals.build_summary_questions(props),
+            stage="summary",
+        )
+        graph.metadata["summary"] = [
+            {
+                "claim": p["claim"],
+                "quote": p.get("quote"),
+                "confidence": answers.get(f"prop_{i}", {}).get(
+                    "noul",
+                    answers.get(f"prop_{i}", {}).get("confidence", 0.0),
+                ),
+            }
+            for i, p in enumerate(props)
+        ]
 
     def _fetch_dataset_values(
         self, node: Node | None, dsid: str, symbol: str

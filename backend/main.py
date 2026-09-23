@@ -52,12 +52,13 @@ def resolve(
     identifier: str = Query(..., min_length=1),
     depth: int = Query(6, ge=0, le=6),
     min_confidence: float = Query(0.0, ge=0.0, le=1.0),
+    summarize: bool = Query(False),
     mock_jev: bool = Query(False),
 ):
     if not mock_jev and not os.environ.get("TYPESAFE_API_KEY"):
         raise HTTPException(500, "TYPESAFE_API_KEY not configured on server")
     resolver = _resolver(mock_jev=mock_jev)
-    graph = resolver.resolve(identifier, depth=depth)
+    graph = resolver.resolve(identifier, depth=depth, summarize=summarize)
     graph.filter_by_confidence(min_confidence)
     return graph.model_dump(mode="json")
 

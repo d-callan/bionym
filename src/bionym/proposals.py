@@ -332,3 +332,88 @@ def build_data_questions(proposals: list[dict[str, Any]]) -> dict:
         }
         for i, p in enumerate(proposals)
     }
+
+
+# -- summary ---------------------------------------------------------------
+
+SUMMARY_EDGES_MAX = 80
+
+_SUMMARY_SYSTEM = (
+    "You write concise structured summaries of gene knowledge graphs. "
+    "Output JSON only, no commentary."
+)
+
+
+def _node_label(graph: Any, node_id: str) -> str:
+    n = graph.nodes.get(node_id)
+    return (n.label or node_id) if n else node_id
+
+
+def serialize_graph(graph: Any, max_edges: int = SUMMARY_EDGES_MAX) -> str:
+    """Graph -> 'subject -predicate-> object (conf)' lines grouped by
+    predicate, highest-confidence first. This is the 'source text' the
+    summary LLM synthesizes from and JEV verifies against."""
+    by_pred: dict[str, list[Any]] = {}
+    for e in graph.edges:
+        by_pred.setdefault(e.predicate, []).append(e)
+    lines = []
+    for pred in sorted(by_pred):
+        edges = sorted(by_pred[pred], key=lambda e: e.confidence, reverse=True)
+        lines.append(f"[{pred}]")
+        for e in edges[:max_edges]:
+            s = _node_label(graph, e.subject)
+            o = _node_label(graph, e.object)
+            lines.append(f"  {s} -{pred}-> {o} ({e.confidence:.2f})")
+        if len(edges) > max_edges:
+            lines.append(f"  ... {len(edges) - max_edges} more")
+    return "\n".join(lines)
+
+
+def build_summary_prompt(
+    match: dict[str, Any], graph_text: str
+) -> tuple[str, str]:
+    """(system, user): propose typed summary claims over the subgraph."""
+    gene = match.get("symbol") or match.get("locus_tag") or "this gene"
+    organism = match.get("organism") or "unknown organism"
+    user = (
+        f"Gene: {gene} ({organism})\n\n"
+        "Knowledge graph edges:\n"
+        f"{graph_text}\n\n"
+        "Propose a concise summary of this gene as typed claims: what it "
+        "is, what it does, where/when it's expressed, what's known vs "
+        "unknown. Each claim must be directly supported by the edges "
+        "above. Gaps are valid claims ('no known function', 'no orthologs "
+        "found').\n"
+        'Return JSON: {"proposals": [{"claim": "...", "quote": "the '
+        'edges supporting it"}]}'
+    )
+    return _SUMMARY_SYSTEM, user
+
+
+def build_summary_state(
+    match: dict[str, Any], graph_text: str, props: list[dict[str, Any]]
+) -> dict:
+    """JEV state: gene context + serialized graph + proposed claims."""
+    return {
+        "gene": match.get("symbol") or match.get("locus_tag"),
+        "graph": graph_text,
+        "proposals": [
+            {"claim": p["claim"], "quote": p.get("quote")} for p in props
+        ],
+    }
+
+
+def build_summary_questions(props: list[dict[str, Any]]) -> dict:
+    return {
+        f"prop_{i}": {
+            "type": "noul",
+            "instructions": (
+                f"`proposals[{i}]` is a candidate summary claim about "
+                "this gene. Is it supported by the edges in `graph`, and "
+                "is it important enough for a concise summary? Reject "
+                "claims the edges don't support and trivia not worth "
+                "surfacing."
+            ),
+        }
+        for i, p in enumerate(props)
+    }
