@@ -314,6 +314,38 @@ def test_parse_normalized():
     assert proposals.parse_normalized("not json", 1) is None
 
 
+def test_jev_ask_splits_on_max_tokens(monkeypatch):
+    from bionym.jev import JevClient, JevError
+    jev = JevClient(model="m", api_key="x")
+    calls = []
+
+    def fake_call(body):
+        qs = body["questions"]
+        calls.append(len(qs))
+        if len(qs) > 2:
+            raise JevError(
+                'JEV API error 400: {"detail":{"error_type":"max_tokens_exceeded"}}'
+            )
+        return {k: {"noul": 0.5} for k in qs}, {"input_tokens": 1, "output_tokens": 1}
+
+    monkeypatch.setattr(jev, "_call", fake_call)
+    questions = {f"q{i}": {"type": "noul", "instructions": "x"} for i in range(4)}
+    answers = jev.ask({"s": 1}, questions, stage="t")
+    assert set(answers) == set(questions)
+    assert calls == [4, 2, 2]
+    # a single oversized question can't be split -> propagates
+    import pytest
+
+    def always_fail(body):
+        raise JevError(
+            'JEV API error 400: {"detail":{"error_type":"max_tokens_exceeded"}}'
+        )
+
+    monkeypatch.setattr(jev, "_call", always_fail)
+    with pytest.raises(JevError):
+        jev.ask({"s": 1}, {"q0": questions["q0"]}, stage="t")
+
+
 def test_filter_by_confidence_and_url():
     from bionym.graph import KnowledgeGraph, Node, NodeType, Edge
     g = KnowledgeGraph(metadata={"query": "Q"})

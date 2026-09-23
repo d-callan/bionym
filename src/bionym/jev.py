@@ -66,7 +66,33 @@ class JevClient:
             answers = self._mock_answers(questions)
             usage = {"input_tokens": 0, "output_tokens": 0}
         else:
-            answers, usage = self._call(body)
+            try:
+                answers, usage = self._call(body)
+            except JevError as e:
+                # A batch too large for the model context comes back as a
+                # 400 max_tokens_exceeded. Halve the questions and retry
+                # against the same state; each sub-ask logs its own usage.
+                # A single question that still overflows means the state
+                # itself is too big — nothing to split, so re-raise.
+                if "max_tokens_exceeded" not in str(e) or len(questions) < 2:
+                    raise
+                log.warning(
+                    "jev stage=%s max_tokens with %d questions — splitting",
+                    stage,
+                    len(questions),
+                )
+                ids = list(questions)
+                mid = len(ids) // 2
+                merged: dict[str, dict[str, Any]] = {}
+                for part in (ids[:mid], ids[mid:]):
+                    merged.update(
+                        self.ask(
+                            state,
+                            {k: questions[k] for k in part},
+                            stage=stage,
+                        )
+                    )
+                return merged
         self.usage_log.append(
             {
                 "stage": stage,
