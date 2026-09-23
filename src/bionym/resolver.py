@@ -1648,13 +1648,29 @@ class Resolver:
             stage="proposals_triage",
         )
         n_levels = len(proposals.TRIAGE_LEVELS)
-        keep = [
-            it
-            for i, it in enumerate(items)
-            if triage_ans.get(f"triage_{i}", {}).get("score", 0)
-            / max(n_levels - 1, 1)
-            >= self.proposal_min_score
-        ]
+        scored = sorted(
+            (
+                (
+                    triage_ans.get(f"triage_{i}", {}).get("score", 0)
+                    / max(n_levels - 1, 1),
+                    it,
+                )
+                for i, it in enumerate(items)
+            ),
+            key=lambda t: t[0],
+            reverse=True,
+        )
+        # Cap per kind (like the s3 ortholog cap): each survivor costs an
+        # LLM call + JEV verification, and a deep graph yields hundreds.
+        counts: dict[str, int] = {}
+        keep = []
+        for score, it in scored:
+            if score < self.proposal_min_score:
+                break
+            if counts.get(it["kind"], 0) >= proposals.MAX_ITEMS_PER_KIND:
+                continue
+            counts[it["kind"]] = counts.get(it["kind"], 0) + 1
+            keep.append(it)
         if not keep:
             return
 

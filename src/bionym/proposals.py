@@ -109,6 +109,9 @@ TRIAGE_LEVELS = ["irrelevant", "unlikely", "likely", "very_likely"]
 TRIAGE_TEXT_CHARS = 600
 # Bound on the text sent to the LLM itself (summaries can be huge).
 PROMPT_TEXT_CHARS = 8000
+# Cap on datasets/publications that survive triage — each one costs an
+# LLM call + JEV verification, and a deep graph can yield hundreds.
+MAX_ITEMS_PER_KIND = 100
 
 
 def build_triage_state(

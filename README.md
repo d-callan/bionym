@@ -81,6 +81,12 @@ cd web && python -m http.server 8080
   Choice question has a `none`/`other` escape. JEV judges, never enumerates.
 - Every edge must carry ≥1 `Evidence` record (source, endpoint, timestamp,
   payload) so "why" is always answerable.
+- Unbounded API result sets are capped before JEV/LLM stages so a single
+  state can't overflow the model context or spend unbounded calls:
+  ortholog candidates keep the top 100 by OMA score (S3), and
+  datasets/publications keep the top 100 per kind by triage score
+  (`proposals.MAX_ITEMS_PER_KIND`). These are hard-coded for now — if a
+  use case needs deeper coverage they should become configurable.
 
 ## Layout
 
