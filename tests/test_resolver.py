@@ -348,6 +348,21 @@ def test_dataset_values_produce_data_claims():
     assert "dataset:GSE12345" not in reports_from
 
 
+def test_propose_false_skips_llm_passes():
+    # quick mode: deterministic stages + JEV edge scoring still run, but
+    # no LLM-proposed nodes/edges and no summary. (condition: nodes from
+    # GXA factors are deterministic and still expected.)
+    g = _resolver().resolve("672", depth=6, propose=False)
+    assert "condition:mock proposal" not in g.nodes
+    assert "claim:mock proposal" not in g.nodes
+    assert not any(
+        e.predicate in ("mentions", "reports") for e in g.edges
+    )
+    assert "summary" not in g.metadata
+    # deterministic edges are unaffected
+    assert g.edges
+
+
 def test_summarize_populates_metadata():
     r = _resolver()
     g = r.resolve("672", depth=1, summarize=True)

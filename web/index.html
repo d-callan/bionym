@@ -49,6 +49,15 @@
   svg#net:active { cursor: grabbing; }
   th { cursor: pointer; user-select: none; }
   th:hover { background: #e2e8f0; }
+  .modes { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .modes label { padding: .4rem .8rem; cursor: pointer; font-size: .85rem; color: var(--ink); background: #fff; }
+  .modes input { position: absolute; opacity: 0; pointer-events: none; }
+  .modes label:has(input:checked) { background: #2b6cb0; color: #fff; }
+  details#summary { margin-top: 1.4rem; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .6rem 1rem; }
+  details#summary > summary { cursor: pointer; font-size: 1.05rem; font-weight: 600; }
+  details#summary ul { margin: .6rem 0 .2rem; padding-left: 1.2rem; font-size: .88rem; }
+  details#summary li { margin-bottom: .35rem; }
+  .sumconf { color: var(--muted); font-size: .78rem; }
 </style>
 </head>
 <body>
@@ -57,11 +66,19 @@
   <form id="f">
     <input type="text" id="id" placeholder="identifier — e.g. PF3D7_0710100, 672, BRCA1" required>
     <button id="go" type="submit">Resolve</button>
+    <span class="modes">
+      <label title="Deterministic lookups + JEV-scored edges only — no AI-generated claims or summary. Usually seconds."><input type="radio" name="mode" value="quick">Quick scan</label>
+      <label title="Everything: datasets, AI-proposed claims and a verified gene summary. Can take several minutes."><input type="radio" name="mode" value="full" checked>Full analysis</label>
+    </span>
     <label>min conf <input type="range" id="minconf" min="0" max="1" step="0.05" value="0" style="width:8rem;vertical-align:middle"><span id="minconfv">0.00</span></label>
   </form>
 </header>
 <div id="status">Enter an identifier to resolve.</div>
 <main>
+  <details id="summary" open hidden>
+    <summary>Summary</summary>
+    <ul id="summarylist"></ul>
+  </details>
   <h2>Network
     <label>layout
       <select id="layout">
@@ -98,7 +115,8 @@ $("#f").addEventListener("submit", async e => {
   const status = $("#status"); status.className = ""; status.textContent = "Resolving " + id + "…";
   $("#go").disabled = true;
   try {
-    const r = await fetch(`${BACKEND}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${DEPTH}`);
+    const mode = document.querySelector('input[name=mode]:checked').value;
+    const r = await fetch(`${BACKEND}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${DEPTH}&propose=${mode === "full"}&summarize=${mode === "full"}`);
     if (!r.ok) throw new Error((await r.json().catch(()=>({}))).detail || r.statusText);
     GRAPH = await r.json();
     d3.select("#net").call(zoom.transform, d3.zoomIdentity);  // new query resets view
@@ -219,6 +237,15 @@ function layout(nodes, edges, mode, W, H) {
 const ellipsize = (s, n=26) => s.length > n ? s.slice(0, n-1) + "…" : s;
 
 function render(g) {
+  // collapsible summary block above the network (full analysis only)
+  const sum = g.metadata.summary;
+  const det = document.getElementById("summary");
+  det.hidden = !sum || !sum.length;
+  if (!det.hidden)
+    document.getElementById("summarylist").innerHTML = sum
+      .map(s => `<li>${esc(s.claim)} <span class="sumconf">${(+s.confidence).toFixed(2)}</span></li>`)
+      .join("");
+
   const nodes = Object.values(g.nodes), edges = g.edges;
   const svg = d3.select("#net"); svg.selectAll("*").remove();
   const W = 1400, H = 700;

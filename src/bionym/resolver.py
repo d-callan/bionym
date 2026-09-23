@@ -93,7 +93,11 @@ class Resolver:
         self.kegg = kegg or KeggClient()
 
     def resolve(
-        self, identifier: str, depth: int = 1, summarize: bool = False
+        self,
+        identifier: str,
+        depth: int = 1,
+        summarize: bool = False,
+        propose: bool = True,
     ) -> KnowledgeGraph:
         graph = KnowledgeGraph(
             metadata={
@@ -139,7 +143,8 @@ class Resolver:
             graph.metadata["stages"].append("s6_remap")
 
         if match:
-            self._propose_claims(graph, match)
+            if propose:
+                self._propose_claims(graph, match)
             if summarize:
                 self._summarize(graph, match)
 
