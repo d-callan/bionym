@@ -18,8 +18,14 @@ annotation: GO evidence-code confidence, KEGG, InterPro/Pfam), S5
 (expression: GEO + Expression Atlas, JEV-scored), S6 (cross-assembly
 presence: `annotated_in` + JEV `likely_present`).
 
-Interfaces: CLI (`bionym resolve`), FastAPI backend (`backend/`), static web
-frontend (`web/`, D3 multi-partite network).
+On top of the staged pipeline, two optional LLM passes propose claims that
+JEV then verifies: text claims over publication/dataset metadata, and data
+claims over per-gene measurements (VEuPathDB ExpressionGraphs, GEO GDS SOFT
+files, GXA baseline/differential TSVs). A third pass can synthesize a
+JEV-verified gene summary into `metadata.summary`.
+
+Interfaces: CLI (`bionym resolve`, `bionym summarize`), FastAPI backend
+(`backend/`), static web frontend (`web/`, D3 multi-partite network).
 
 ## Install
 
@@ -47,7 +53,11 @@ bionym resolve PF3D7_0710100 -o graph.json -v
 bionym resolve 672 --depth 0            # classify only
 bionym resolve 672 --report             # + self-contained HTML report
 bionym resolve 672 --min-confidence 0.7 # drop low-confidence edges
+bionym resolve 672 --no-propose         # quick scan: skip LLM claim passes
+bionym resolve 672 --summarize          # + JEV-verified summary in metadata
 bionym resolve 672 --mock-jev           # offline dev, no API key
+
+bionym summarize graph.json           # summary pass on an existing graph
 ```
 
 > **`--mock-jev` is for development only.** It returns deterministic
@@ -61,7 +71,8 @@ bionym resolve 672 --mock-jev           # offline dev, no API key
 Output: a JSON knowledge graph — `nodes` (typed: Gene, Organism, Assembly,
 IdType, ...; each with an external `url`), `edges` (claims with
 `confidence`, `probabilities`, `jev_question_id`, `evidence[]`), and
-`metadata.jev_usage` (per-stage token counts for cost projection).
+`metadata` (`stages`, `jev_usage` per-stage token counts, optional
+`summary`: JEV-verified claim list with `claim`/`quote`/`confidence`).
 
 ## Web app
 
@@ -73,6 +84,13 @@ cd backend && uvicorn main:app --port 8001
 cd web && python -m http.server 8080
 # open http://localhost:8080 — backend URL is set in web/index.html (BACKEND const)
 ```
+
+The UI offers **Quick scan** (`propose=false` — deterministic stages + JEV
+edge scoring only, seconds) vs **Full analysis** (`propose+summarize`,
+minutes). The verified summary renders in a collapsible section above the
+network. API: `GET /api/resolve?identifier=…&depth=…&propose=…&summarize=…`,
+plus `POST /api/summarize` which runs the summary pass over a previously
+returned graph body.
 
 ## Design rules
 
@@ -93,11 +111,13 @@ cd web && python -m http.server 8080
 ```
 src/bionym/       core library + CLI (no web deps)
   jev.py          systemone client: batch questions, token logging, mock mode
+  llm.py          proposal/summary LLM client (mock mode for dev)
   evidence.py     Evidence records
   graph.py        KnowledgeGraph: nodes/edges/confidence, url + filtering
+  proposals.py    LLM propose-then-JEV-verify: prompts, serializers, parsers
   questions/      staged JEV question builders (s0–s6)
   clients/        one thin client per data source
-  resolver.py     stage orchestration
+  resolver.py     stage orchestration + proposal/summary passes
   report.py       self-contained HTML report (D3 network + tables)
 backend/          FastAPI deployable
 web/              static frontend (D3 multi-partite network)
