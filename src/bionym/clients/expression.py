@@ -19,6 +19,7 @@ from typing import Any
 import httpx
 
 from ..evidence import Evidence
+from ..species import same_species
 
 log = logging.getLogger(__name__)
 
@@ -41,10 +42,9 @@ class ExpressionAtlasClient:
         data = self._get(BASE, params)
         experiments = data.get("experiments", [])
         if organism:
-            key = organism.lower()
             experiments = [
                 e for e in experiments
-                if (e.get("species") or "").lower() == key
+                if same_species(e.get("species"), organism)
             ]
         records = [self._normalize(e) for e in experiments]
         ev = Evidence(

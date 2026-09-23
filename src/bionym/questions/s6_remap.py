@@ -54,3 +54,36 @@ def build_questions(unannotated: list[dict[str, Any]]) -> dict:
         }
         for i in range(len(unannotated))
     }
+
+
+def build_candidate_state(pairs: list[dict[str, Any]]) -> dict:
+    """State for has_candidate_gene pairs: (assembly, gene) joined on
+    species — JEV judges whether the assembly plausibly encodes the gene."""
+    return {
+        "pairs": [
+            {
+                "assembly": p["assembly"],
+                "assembly_organism": p.get("assembly_organism"),
+                "assembly_level": p.get("assembly_level"),
+                "gene": p["gene"],
+                "gene_species": p.get("gene_species"),
+            }
+            for p in pairs
+        ]
+    }
+
+
+def build_candidate_questions(pairs: list[dict[str, Any]]) -> dict:
+    return {
+        f"candidate_{i}": {
+            "type": "noul",
+            "instructions": (
+                f"`pairs[{i}]` joins a gene to an assembly by species name "
+                "only — no ortholog call or annotation verifies it. Is the "
+                "gene plausibly encoded in this assembly? Weigh whether the "
+                "organism names really denote the same species and whether "
+                "the assembly level makes a gene call realistic."
+            ),
+        }
+        for i in range(len(pairs))
+    }

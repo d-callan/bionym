@@ -20,6 +20,7 @@ from .clients.veupathdb import VEuPathDBClient
 from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
 from .jev import JevClient
+from .species import same_species, species_key
 from .questions import (
     s0_classify,
     s1_resolve,
@@ -43,7 +44,6 @@ class Resolver:
         uniprot: UniProtClient | None = None,
         gxa: ExpressionAtlasClient | None = None,
         kegg: KeggClient | None = None,
-        max_candidates: int = 20,
     ) -> None:
         self.jev = jev
         self.ncbi = ncbi or NcbiClient()
@@ -52,7 +52,6 @@ class Resolver:
         self.uniprot = uniprot or UniProtClient()
         self.gxa = gxa or ExpressionAtlasClient()
         self.kegg = kegg or KeggClient()
-        self.max_candidates = max_candidates
 
     def resolve(self, identifier: str, depth: int = 1) -> KnowledgeGraph:
         graph = KnowledgeGraph(
@@ -154,7 +153,6 @@ class Resolver:
         graph: KnowledgeGraph,
     ) -> dict[str, Any] | None:
         candidates, evidence = self._fetch_candidates(identifier, namespace)
-        candidates = candidates[: self.max_candidates]
         if not candidates:
             log.warning("no candidate gene records for %r", identifier)
             graph.metadata["stages"].append("s1_resolve:no_match")
@@ -293,10 +291,10 @@ class Resolver:
         """Link a non-NCBI match back to its NCBI Gene record.
 
         NCBI indexes VEuPathDB locus tags in db=gene, so esearch on the
-        canonical id finds the GeneID. Prefers a hit whose tax_id matches
-        the resolved organism; falls back to the top hit at lower
-        confidence. No-op when the match already came from NCBI (the query
-        node is the NCBI gene) or no locus-tag-like id is available.
+        canonical id finds the GeneID. A tax_id match decides
+        deterministically; otherwise JEV picks among the hits. No-op when
+        the match already came from NCBI (the query node is the NCBI gene)
+        or no locus-tag-like id is available.
         """
         if match.get("source") in ("ncbi_datasets", "ncbi_eutils"):
             return
@@ -306,13 +304,55 @@ class Resolver:
         records, evidence = self.ncbi.find_gene(query)
         if not records:
             return
-        tax_id = match.get("tax_id")
-        hit = next(
-            (r for r in records if tax_id and str(r.get("tax_id")) == str(tax_id)),
-            records[0],
+        hit, confidence, qid = self._pick_ncbi_hit(
+            query, records, match.get("tax_id")
         )
-        confidence = 0.9 if tax_id and str(hit.get("tax_id")) == str(tax_id) else 0.6
+        if not hit:
+            return
         match["ncbi_gene_id"] = hit["gene_id"]
+        node_id = self._add_ncbigene_node(graph, hit)
+        graph.add_edge(
+            Edge(
+                subject=identifier,
+                predicate="same_as",
+                object=node_id,
+                confidence=confidence,
+                jev_question_id=qid,
+                evidence=evidence,
+            )
+        )
+
+    def _pick_ncbi_hit(
+        self, query: str, records: list[dict[str, Any]], tax_id: Any
+    ) -> tuple[dict[str, Any] | None, float, str]:
+        """Choose which find_gene hit `query` refers to.
+
+        A unique tax_id match is strong deterministic evidence (0.9).
+        When it doesn't decide — no tax_id, no matching hit, or several
+        same-taxon hits — JEV picks (choice) or confirms (noul), and can
+        reject all hits via 'none'.
+        """
+        matched = [
+            r for r in records if tax_id and str(r.get("tax_id")) == str(tax_id)
+        ]
+        if len(matched) == 1:
+            return matched[0], 0.9, ""
+        pool = matched or records
+        state = s1_resolve.build_state(query, pool)
+        questions = s1_resolve.build_questions(pool)
+        ans = self.jev.ask(state, questions, stage="ncbi_link")["gene_match"]
+        if len(pool) == 1:
+            return pool[0], ans.get("noul", ans.get("confidence", 0.0)), "gene_match"
+        pick = ans.get("choice")
+        if pick == "none":
+            return None, 0.0, "gene_match"
+        try:
+            return pool[int(pick)], ans.get("confidence", 0.0), "gene_match"
+        except (TypeError, ValueError, IndexError):
+            return None, 0.0, "gene_match"
+
+    @staticmethod
+    def _add_ncbigene_node(graph: KnowledgeGraph, hit: dict[str, Any]) -> str:
         node_id = f"ncbigene:{hit['gene_id']}"
         graph.add_node(
             Node(
@@ -327,15 +367,7 @@ class Resolver:
                 },
             )
         )
-        graph.add_edge(
-            Edge(
-                subject=identifier,
-                predicate="same_as",
-                object=node_id,
-                confidence=confidence,
-                evidence=evidence,
-            )
-        )
+        return node_id
 
     def _enrich_ncbi_gene(
         self,
@@ -588,8 +620,7 @@ class Resolver:
             or taxon.get("species_tax_id")
             or tax_id
         )
-        assemblies, asm_ev = self.ncbi.assemblies_for_taxon(group_taxid)
-        candidates = assemblies[: self.max_candidates]
+        candidates, asm_ev = self.ncbi.assemblies_for_taxon(group_taxid)
         if not candidates:
             graph.metadata["stages"].append("s2_assemblies:no_candidates")
             return
@@ -655,11 +686,6 @@ class Resolver:
 
     # -- S3 ----------------------------------------------------------------
 
-    @staticmethod
-    def _species_key(name: str | None) -> str:
-        """Genus + species epithet, lowercased — ignores strain/isolate."""
-        return " ".join((name or "").lower().split()[:2])
-
     def _s3_orthologs(
         self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
     ) -> None:
@@ -696,8 +722,6 @@ class Resolver:
                 if candidates:
                     oma_id_used = alt
                     break
-
-        candidates = candidates[: self.max_candidates]
 
         anchor = match.get("anchor") or identifier
 
@@ -748,21 +772,19 @@ class Resolver:
             self._add_orthomcl_group(vpd_node, match["orthomcl_name"], graph)
 
         # Organisms of related assemblies (S2) minus the source organism.
-        source_key = self._species_key(match.get("organism"))
+        source_key = species_key(match.get("organism"))
         related_organisms = sorted(
             {
                 n.attrs["organism"]
                 for n in graph.nodes.values()
                 if n.type == NodeType.ASSEMBLY
                 and n.attrs.get("organism")
-                and self._species_key(n.attrs["organism"]) != source_key
+                and species_key(n.attrs["organism"]) != source_key
             }
         )
-        covered = {
-            self._species_key(c.get("species")) for c in candidates
-        }
+        covered = {species_key(c.get("species")) for c in candidates}
         uncovered = [
-            o for o in related_organisms if self._species_key(o) not in covered
+            o for o in related_organisms if species_key(o) not in covered
         ]
 
         if not candidates and not uncovered:
@@ -849,31 +871,17 @@ class Resolver:
         records, ev = self.ncbi.find_gene(resolve_id)
         if not records:
             return
-        hit = next(
-            (r for r in records if tax_id and str(r.get("tax_id")) == str(tax_id)),
-            records[0],
-        )
-        confidence = 0.9 if tax_id and str(hit.get("tax_id")) == str(tax_id) else 0.6
-        node_id = f"ncbigene:{hit['gene_id']}"
-        graph.add_node(
-            Node(
-                id=node_id,
-                type=NodeType.GENE,
-                label=hit.get("symbol") or hit["gene_id"],
-                id_namespace="ncbi_gene",
-                attrs={
-                    "gene_id": hit.get("gene_id"),
-                    "organism": hit.get("organism"),
-                    "description": hit.get("description"),
-                },
-            )
-        )
+        hit, confidence, qid = self._pick_ncbi_hit(resolve_id, records, tax_id)
+        if not hit:
+            return
+        node_id = self._add_ncbigene_node(graph, hit)
         graph.add_edge(
             Edge(
                 subject=gene_node,
                 predicate="same_as",
                 object=node_id,
                 confidence=confidence,
+                jev_question_id=qid,
                 evidence=ev,
             )
         )
@@ -906,21 +914,21 @@ class Resolver:
                 evidence=evidence,
             )
         )
-        # Cap member nodes like other candidate lists. Core members first,
-        # but prefer members whose species matches a related assembly (S2)
-        # — those are the candidate genes for the other assemblies.
+        # Order members deterministically: those whose species matches a
+        # related assembly (S2) first — the candidate genes for the other
+        # assemblies — then Core before peripheral.
         asm_species = {
-            self._species_key(n.attrs["organism"])
+            species_key(n.attrs["organism"])
             for n in graph.nodes.values()
             if n.type == NodeType.ASSEMBLY and n.attrs.get("organism")
         }
         members = sorted(
             group.get("members", []),
             key=lambda m: (
-                self._species_key(m.get("organism")) not in asm_species,
+                species_key(m.get("organism")) not in asm_species,
                 m.get("core_peripheral") != "Core",
             ),
-        )[: self.max_candidates]
+        )
         for m in members:
             fid = m.get("full_id")
             if not fid:
@@ -1016,7 +1024,27 @@ class Resolver:
         if not records:
             graph.metadata["stages"].append("s4_annotate:no_uniprot")
             return
-        rec = records[0]
+
+        # Which UniProt entry is this gene? The search matched on a gene
+        # name that may be a symbol or a locus tag, so a deterministic
+        # name comparison can't decide — JEV picks (or rejects).
+        state = s4_annotate.build_pick_state(match, records)
+        questions = s4_annotate.build_pick_questions(records)
+        ans = self.jev.ask(state, questions, stage="s4_pick")["uniprot_match"]
+        if len(records) == 1:
+            rec = records[0]
+            confidence = ans.get("noul", ans.get("confidence", 0.0))
+        else:
+            pick = ans.get("choice")
+            if pick == "none":
+                graph.metadata["stages"].append("s4_annotate:no_uniprot_match")
+                return
+            try:
+                rec = records[int(pick)]
+            except (TypeError, ValueError, IndexError):
+                graph.metadata["stages"].append("s4_annotate:no_uniprot_match")
+                return
+            confidence = ans.get("confidence", 0.0)
         anchor = match.get("anchor") or identifier
 
         # same_as edge: deterministic confidence from identifier agreement.
@@ -1037,14 +1065,13 @@ class Resolver:
                     },
                 )
             )
-            name_match = (rec.get("gene_name") or "").lower() == symbol.lower()
-            tax_match = not match.get("tax_id") or rec.get("tax_id") == match.get("tax_id")
             graph.add_edge(
                 Edge(
                     subject=identifier,
                     predicate="same_as",
                     object=up_node,
-                    confidence=0.9 if (name_match and tax_match) else 0.6,
+                    confidence=confidence,
+                    jev_question_id="uniprot_match",
                     evidence=evidence,
                 )
             )
@@ -1163,9 +1190,8 @@ class Resolver:
         gxa, gxa_ev = self.gxa.experiments_for_gene(symbol, organism)
         evidence = geo_ev + gxa_ev
 
-        # Cap each source independently so one noisy source can't starve the
-        # other; JEV scores every candidate for relevance.
-        candidates = geo[: self.max_candidates] + gxa[: self.max_candidates]
+        # JEV scores every candidate for relevance.
+        candidates = geo + gxa
         if not candidates:
             if not n_vpd:
                 graph.metadata["stages"].append("s5_expression:no_data")
@@ -1242,8 +1268,13 @@ class Resolver:
         datasets = result.get("datasets", [])
         # One bulk call resolves display names, summaries, and citations —
         # the metadata JEV would need to judge condition relevance.
-        meta = self.veupathdb.dataset_records(
-            [d["dataset_id"] for d in datasets], result.get("project", "plasmodb")
+        project = result.get("project")
+        meta = (
+            self.veupathdb.dataset_records(
+                [d["dataset_id"] for d in datasets], project
+            )
+            if project
+            else {}
         )
         for d in datasets:
             dsid = d["dataset_id"]
@@ -1455,7 +1486,10 @@ class Resolver:
                         type=NodeType.ASSEMBLY,
                         label=acc,
                         id_namespace="insdc",
-                        attrs={"organism": rep.get("organism")},
+                        attrs={
+                            "organism": rep.get("organism"),
+                            "tax_id": rep.get("tax_id"),
+                        },
                     )
                 )
                 graph.add_edge(
@@ -1509,8 +1543,8 @@ class Resolver:
         Ortholog members (OMA gene:*, OrthoMCL omclseq:*) carry a species
         name; assemblies carry an organism. A species match means that
         assembly plausibly encodes that member — a *suspected* gene id for
-        the same gene in the other assembly. Species-level inference, so
-        confidence is capped at 0.6 and the evidence records the join key.
+        the same gene in the other assembly. The join is deterministic
+        (tax_id or species-name match); JEV scores each pair's plausibility.
         """
         assemblies = [
             n for n in graph.nodes.values()
@@ -1538,34 +1572,53 @@ class Resolver:
             and n.id not in skip
             and (n.attrs.get("species") or n.attrs.get("organism"))
         ]
+        pairs = []
         for asm in assemblies:
-            asm_key = self._species_key(asm.attrs["organism"])
             for g in genes:
-                g_key = self._species_key(
-                    g.attrs.get("species") or g.attrs.get("organism")
+                g_name = g.attrs.get("species") or g.attrs.get("organism")
+                same_taxon = (
+                    asm.attrs.get("tax_id")
+                    and g.attrs.get("tax_id")
+                    and str(asm.attrs["tax_id"]) == str(g.attrs["tax_id"])
                 )
-                if g_key != asm_key:
+                if not (same_taxon or same_species(asm.attrs["organism"], g_name)):
                     continue
-                graph.add_edge(
-                    Edge(
-                        subject=asm.id,
-                        predicate="has_candidate_gene",
-                        object=g.id,
-                        confidence=0.6,
-                        evidence=[
-                            Evidence(
-                                source="bionym",
-                                endpoint="species join",
-                                summary=(
-                                    f"assembly organism {asm.attrs['organism']!r} "
-                                    f"matches gene species {g_key!r}"
-                                ),
-                                payload={
-                                    "assembly": asm.id,
-                                    "gene": g.id,
-                                    "species_key": g_key,
-                                },
-                            )
-                        ],
-                    )
+                pairs.append(
+                    {
+                        "assembly": asm.id,
+                        "assembly_organism": asm.attrs["organism"],
+                        "assembly_level": asm.attrs.get("level"),
+                        "gene": g.id,
+                        "gene_species": g_name,
+                    }
                 )
+        if not pairs:
+            return
+        state = s6_remap.build_candidate_state(pairs)
+        questions = s6_remap.build_candidate_questions(pairs)
+        answers = self.jev.ask(state, questions, stage="s6_candidates")
+        for i, p in enumerate(pairs):
+            ans = answers.get(f"candidate_{i}", {})
+            graph.add_edge(
+                Edge(
+                    subject=p["assembly"],
+                    predicate="has_candidate_gene",
+                    object=p["gene"],
+                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                    jev_question_id=f"candidate_{i}",
+                    evidence=[
+                        Evidence(
+                            source="bionym",
+                            endpoint="species join",
+                            summary=(
+                                f"assembly organism {p['assembly_organism']!r} "
+                                f"matches gene species {p['gene_species']!r}"
+                            ),
+                            payload={
+                                "assembly": p["assembly"],
+                                "gene": p["gene"],
+                            },
+                        )
+                    ],
+                )
+            )
