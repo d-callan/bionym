@@ -278,6 +278,42 @@ class Resolver:
                 )
             )
 
+        # VEuPathDB's Alias table lists every known cross-reference for
+        # the gene — surface them as IdType nodes so the graph shows all
+        # the names it answers to. Confidence 1.0: VEuPathDB's own
+        # assertion, no judgment needed.
+        seen_aliases: set[str] = set()
+        for a in vpd.get("aliases") or []:
+            # Alias shape varies by source: VEuPathDB gives
+            # {db, alias, type} dicts; other sources give plain strings.
+            if isinstance(a, dict):
+                value, db, id_type = a.get("alias"), a.get("db"), a.get("type")
+            else:
+                value, db, id_type = a, None, None
+            if not value or value == vpd_id or value in seen_aliases:
+                continue
+            seen_aliases.add(value)
+            alias_node = f"alias:{value}"
+            if alias_node not in graph.nodes:
+                graph.add_node(
+                    Node(
+                        id=alias_node,
+                        type=NodeType.ID_TYPE,
+                        label=value,
+                        id_namespace=(db or "").lower(),
+                        attrs={"db": db, "id_type": id_type},
+                    )
+                )
+            graph.add_edge(
+                Edge(
+                    subject=node_id,
+                    predicate="has_alias",
+                    object=alias_node,
+                    confidence=1.0,
+                    evidence=vpd_ev,
+                )
+            )
+
         # VEuPathDB curates its own citation list (with titles/authors) —
         # complements the bare pmid links from NCBI elink.
         citations, cite_ev = self.veupathdb.gene_pubmed(vpd_id)

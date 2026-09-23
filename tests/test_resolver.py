@@ -105,7 +105,33 @@ class FakeNcbi:
 
 class FakeVeuPathDB:
     def lookup_gene(self, gene_id):
-        return [], []
+        if gene_id != "PF3D7_1477700":
+            return [], []
+        return [
+            {
+                "source": "veupathdb",
+                "project": "plasmodb",
+                "gene_id": gene_id,
+                "symbol": "MAL13P1.100",
+                "tax_id": 5833,
+                "organism": "Plasmodium falciparum 3D7",
+                "url": "https://plasmodb.org/x",
+                "aliases": [
+                    {
+                        "db": "Uniprot/SWISSPROT",
+                        "alias": "Q8I5A7",
+                        "type": "protein",
+                    },
+                    {"db": "GeneDB", "alias": "PFF0740w", "type": "previous ID"},
+                    # duplicate + self-reference: both must be skipped
+                    {"db": "GeneDB", "alias": "PFF0740w", "type": "previous ID"},
+                    {"db": "PlasmoDB", "alias": gene_id, "type": "primary key"},
+                ],
+            }
+        ], _EV
+
+    def gene_pubmed(self, gene_id):
+        return [], _EV
 
 
 class FakeOma:
@@ -225,6 +251,19 @@ def test_resolve_veupathdb_id_falls_back_to_ncbi():
     g = r.resolve("PF3D7_0710100", depth=1)
     assert "idtype:veupathdb" in g.nodes
     assert "taxon:5833" in g.nodes
+
+
+def test_veupathdb_aliases_become_idtype_nodes():
+    r = _resolver()
+    g = r.resolve("PF3D7_1477700", depth=1)
+    assert "veupathdb:PF3D7_1477700" in g.nodes
+    # alias list → IdType nodes; duplicate and self-reference skipped
+    assert g.nodes["alias:Q8I5A7"].type == NodeType.ID_TYPE
+    assert g.nodes["alias:Q8I5A7"].id_namespace == "uniprot/swissprot"
+    edges = [e for e in g.edges if e.predicate == "has_alias"]
+    assert {e.object for e in edges} == {"alias:Q8I5A7", "alias:PFF0740w"}
+    assert all(e.subject == "veupathdb:PF3D7_1477700" for e in edges)
+    assert all(e.confidence == 1.0 for e in edges)
 
 
 def test_depth_zero_classifies_only():
