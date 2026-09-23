@@ -15,6 +15,7 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from bionym.clients.ncbi import NcbiClient
+from bionym.clients.oma import OmaClient
 from bionym.clients.veupathdb import VEuPathDBClient
 from bionym.jev import JevClient
 from bionym.llm import LlmClient
@@ -39,6 +40,7 @@ _cache_dir = os.environ.get("BIONYM_CACHE_DIR") or None
 def _resolver(mock_jev: bool = False) -> Resolver:
     return Resolver(
         jev=JevClient(mock=mock_jev, cache_dir=_cache_dir),
+        oma=OmaClient(cache_dir=_cache_dir),
         ncbi=NcbiClient(cache_dir=_cache_dir),
         veupathdb=VEuPathDBClient(cache_dir=_cache_dir),
         llm=LlmClient(mock=mock_jev, cache_dir=_cache_dir),
