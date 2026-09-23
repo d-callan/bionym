@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 from .clients.ncbi import NcbiClient
 from .clients.veupathdb import VEuPathDBClient
+from .graph import KnowledgeGraph
 from .jev import JevClient, JevError
 from .llm import LlmClient
 from .resolver import Resolver
@@ -41,6 +42,8 @@ def resolve(
     min_confidence: float = typer.Option(0.0, "--min-confidence", help="Drop edges below this confidence (and orphan nodes)."),
     mock_jev: bool = typer.Option(False, "--mock-jev", help="Offline dev: no API key needed."),
     mock_llm: bool = typer.Option(False, "--mock-llm", help="Offline dev: canned LLM proposals."),
+    propose: bool = typer.Option(True, "--propose/--no-propose", help="LLM proposal passes (claims). --no-propose = quick scan."),
+    summarize: bool = typer.Option(False, "--summarize", help="Also write a JEV-verified gene summary into metadata."),
     report: bool = typer.Option(False, "--report", help="Also write an HTML report next to the JSON."),
     verbose: bool = typer.Option(False, "-v", "--verbose"),
 ) -> None:
@@ -62,7 +65,9 @@ def resolve(
         veupathdb=VEuPathDBClient(cache_dir=cache),
         llm=LlmClient(mock=mock_llm, cache_dir=cache),
     )
-    graph = resolver.resolve(identifier, depth=depth)
+    graph = resolver.resolve(
+        identifier, depth=depth, summarize=summarize, propose=propose
+    )
     graph.filter_by_confidence(min_confidence)
     graph.to_json(out)
 
@@ -77,6 +82,45 @@ def resolve(
         report_path = out.with_suffix(".html")
         write_report(graph, report_path)
         typer.echo(f"wrote {report_path}")
+
+
+@app.command()
+def summarize(
+    graph_json: Path = typer.Argument(
+        ..., help="Existing graph JSON from `bionym resolve`."
+    ),
+    out: Optional[Path] = typer.Option(
+        None, "-o", "--out", help="Output path (default: overwrite input)."
+    ),
+    mock_jev: bool = typer.Option(False, "--mock-jev", help="Offline dev: no API key needed."),
+    mock_llm: bool = typer.Option(False, "--mock-llm", help="Offline dev: canned LLM proposals."),
+    verbose: bool = typer.Option(False, "-v", "--verbose"),
+) -> None:
+    """Run the LLM+JEV summary pass over an existing graph JSON."""
+    load_dotenv()
+    logging.basicConfig(
+        level=logging.DEBUG if verbose else logging.WARNING,
+        format="%(levelname)s %(name)s: %(message)s",
+    )
+    cache = _cache_dir()
+    try:
+        jev = JevClient(mock=mock_jev, cache_dir=cache)
+    except JevError as e:
+        typer.secho(str(e), err=True, fg=typer.colors.RED)
+        raise typer.Exit(2)
+
+    resolver = Resolver(jev=jev, llm=LlmClient(mock=mock_llm, cache_dir=cache))
+    graph = KnowledgeGraph.from_json(graph_json)
+    resolver.summarize(graph)  # match derived from the graph itself
+
+    summary = graph.metadata.get("summary") or []
+    for s in summary:
+        typer.echo(f"[{s['confidence']:.2f}] {s['claim']}")
+    if not summary:
+        typer.echo("no summary claims produced")
+    dest = out or graph_json
+    graph.to_json(dest)
+    typer.echo(f"wrote {dest}")
 
 
 if __name__ == "__main__":

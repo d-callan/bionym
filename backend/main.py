@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from bionym.clients.ncbi import NcbiClient
 from bionym.clients.oma import OmaClient
 from bionym.clients.veupathdb import VEuPathDBClient
+from bionym.graph import KnowledgeGraph
 from bionym.jev import JevClient
 from bionym.llm import LlmClient
 from bionym.resolver import Resolver
@@ -30,7 +31,7 @@ app = FastAPI(title="bionym", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
@@ -64,6 +65,18 @@ def resolve(
     )
     graph.filter_by_confidence(min_confidence)
     return graph.model_dump(mode="json")
+
+
+@app.post("/api/summarize")
+def summarize(graph: dict, mock_jev: bool = Query(False)):
+    """Run the LLM+JEV summary pass over a previously returned graph
+    (e.g. a Quick scan result the user wants summarized after the fact)."""
+    if not mock_jev and not os.environ.get("TYPESAFE_API_KEY"):
+        raise HTTPException(500, "TYPESAFE_API_KEY not configured on server")
+    g = KnowledgeGraph.model_validate(graph)
+    resolver = _resolver(mock_jev=mock_jev)
+    resolver.summarize(g)  # match derived from the graph itself
+    return {"summary": g.metadata.get("summary") or []}
 
 
 @app.get("/api/health")

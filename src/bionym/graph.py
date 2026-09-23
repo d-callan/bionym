@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -10,6 +11,8 @@ from typing import Any
 from pydantic import BaseModel, Field, computed_field
 
 from .evidence import Evidence
+
+log = logging.getLogger(__name__)
 
 
 class NodeType(str, Enum):
@@ -130,6 +133,12 @@ class KnowledgeGraph(BaseModel):
     def add_edge(self, edge: Edge) -> Edge:
         self.edges.append(edge)
         return edge
+
+    def mark_stage(self, name: str) -> None:
+        """Record a completed pipeline stage and log it — the only
+        progress signal while a resolve is in flight."""
+        self.metadata.setdefault("stages", []).append(name)
+        log.info("[%s] stage %s", self.metadata.get("input"), name)
 
     def filter_by_confidence(self, min_confidence: float) -> "KnowledgeGraph":
         """Drop edges below `min_confidence`, then nodes left with no edges.

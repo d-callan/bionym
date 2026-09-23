@@ -115,38 +115,40 @@ class Resolver:
 
         namespace, ev = self._s0_classify(identifier, graph)
         gene_node.id_namespace = namespace
-        graph.metadata["stages"].append("s0_classify")
+        graph.mark_stage("s0_classify")
 
         match = None
         if depth >= 1:
             match = self._s1_resolve(identifier, namespace, gene_node, graph)
-            graph.metadata["stages"].append("s1_resolve")
+            graph.mark_stage("s1_resolve")
 
         if depth >= 2 and match:
             self._s2_assemblies(match, graph)
-            graph.metadata["stages"].append("s2_assemblies")
+            graph.mark_stage("s2_assemblies")
 
         if depth >= 3 and match:
             self._s3_orthologs(identifier, match, graph)
-            graph.metadata["stages"].append("s3_orthologs")
+            graph.mark_stage("s3_orthologs")
 
         if depth >= 4 and match:
             self._s4_annotate(identifier, match, graph)
-            graph.metadata["stages"].append("s4_annotate")
+            graph.mark_stage("s4_annotate")
 
         if depth >= 5 and match:
             self._s5_expression(identifier, match, graph)
-            graph.metadata["stages"].append("s5_expression")
+            graph.mark_stage("s5_expression")
 
         if depth >= 6 and match:
             self._s6_remap(identifier, match, graph)
-            graph.metadata["stages"].append("s6_remap")
+            graph.mark_stage("s6_remap")
 
         if match:
             if propose:
                 self._propose_claims(graph, match)
+                graph.mark_stage("proposals")
             if summarize:
-                self._summarize(graph, match)
+                self.summarize(graph, match)
+                graph.mark_stage("summary")
 
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
@@ -206,7 +208,7 @@ class Resolver:
         candidates, evidence = self._fetch_candidates(identifier, namespace)
         if not candidates:
             log.warning("no candidate gene records for %r", identifier)
-            graph.metadata["stages"].append("s1_resolve:no_match")
+            graph.mark_stage("s1_resolve:no_match")
             return None
 
         state = s1_resolve.build_state(identifier, candidates)
@@ -222,7 +224,7 @@ class Resolver:
             pick = ans["choice"]
             if pick == "none":
                 log.warning("JEV rejected all candidates for %r", identifier)
-                graph.metadata["stages"].append("s1_resolve:no_match")
+                graph.mark_stage("s1_resolve:no_match")
                 return None
             match = candidates[int(pick)]
             confidence = ans.get("confidence", 0.0)
@@ -683,12 +685,12 @@ class Resolver:
         tax_id = match.get("tax_id")
         if not tax_id:
             log.warning("no tax_id on resolved gene; skipping S2")
-            graph.metadata["stages"].append("s2_assemblies:no_taxon")
+            graph.mark_stage("s2_assemblies:no_taxon")
             return
 
         taxon, tax_ev = self.ncbi.taxon(tax_id)
         if not taxon:
-            graph.metadata["stages"].append("s2_assemblies:no_taxon")
+            graph.mark_stage("s2_assemblies:no_taxon")
             return
 
         # Normalize to species rank; ask JEV only when the lineage makes
@@ -709,7 +711,7 @@ class Resolver:
         )
         candidates, asm_ev = self.ncbi.assemblies_for_taxon(group_taxid)
         if not candidates:
-            graph.metadata["stages"].append("s2_assemblies:no_candidates")
+            graph.mark_stage("s2_assemblies:no_candidates")
             return
 
         source_acc = match.get("assembly_accession")
@@ -875,7 +877,7 @@ class Resolver:
         ]
 
         if not candidates and not uncovered:
-            graph.metadata["stages"].append("s3_orthologs:no_data")
+            graph.mark_stage("s3_orthologs:no_data")
             return
 
         # OMA returns every ortholog across all species — hundreds for a
@@ -1117,7 +1119,7 @@ class Resolver:
             records, ev2 = self.uniprot.search_gene(identifier, match.get("tax_id"))
             evidence += ev2
         if not records:
-            graph.metadata["stages"].append("s4_annotate:no_uniprot")
+            graph.mark_stage("s4_annotate:no_uniprot")
             return
 
         # Which UniProt entry is this gene? The search matched on a gene
@@ -1132,12 +1134,12 @@ class Resolver:
         else:
             pick = ans.get("choice")
             if pick == "none":
-                graph.metadata["stages"].append("s4_annotate:no_uniprot_match")
+                graph.mark_stage("s4_annotate:no_uniprot_match")
                 return
             try:
                 rec = records[int(pick)]
             except (TypeError, ValueError, IndexError):
-                graph.metadata["stages"].append("s4_annotate:no_uniprot_match")
+                graph.mark_stage("s4_annotate:no_uniprot_match")
                 return
             confidence = ans.get("confidence", 0.0)
         anchor = match.get("anchor") or identifier
@@ -1289,7 +1291,7 @@ class Resolver:
         candidates = geo + gxa
         if not candidates:
             if not n_vpd:
-                graph.metadata["stages"].append("s5_expression:no_data")
+                graph.mark_stage("s5_expression:no_data")
             return
 
         state = s5_expression.build_state(identifier, match, candidates)
@@ -1925,15 +1927,33 @@ class Resolver:
                     extra_payload={"n_rows": len(rows)},
                 )
 
-    def _summarize(
-        self, graph: KnowledgeGraph, match: dict[str, Any]
+    @staticmethod
+    def _match_from_graph(graph: KnowledgeGraph) -> dict[str, Any]:
+        """Minimal match dict reconstructed from a built graph — gene
+        label from the query node, organism from the Organism-typed
+        node. Used when summarize() runs standalone on a loaded graph."""
+        gene = graph.nodes.get(graph.metadata.get("query", ""))
+        org = next(
+            (n for n in graph.nodes.values() if n.type == NodeType.ORGANISM),
+            None,
+        )
+        return {
+            "symbol": (gene.label if gene else None)
+            or graph.metadata.get("input"),
+            "organism": org.label if org else None,
+        }
+
+    def summarize(
+        self, graph: KnowledgeGraph, match: dict[str, Any] | None = None
     ) -> None:
         """LLM synthesizes typed summary claims over the graph; JEV
         verifies each against the serialized edges. Lands in
         graph.metadata['summary'] — a list of {claim, quote,
-        confidence}. Gaps ('no known function') are valid claims."""
+        confidence}. Gaps ('no known function') are valid claims.
+        match is optional — derived from the graph when standalone."""
         if not self.llm.enabled:
             return
+        match = match or self._match_from_graph(graph)
         graph_text = proposals.serialize_graph(graph)
         if not graph_text.strip():
             return

@@ -375,6 +375,15 @@ def test_summarize_populates_metadata():
     assert "summary" not in g2.metadata
 
 
+def test_summarize_on_existing_graph():
+    # the /api/summarize path: summarize a graph built without it
+    r = _resolver()
+    g = r.resolve("672", depth=1)
+    assert "summary" not in g.metadata
+    r.summarize(g, {"symbol": "BRCA2", "organism": "Homo sapiens"})
+    assert g.metadata["summary"][0]["claim"] == "mock proposal"
+
+
 def test_serialize_rows_sorts_caps_tolerates():
     from bionym import proposals
 
