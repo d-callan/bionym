@@ -11,14 +11,15 @@ from __future__ import annotations
 import os
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from bionym.clients.ncbi import NcbiClient
 from bionym.clients.oma import OmaClient
 from bionym.clients.veupathdb import VEuPathDBClient
 from bionym.graph import KnowledgeGraph
-from bionym.jev import JevClient
+from bionym.jev import JevClient, JevError
 from bionym.llm import LlmClient
 from bionym.resolver import Resolver
 
@@ -36,6 +37,13 @@ app.add_middleware(
 )
 
 _cache_dir = os.environ.get("BIONYM_CACHE_DIR") or None
+
+
+@app.exception_handler(JevError)
+def _jev_error(_: Request, exc: JevError) -> JSONResponse:
+    # JEV upstream failures (max_tokens, 5xx after retries) otherwise
+    # surface as a bare 500 the frontend can't decode.
+    return JSONResponse(status_code=502, content={"detail": f"JEV upstream error: {exc}"})
 
 
 def _resolver(mock_jev: bool = False) -> Resolver:

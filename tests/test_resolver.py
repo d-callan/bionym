@@ -537,3 +537,56 @@ def test_filter_by_confidence_and_url():
     g.filter_by_confidence(0.5)
     assert len(g.edges) == 1 and g.edges[0].predicate == "in_pathway"
     assert "dataset:GSE1" not in g.nodes and "Q" in g.nodes
+
+
+def test_s5_expression_caps_and_chunks_candidate_flood():
+    """Well-studied genes (BRCA1 → ~1.7k fuzzy GXA hits) must not send
+    one giant ask: candidates live in JEV's state, so asks are chunked
+    at S5_ASK_CHUNK, then survivors are ranked exact-species-then-score
+    and capped at S5_MAX_CANDIDATES."""
+    import math
+
+    from bionym.resolver import S5_ASK_CHUNK, S5_MAX_CANDIDATES
+
+    class FloodedGxa(FakeGxa):
+        def experiments_for_gene(self, symbol, organism=None):
+            human = [
+                {
+                    "source": "expression_atlas",
+                    "accession": f"E-MTAB-{i:05d}",
+                    "title": f"Experiment {i}",
+                    "type": "Baseline",
+                    "species": "Homo sapiens",
+                }
+                for i in range(S5_MAX_CANDIDATES + 60)
+            ]
+            mouse = [
+                {**human[0], "accession": f"E-MOUS-{i:05d}",
+                 "species": "Mus musculus"}
+                for i in range(40)
+            ]
+            return human + mouse, []
+
+    jev = JevClient(mock=True)
+    r = Resolver(
+        jev=jev,
+        ncbi=FakeNcbi(),
+        veupathdb=FakeVeuPathDB(),
+        oma=FakeOma(),
+        uniprot=FakeUniProt(),
+        gxa=FloodedGxa(),
+        kegg=FakeKegg(),
+        llm=LlmClient(mock=True),
+    )
+    g = r.resolve("672", depth=5, propose=False)
+    # 2 GEO + 350 GXA = 352 candidates, all scored in 50-sized chunks
+    n_cand = 2 + S5_MAX_CANDIDATES + 60 + 40
+    s5_calls = [u for u in jev.usage_log if u["stage"] == "s5_expression"]
+    assert len(s5_calls) == math.ceil(n_cand / S5_ASK_CHUNK)
+    assert all(u["n_questions"] <= S5_ASK_CHUNK for u in s5_calls)
+    # cap keeps 250 — exact-species first, so every mouse hit drops out
+    datasets = [n for n in g.nodes if n.startswith("dataset:")]
+    assert len(datasets) == S5_MAX_CANDIDATES
+    assert not any("E-MOUS" in n for n in datasets)
+    assert "dataset:GSE12345" in g.nodes  # GEO always survives
+    assert len([e for e in g.edges if e.predicate == "measured_in"]) == S5_MAX_CANDIDATES

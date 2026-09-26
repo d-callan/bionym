@@ -45,11 +45,11 @@ def build_questions(candidates: list[dict[str, Any]]) -> dict:
         f"relevant_{i}": {
             "type": "noul",
             "instructions": (
-                f"Is `candidates[{i}]` an expression dataset that plausibly "
-                "contains measurements of `source_gene` in its organism? "
-                "The source queries are fuzzy — reject datasets whose title, "
-                "species, or factors indicate a different gene, organism, or "
-                "unrelated context."
+                f"Is `candidates[{i}]` an expression dataset likely to yield "
+                "biologically relevant claims about `source_gene` in its "
+                "organism? The source queries are fuzzy — score low for "
+                "datasets whose title, species, or factors indicate a "
+                "different gene, organism, or unrelated context."
             ),
         }
         for i in range(len(candidates))

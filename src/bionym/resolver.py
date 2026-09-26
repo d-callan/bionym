@@ -36,6 +36,21 @@ from .questions import (
 
 log = logging.getLogger(__name__)
 
+# Bounds for the S5 expression-evidence JEV pass. Well-studied genes
+# return far more fuzzy GEO/GXA hits than a single ask can hold (BRCA1
+# → ~1.7k candidates): the whole list is embedded in `state`, so the
+# context overflows no matter how many questions are split off. Beyond
+# the cap, extra fuzzy hits are noise and JEV cost — and dataset nodes —
+# explode. See _s5_expression.
+S5_MAX_CANDIDATES = 250
+S5_ASK_CHUNK = 50
+
+
+def _score(ans: dict[str, Any]) -> float:
+    """JEV answer -> scalar; noul is the confidence proxy used both
+    for edge confidence and for ranking candidates under the S5 cap."""
+    return ans.get("noul", ans.get("confidence", 0.0))
+
 
 def _dataset_kind(type_text: str | None) -> str:
     """Normalize a source dataset-type string to expression/variant/other.
@@ -218,7 +233,7 @@ class Resolver:
 
         if len(candidates) == 1:
             match = candidates[0]
-            confidence = ans.get("noul", ans.get("confidence", 0.0))
+            confidence = _score(ans)
             probabilities = {"yes": ans.get("noul", 0.0)}
         else:
             pick = ans["choice"]
@@ -431,7 +446,7 @@ class Resolver:
         questions = s1_resolve.build_questions(pool)
         ans = self.jev.ask(state, questions, stage="ncbi_link")["gene_match"]
         if len(pool) == 1:
-            return pool[0], ans.get("noul", ans.get("confidence", 0.0)), "gene_match"
+            return pool[0], _score(ans), "gene_match"
         pick = ans.get("choice")
         if pick == "none":
             return None, 0.0, "gene_match"
@@ -929,7 +944,7 @@ class Resolver:
                     subject=oma_subject,
                     predicate="ortholog_of",
                     object=node_id,
-                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                    confidence=_score(ans),
                     jev_question_id=f"ortholog_{i}",
                     evidence=evidence,
                 )
@@ -947,7 +962,7 @@ class Resolver:
                     subject=oma_subject,
                     predicate="absent_in",
                     object=org_node,
-                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                    confidence=_score(ans),
                     jev_question_id=f"absent_{j}",
                     evidence=evidence,
                 )
@@ -1130,7 +1145,7 @@ class Resolver:
         ans = self.jev.ask(state, questions, stage="s4_pick")["uniprot_match"]
         if len(records) == 1:
             rec = records[0]
-            confidence = ans.get("noul", ans.get("confidence", 0.0))
+            confidence = _score(ans)
         else:
             pick = ans.get("choice")
             if pick == "none":
@@ -1294,11 +1309,44 @@ class Resolver:
                 graph.mark_stage("s5_expression:no_data")
             return
 
-        state = s5_expression.build_state(identifier, match, candidates)
-        questions = s5_expression.build_questions(candidates)
-        answers = self.jev.ask(state, questions, stage="s5_expression")
+        # Chunked asks keep each state's candidate list small — the
+        # whole chunk is embedded in JEV's state, and one giant ask
+        # overflows the context (BRCA1's ~1.7k hits did). A failed chunk
+        # is skipped rather than killing the resolve; its candidates are
+        # left unscored and sort to the bottom below.
+        scored: list[tuple[dict[str, Any], dict[str, Any], str]] = []
+        for start in range(0, len(candidates), S5_ASK_CHUNK):
+            chunk = candidates[start : start + S5_ASK_CHUNK]
+            try:
+                batch = self.jev.ask(
+                    s5_expression.build_state(identifier, match, chunk),
+                    s5_expression.build_questions(chunk),
+                    stage="s5_expression",
+                )
+            except JevError as e:
+                log.warning("s5_expression chunk %d failed: %s", start, e)
+                batch = {}
+            scored.extend(
+                (c, batch.get(f"relevant_{i}", {}), f"relevant_{start + i}")
+                for i, c in enumerate(chunk)
+            )
 
-        for i, c in enumerate(candidates):
+        # See S5_MAX_CANDIDATES: when the flood exceeds the cap, rank
+        # survivors — exact-species datasets first (deterministic), then
+        # JEV's claim-potential score. The sort is stable, so equal
+        # scores keep the GEO-before-GXA source order.
+        if len(scored) > S5_MAX_CANDIDATES:
+            scored.sort(
+                key=lambda p: (
+                    not same_species(
+                        p[0].get("species") or p[0].get("taxon"), organism
+                    ),
+                    -_score(p[1]),
+                )
+            )
+            scored = scored[:S5_MAX_CANDIDATES]
+
+        for c, ans, qid in scored:
             acc = c.get("accession")
             if not acc:
                 continue
@@ -1319,14 +1367,13 @@ class Resolver:
                     },
                 )
             )
-            ans = answers.get(f"relevant_{i}", {})
             graph.add_edge(
                 Edge(
                     subject=match.get("anchor") or identifier,
                     predicate="measured_in",
                     object=node_id,
-                    confidence=ans.get("noul", ans.get("confidence", 0.0)),
-                    jev_question_id=f"relevant_{i}",
+                    confidence=_score(ans),
+                    jev_question_id=qid,
                     evidence=evidence,
                 )
             )
@@ -1543,7 +1590,7 @@ class Resolver:
                         subject=family,
                         predicate="likely_present",
                         object=f"assembly:{c['accession']}",
-                        confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                        confidence=_score(ans),
                         jev_question_id=f"present_{i}",
                         evidence=[
                             Evidence(
@@ -1841,7 +1888,7 @@ class Resolver:
                 subject=it["node"],
                 predicate=predicate,
                 object=obj,
-                confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                confidence=_score(ans),
                 jev_question_id=f"prop_{i}",
                 evidence=[
                     Evidence(
@@ -2086,7 +2133,7 @@ class Resolver:
                 subject=p["assembly"],
                 predicate="has_candidate_gene",
                 object=p["gene"],
-                confidence=ans.get("noul", ans.get("confidence", 0.0)),
+                confidence=_score(ans),
                 jev_question_id=f"candidate_{idx}",
                 evidence=[
                     Evidence(
