@@ -58,6 +58,31 @@
   details#summary ul { margin: .6rem 0 .2rem; padding-left: 1.2rem; font-size: .88rem; }
   details#summary li { margin-bottom: .35rem; }
   .sumconf { color: var(--muted); font-size: .78rem; }
+  #tip { position: fixed; z-index: 10; pointer-events: none; background: #fff; border: 1px solid var(--line);
+    border-radius: 6px; padding: .4rem .6rem; font-size: .78rem; max-width: 22rem; box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    display: none; }
+  #tip .t-title { font-weight: 600; margin-bottom: .15rem; }
+  #tip .t-sub { color: var(--muted); }
+  aside#detail { position: fixed; right: 1rem; top: 8rem; z-index: 9; width: 19rem; max-height: 60vh; overflow: auto;
+    background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .7rem .9rem; font-size: .8rem;
+    box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+  aside#detail h3 { margin: 0 0 .3rem; font-size: .9rem; }
+  aside#detail .d-sub { color: var(--muted); font-size: .72rem; word-break: break-all; }
+  aside#detail ul { margin: .4rem 0 0; padding-left: 1.1rem; }
+  aside#detail .d-close { float: right; background: none; border: 0; color: var(--muted); font-size: 1rem; padding: 0; }
+  aside#detail .d-actions a { margin-right: .8rem; font-size: .78rem; }
+  .nodelabel { opacity: 0; transition: opacity .1s; }
+  .nodelabel.on { opacity: 1; }
+  .nodeg:focus { outline: none; }
+  .nodeg:focus .node { stroke: #2b6cb0; stroke-width: 2px; }
+  .cluster { cursor: pointer; }
+  #overview-wrap { margin: .2rem 0 .6rem; }
+  svg#overview { border: 0; background: transparent; display: block; height: 130px; }
+  svg#overview text { font-size: 9px; fill: var(--muted); }
+  .seg { stroke: #fff; stroke-width: .5px; }
+  #stackmode { font-size: .75rem; color: var(--muted); margin-left: .8rem; }
+  #stackmode select { font-size: .75rem; padding: .1rem .3rem; }
+  #clustwrap { font-weight: normal; font-size: .8rem; margin-left: .8rem; }
 </style>
 </head>
 <body>
@@ -89,9 +114,18 @@
     <button id="zout" type="button" title="zoom out">−</button>
     <button id="zin" type="button" title="zoom in">+</button>
     <button id="resetzoom" type="button">reset view</button>
+    <label id="clustwrap" hidden title="Group crowded nodes into a single pie glyph when zoomed out (force-directed layout only)"><input type="checkbox" id="clustergroup" checked> cluster nearby nodes</label>
     <span class="hint">scroll to zoom · drag to pan · hover a node to highlight its neighborhood</span>
   </h2>
+  <div id="overview-wrap" hidden>
+    <label id="stackmode">stack by predicate (node as)
+      <select id="stacksel"><option value="off" selected>off</option><option value="subject">subject</option><option value="object">object</option></select>
+    </label>
+    <svg id="overview"></svg>
+  </div>
   <svg id="net" viewBox="0 0 1400 700" preserveAspectRatio="xMidYMid meet"></svg>
+  <div id="tip"></div>
+  <aside id="detail" hidden></aside>
   <div id="legend"></div>
   <h2>Edges <input class="tfilter" data-for="edges" placeholder="filter…"></h2>
   <div class="tablewrap"><table id="edges"><thead><tr><th>subject</th><th>predicate</th><th>object</th><th>conf</th></tr></thead><tbody></tbody></table></div>
@@ -192,16 +226,34 @@ function sortable(tableId, rows, cols, initKey = null, initDir = 1) {
 
 // Pan/zoom transform on the viewport <g>; persists across re-renders
 // (e.g. min-conf slider) but resets on a new query.
-const zoom = d3.zoom().scaleExtent([0.2, 6]).on("zoom", e => {
+const ZMIN = 0.05, ZMAX = 6;  // low floor: force layouts can span many viewport widths
+const zoom = d3.zoom().scaleExtent([ZMIN, ZMAX]).on("zoom", e => {
   d3.select("#net .viewport").attr("transform", e.transform);
+  if (LAST && LAST.mode === "force" && $("#clustergroup").checked) queueScene();
 });
-$("#resetzoom").addEventListener("click", () =>
-  d3.select("#net").transition().duration(300).call(zoom.transform, d3.zoomIdentity));
+// data-space bounds → zoom transform that centers them in the 1400×700 viewBox
+function fitTransform(x0, y0, x1, y1, pad = 0.85, maxK = ZMAX) {
+  const W = 1400, H = 700;
+  const k = Math.max(ZMIN, Math.min(maxK, pad * Math.min(W / Math.max(20, x1 - x0), H / Math.max(20, y1 - y0))));
+  return d3.zoomIdentity.translate(W / 2 - k * (x0 + x1) / 2, H / 2 - k * (y0 + y1) / 2).scale(k);
+}
+$("#resetzoom").addEventListener("click", () => {
+  const s = d3.select("#net");
+  if (LAST && LAST.nodes.length) {
+    const xs = LAST.nodes.map(n => LAST.pos[n.id].x), ys = LAST.nodes.map(n => LAST.pos[n.id].y);
+    s.transition().duration(300).call(zoom.transform, fitTransform(d3.min(xs), d3.min(ys), d3.max(xs), d3.max(ys), 0.9, 1.5));
+  } else s.transition().duration(300).call(zoom.transform, d3.zoomIdentity);
+});
 $("#zin").addEventListener("click", () =>
   d3.select("#net").transition().duration(200).call(zoom.scaleBy, 1.4));
 $("#zout").addEventListener("click", () =>
   d3.select("#net").transition().duration(200).call(zoom.scaleBy, 1/1.4));
-$("#layout").addEventListener("change", () => { if (GRAPH) renderFiltered(); });
+$("#layout").addEventListener("change", () => {
+  $("#clustwrap").hidden = $("#layout").value !== "force";
+  if (GRAPH) renderFiltered();
+});
+$("#clustergroup").addEventListener("change", () => { if (LAST) drawScene(); });
+$("#stacksel").addEventListener("change", () => { if (LAST) overviewChart(LAST.nodes, LAST.edges); });
 
 // Node positions: {id: {x, y}}. "columns" = multi-partite by type;
 // "force" = synchronous d3.forceSimulation (cloned data — forceLink
@@ -236,6 +288,355 @@ function layout(nodes, edges, mode, W, H) {
 
 const ellipsize = (s, n=26) => s.length > n ? s.slice(0, n-1) + "…" : s;
 
+// ---- interaction helpers ---------------------------------------------------
+let LAST = null;  // {nodes, edges, pos, mode, byId} — lets zoom re-cluster without re-render
+let SELECTED = null;  // pinned node id — ego highlight persists after mouseleave until re-click/background click
+const tipEl = document.getElementById("tip");
+function showTip(ev, html) {
+  tipEl.innerHTML = html; tipEl.style.display = "block";
+  const r = tipEl.getBoundingClientRect();
+  tipEl.style.left = Math.min(ev.clientX + 14, innerWidth - r.width - 10) + "px";
+  tipEl.style.top = Math.min(ev.clientY + 12, innerHeight - r.height - 10) + "px";
+}
+const hideTip = () => tipEl.style.display = "none";
+
+// Click-to-pin detail panel: labels live here + tooltip instead of on-canvas.
+const detailEl = document.getElementById("detail");
+function showDetail(n, edges, byId) {
+  const inc = edges.filter(e => e.subject === n.id || e.object === n.id);
+  detailEl.innerHTML = `<button class="d-close" title="close">✕</button><h3>${esc(n.label || n.id)}</h3>` +
+    `<div class="d-sub">${esc(n.id)} · ${esc(n.type)}${n.id_namespace ? " · " + esc(n.id_namespace) : ""}</div><ul>` +
+    inc.map(e => {
+      const o = e.subject === n.id ? e.object : e.subject, on = byId[o];
+      return `<li>${e.subject === n.id ? "→" : "←"} ${esc(e.predicate)} ${esc(on ? on.label || o : o)} <span class="sumconf">${e.confidence.toFixed(2)}</span></li>`;
+    }).join("") + `</ul><div class="d-actions">` +
+    (n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">source ↗</a>` : "") +
+    (n.type === "Gene" ? `<a href="#" class="d-resolve">resolve →</a>` : "") + `</div>`;
+  detailEl.hidden = false;
+  detailEl.querySelector(".d-close").onclick = () => detailEl.hidden = true;
+  const r = detailEl.querySelector(".d-resolve");
+  if (r) r.onclick = e => { e.preventDefault(); resolveNext(n); };
+}
+
+const PRED_PALETTE = ["#2b6cb0","#c53030","#2f855a","#b7791f","#6b46c1","#97266d","#2c7a7b","#dd6b20"];
+// ~19 predicates is too many for a categorical scale: top-8 get colors, tail = "other" gray.
+function predColor(edges) {
+  const ranked = [...d3.rollup(edges, v => v.length, e => e.predicate).entries()].sort((a, b) => b[1] - a[1]);
+  const m = new Map(ranked.slice(0, 8).map((d, i) => [d[0], PRED_PALETTE[i]]));
+  return { color: p => m.get(p) || "#a0aec0", ranked };
+}
+
+function nodeTipHtml(n, edges) {
+  const inc = edges.filter(e => e.subject === n.id || e.object === n.id);
+  const preds = [...d3.rollup(inc, v => v.length, e => e.predicate).entries()].sort((a, b) => b[1] - a[1]);
+  return `<div class="t-title">${esc(n.label || n.id)}</div>` +
+    `<div class="t-sub">${esc(n.id)} · ${esc(n.type)} · click for details</div>` +
+    (inc.length ? `<div class="t-sub">${inc.length} edges · ${preds.map(([p, c]) => `${esc(p)}×${c}`).join(" ")}</div>` : "");
+}
+
+// ---- semantic zoom (force layout) -------------------------------------------
+// Positions are fixed after the sim, so clustering is a pure function of
+// layout + zoom transform.
+const CLUSTER_R = 44;    // screen px: edges shorter than this can merge their endpoints
+const CLUSTER_EXT = 110; // screen px: max extent of a merged cluster — guards against
+                         // long chains of short edges collapsing into one giant glyph
+// Connectivity-aware clustering: union-find over edges whose *screen* length is
+// below CLUSTER_R, shortest first. Purely spatial neighbors that share no edge
+// are never merged — a pie glyph always means "these nodes are connected".
+function clusterPoints(nodes, pos, edges, t) {
+  const pts = new Map(nodes.map(n => [n.id, {...n, x: pos[n.id].x, y: pos[n.id].y}]));
+  const parent = new Map(), box = new Map();
+  nodes.forEach(n => {
+    parent.set(n.id, n.id);
+    const [sx, sy] = t.apply([pos[n.id].x, pos[n.id].y]);
+    box.set(n.id, [sx, sy, sx, sy]);  // screen bbox of the component rooted here
+  });
+  const find = x => { while (parent.get(x) !== x) { parent.set(x, parent.get(parent.get(x))); x = parent.get(x); } return x; };
+  edges.map(e => {
+    const s = pos[e.subject], o = pos[e.object];
+    if (!s || !o) return null;
+    const [sx, sy] = t.apply([s.x, s.y]), [ox, oy] = t.apply([o.x, o.y]);
+    return {d: Math.hypot(sx - ox, sy - oy), s: e.subject, o: e.object};
+  }).filter(e => e && e.d < CLUSTER_R).sort((a, b) => a.d - b.d)
+    .forEach(({s, o}) => {
+      const rs = find(s), ro = find(o);
+      if (rs === ro) return;
+      const a = box.get(rs), b = box.get(ro);
+      const nb = [Math.min(a[0], b[0]), Math.min(a[1], b[1]), Math.max(a[2], b[2]), Math.max(a[3], b[3])];
+      if (Math.max(nb[2] - nb[0], nb[3] - nb[1]) > CLUSTER_EXT) return;  // would get too big
+      parent.set(rs, ro); box.set(ro, nb);
+    });
+  const groups = new Map();
+  nodes.forEach(n => { const r = find(n.id); (groups.get(r) || groups.set(r, []).get(r)).push(pts.get(n.id)); });
+  return [...groups.entries()].map(([r, members]) =>
+    ({key: members.length > 1 ? `c:${r}` : `s:${members[0].id}`, members}));
+}
+
+// ---- scene drawing ----------------------------------------------------------
+let sceneQueued = false;
+function queueScene() {
+  if (sceneQueued) return;
+  sceneQueued = true;
+  requestAnimationFrame(() => { sceneQueued = false; if (LAST) drawScene(); });
+}
+
+function drawScene() {
+  const {nodes, edges, pos, mode, byId, labelAlways} = LAST;
+  const svg = d3.select("#net"), vp = svg.select(".viewport");
+  const t = d3.zoomTransform(svg.node());
+  vp.select(".links").selectAll("*").remove();
+  vp.select(".nodes").selectAll("*").remove();
+
+  // adjacency for ego-highlighting
+  const neighbors = new Map();
+  edges.forEach(e => {
+    (neighbors.get(e.subject) || neighbors.set(e.subject, new Set()).get(e.subject)).add(e.object);
+    (neighbors.get(e.object) || neighbors.set(e.object, new Set()).get(e.object)).add(e.subject);
+  });
+  const nb = id => neighbors.get(id) || new Set();
+
+  // click on empty canvas clears the pinned highlight + detail panel
+  svg.on("click.bg", ev => {
+    if (ev.target.closest && ev.target.closest(".nodeg")) return;
+    if (SELECTED !== null || !detailEl.hidden) { SELECTED = null; detailEl.hidden = true; drawScene(); }
+  });
+
+  if (mode === "force" && $("#clustergroup").checked) {
+    drawClustered(vp, nodes, edges, pos, byId, t, nb);
+    return;
+  }
+
+  const linkSel = vp.select(".links").selectAll(".link").data(edges).join("path")
+    .attr("class", "link")
+    .attr("d", e => { const s = pos[e.subject], o = pos[e.object]; if (!s || !o) return "";
+      const mx = (s.x + o.x) / 2; return `M${s.x},${s.y} C${mx},${s.y} ${mx},${o.y} ${o.x},${o.y}`; })
+    .attr("stroke", "#718096")
+    .attr("stroke-opacity", e => 0.12 + 0.88 * e.confidence)
+    .attr("stroke-width", e => 0.5 + 2.5 * e.confidence);
+
+  // functions (hoisted) so handlers bound below can call them after nodeG exists
+  function applyEgo(id) {
+    const nbs = nb(id);
+    nodeG.classed("dim", m => m.id !== id && !nbs.has(m.id));
+    linkSel.classed("link-dim", l => l.subject !== id && l.object !== id)
+          .classed("link-hi", l => l.subject === id || l.object === id);
+    nodeG.select(".nodelabel").classed("on", m => m.id === id || nbs.has(m.id) || labelAlways.has(m.id));
+  }
+  function clearEgo() {
+    nodeG.classed("dim", false);
+    linkSel.classed("link-dim", false).classed("link-hi", false);
+    nodeG.select(".nodelabel").classed("on", m => labelAlways.has(m.id));
+  }
+  const restoreSel = () => { SELECTED && byId[SELECTED] ? applyEgo(SELECTED) : clearEgo(); };
+  const pin = n => { SELECTED = SELECTED === n.id ? null : n.id; showDetail(n, edges, byId); };
+
+  const nodeG = vp.select(".nodes").selectAll(".nodeg").data(nodes, n => n.id).join("g")
+    .attr("class", "nodeg")
+    .attr("transform", n => `translate(${pos[n.id].x},${pos[n.id].y})`)
+    .attr("tabindex", 0)
+    .attr("role", "button")
+    .attr("aria-label", n => `${n.label || n.id} (${n.type})`)
+    .style("cursor", "pointer")
+    .on("click", (e, n) => pin(n))
+    .on("keydown", (e, n) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pin(n); } })
+    .on("mouseenter", (e, n) => { applyEgo(n.id); showTip(e, nodeTipHtml(n, edges)); })
+    .on("mousemove", (e, n) => showTip(e, nodeTipHtml(n, edges)))
+    .on("mouseleave", () => { restoreSel(); hideTip(); })
+    .on("focus", (e, n) => {
+      const p = pos[n.id], tt = d3.zoomTransform(svg.node());
+      const [sx, sy] = tt.apply([p.x, p.y]);
+      const sr = svg.node().getBoundingClientRect();
+      showTip({clientX: sr.left + sx * sr.width / 1400, clientY: sr.top + sy * sr.height / 700}, nodeTipHtml(n, edges));
+      applyEgo(n.id);
+    })
+    .on("blur", () => { hideTip(); restoreSel(); });
+  nodeG.append("circle").attr("class", "node").attr("r", 5)
+    .attr("fill", n => COLORS[n.type] || "#999");
+  nodeG.append("text").attr("class", "nodelabel").attr("x", 7).attr("y", 3)
+    .classed("on", n => labelAlways.has(n.id))
+    .text(n => ellipsize(n.label || n.id));
+  restoreSel();  // re-apply a pinned highlight after redraw (zoom/pan)
+}
+
+function clusterTipHtml(c, edges) {
+  if (c.count === 1) return nodeTipHtml(c.members[0], edges);
+  const types = [...d3.rollup(c.members, v => v.length, m => m.type).entries()].sort((a, b) => b[1] - a[1]);
+  const names = c.members.slice(0, 5).map(m => esc(m.label || m.id));
+  return `<div class="t-title">${c.count} nodes — click to zoom in</div>` +
+    `<div class="t-sub">${types.map(([ty, n]) => `${esc(ty)}×${n}`).join(" ")}</div>` +
+    `<div class="t-sub">${names.join(", ")}${c.count > 5 ? ", …" : ""}</div>`;
+}
+
+function zoomToFit(svgSel, members) {
+  const x0 = d3.min(members, m => m.x), x1 = d3.max(members, m => m.x);
+  const y0 = d3.min(members, m => m.y), y1 = d3.max(members, m => m.y);
+  svgSel.transition().duration(450).call(zoom.transform, fitTransform(x0, y0, x1, y1));
+}
+
+// Clustered rendering: connectivity clusters → pie glyphs (slices = type mix,
+// radius ∝ sqrt(count)), one aggregated edge per cluster-pair.
+function drawClustered(vp, nodes, edges, pos, byId, t, nb) {
+  const clusters = clusterPoints(nodes, pos, edges, t);
+  clusters.forEach((c, i) => {
+    c.i = i; c.count = c.members.length;
+    c.x = d3.mean(c.members, m => m.x);
+    c.y = d3.mean(c.members, m => m.y);
+  });
+  const memberCl = new Map();
+  clusters.forEach(c => c.members.forEach(m => memberCl.set(m.id, c)));
+
+  const adj = new Map(), agg = new Map();
+  edges.forEach(e => {
+    const a = memberCl.get(e.subject), b = memberCl.get(e.object);
+    if (!a || !b || a === b) return;
+    (adj.get(a) || adj.set(a, new Set()).get(a)).add(b);
+    (adj.get(b) || adj.set(b, new Set()).get(b)).add(a);
+    const key = a.i < b.i ? a.i + "|" + b.i : b.i + "|" + a.i;
+    const A = agg.get(key) || {a, b, n: 0, conf: 0, preds: {}};
+    A.n++; A.conf += e.confidence; A.preds[e.predicate] = (A.preds[e.predicate] || 0) + 1;
+    agg.set(key, A);
+  });
+  const links = [...agg.values()];
+
+  const linkSel = vp.select(".links").selectAll(".link").data(links).join("path")
+    .attr("class", "link")
+    .attr("d", L => { const mx = (L.a.x + L.b.x) / 2; return `M${L.a.x},${L.a.y} C${mx},${L.a.y} ${mx},${L.b.y} ${L.b.x},${L.b.y}`; })
+    .attr("stroke", "#718096")
+    .attr("stroke-opacity", L => 0.12 + 0.88 * (L.conf / L.n))
+    .attr("stroke-width", L => 0.8 + 1.6 * Math.sqrt(L.n));
+  linkSel.append("title").text(L => `${L.n} edge${L.n > 1 ? "s" : ""} · ` +
+    Object.entries(L.preds).sort((x, y) => y[1] - x[1]).map(([p, c]) => `${p}×${c}`).join(" "));
+
+  const r = d3.scaleSqrt().domain([1, Math.max(2, d3.max(clusters, c => c.count))]).range([5, 26]);
+  const pie = d3.pie().value(d => d[1]), arc = d3.arc().innerRadius(0);
+
+  function applyC(c) {
+    const nbs = adj.get(c) || new Set();
+    cg.classed("dim", m => m !== c && !nbs.has(m));
+    linkSel.classed("link-dim", L => L.a !== c && L.b !== c)
+          .classed("link-hi", L => L.a === c || L.b === c);
+    cg.select(".nodelabel").classed("on", m => m.count > 1 || m === c || nbs.has(m));
+  }
+  function clearC() {
+    cg.classed("dim", false);
+    linkSel.classed("link-dim", false).classed("link-hi", false);
+    cg.select(".nodelabel").classed("on", m => m.count > 1);
+  }
+  const restoreC = () => { const s = SELECTED ? memberCl.get(SELECTED) : null; s ? applyC(s) : clearC(); };
+  const activate = c => {
+    hideTip();
+    if (c.count === 1) { const m = c.members[0]; SELECTED = SELECTED === m.id ? null : m.id; showDetail(m, edges, byId); }
+    else zoomToFit(d3.select("#net"), c.members);
+  };
+
+  const cg = vp.select(".nodes").selectAll(".nodeg").data(clusters, c => c.key).join("g")
+    .attr("class", c => "nodeg" + (c.count > 1 ? " cluster" : ""))
+    .attr("transform", c => `translate(${c.x},${c.y})`)
+    .attr("tabindex", 0).attr("role", "button")
+    .attr("aria-label", c => c.count > 1 ? `cluster of ${c.count} nodes` : `${c.members[0].label || c.members[0].id} (${c.members[0].type})`)
+    .style("cursor", "pointer")
+    .on("click", (e, c) => activate(c))
+    .on("keydown", (e, c) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(c); } })
+    .on("mouseenter", (e, c) => { applyC(c); showTip(e, clusterTipHtml(c, edges)); })
+    .on("mousemove", (e, c) => showTip(e, clusterTipHtml(c, edges)))
+    .on("mouseleave", () => { restoreC(); hideTip(); })
+    .on("focus", (e, c) => {
+      applyC(c);
+      const tt = d3.zoomTransform(d3.select("#net").node());
+      const [sx, sy] = tt.apply([c.x, c.y]);
+      const sr = d3.select("#net").node().getBoundingClientRect();
+      showTip({clientX: sr.left + sx * sr.width / 1400, clientY: sr.top + sy * sr.height / 700}, clusterTipHtml(c, edges));
+    })
+    .on("blur", () => { restoreC(); hideTip(); });
+
+  cg.each(function (c) {
+    const g = d3.select(this);
+    if (c.count > 1) {
+      const arcs = pie([...d3.rollup(c.members, v => v.length, m => m.type).entries()]);
+      g.selectAll("path.slice").data(arcs).join("path").attr("class", "slice")
+        .attr("d", arc.outerRadius(r(c.count)))
+        .attr("fill", d => COLORS[d.data[0]] || "#999")
+        .attr("stroke", "#fff").attr("stroke-width", 1);
+      g.append("text").attr("class", "nodelabel on").attr("text-anchor", "middle")
+        .attr("dy", "0.35em").attr("font-weight", "600").text(c.count);
+    } else {
+      const m = c.members[0];
+      g.append("circle").attr("class", "node").attr("r", 5).attr("fill", COLORS[m.type] || "#999");
+      g.append("text").attr("class", "nodelabel").attr("x", 7).attr("y", 3).text(ellipsize(m.label || m.id));
+    }
+  });
+  restoreC();  // re-apply a pinned highlight after redraw (zoom/pan)
+}
+
+// ---- overview bar chart -----------------------------------------------------
+// x = node type, y = count. Flat blue bars by default; subject/object toggle
+// stacks each bar by the predicates of edges incident on that side.
+function overviewChart(nodes, edges) {
+  const side = $("#stacksel").value;
+  const svg = d3.select("#overview");
+  svg.selectAll("*").remove();
+  document.getElementById("overview-wrap").hidden = !nodes.length;
+  if (!nodes.length) return;
+  const W = Math.max(600, svg.node().clientWidth || 900), H = 130, m = {t: 28, r: 10, b: 30, l: 36};
+  svg.attr("viewBox", `0 0 ${W} ${H}`);
+
+  const byType = d3.group(nodes, n => n.type);
+  const types = COLS.filter(ty => byType.has(ty)).concat([...byType.keys()].filter(ty => !COLS.includes(ty)));
+  const x = d3.scaleBand(types, [m.l, W - m.r]).padding(0.25);
+  const pc = predColor(edges);
+
+  let stacks = null, yMax;
+  if (side === "off") {
+    yMax = d3.max(types, ty => byType.get(ty).length) || 1;
+  } else {
+    const acc = new Map(types.map(ty => [ty, new Map()]));
+    edges.forEach(e => {
+      const n = LAST.byId[side === "subject" ? e.subject : e.object];
+      if (!n || !acc.has(n.type)) return;
+      acc.get(n.type).set(e.predicate, (acc.get(n.type).get(e.predicate) || 0) + 1);
+    });
+    stacks = new Map(types.map(ty => {
+      let y0 = 0;
+      return [ty, [...acc.get(ty).entries()].sort((a, b) => b[1] - a[1])
+        .map(([p, c]) => ({pred: p, v0: y0, v1: (y0 += c)}))];
+    }));
+    yMax = d3.max(types, ty => d3.sum([...acc.get(ty).values()])) || 1;
+  }
+  const y = d3.scaleLinear([0, yMax], [H - m.b, m.t]);
+  svg.append("g").attr("transform", `translate(${m.l},0)`)
+    .call(d3.axisLeft(y).ticks(4).tickSize(0))
+    .call(g => g.select(".domain").remove());
+
+  const bg = svg.selectAll(".bar").data(types).join("g").attr("class", "bar")
+    .attr("transform", ty => `translate(${x(ty)},0)`);
+  if (side === "off") {
+    bg.append("rect").attr("y", ty => y(byType.get(ty).length))
+      .attr("height", ty => H - m.b - y(byType.get(ty).length))
+      .attr("width", x.bandwidth()).attr("fill", "#2b6cb0")
+      .append("title").text(ty => `${ty}: ${byType.get(ty).length} nodes`);
+    bg.append("text").attr("x", x.bandwidth() / 2).attr("text-anchor", "middle")
+      .attr("y", ty => y(byType.get(ty).length) - 3).text(ty => byType.get(ty).length);
+  } else {
+    bg.selectAll("rect.seg").data(ty => stacks.get(ty)).join("rect")
+      .attr("class", "seg")
+      .attr("y", s => y(s.v1)).attr("height", s => y(s.v0) - y(s.v1))
+      .attr("width", x.bandwidth()).attr("fill", s => pc.color(s.pred))
+      .append("title").text(s => `${s.pred} ×${s.v1 - s.v0}`);
+    const vis = new Set(); stacks.forEach(segs => segs.forEach(s => vis.add(s.pred)));
+    const items = pc.ranked.filter(([p]) => vis.has(p)).slice(0, 8).map(([p]) => p);
+    if ([...vis].some(p => pc.color(p) === "#a0aec0")) items.push("other");
+    const leg = svg.append("g").attr("transform", `translate(${m.l + 6},6)`);
+    items.forEach((p, i) => {
+      const lx = (i % 5) * 115, ly = Math.floor(i / 5) * 12;
+      leg.append("rect").attr("x", lx).attr("y", ly).attr("width", 8).attr("height", 8)
+        .attr("fill", p === "other" ? "#a0aec0" : pc.color(p));
+      leg.append("text").attr("x", lx + 11).attr("y", ly + 7).text(p);
+    });
+  }
+  bg.append("text").attr("x", x.bandwidth() / 2).attr("y", H - m.b + 12)
+    .attr("text-anchor", "middle").text(ty => ty);
+}
+
 function render(g) {
   // collapsible summary block above the network (full analysis only)
   const sum = g.metadata.summary;
@@ -251,50 +652,44 @@ function render(g) {
   const W = 1400, H = 700;
   const mode = $("#layout").value;
   const [pos, cols] = layout(nodes, edges, mode, W, H);
+  $("#clustwrap").hidden = mode !== "force";
 
   // everything lives in .viewport so d3.zoom pans/zooms the whole scene
   const vp = svg.append("g").attr("class", "viewport");
   svg.call(zoom);
   // re-apply the persisted transform to the fresh viewport (re-renders
-  // from the min-conf slider keep the user's pan/zoom)
+  // from the min-conf slider keep the user's pan/zoom); on a fresh query
+  // (identity transform) force mode fits the node bounds — force layouts
+  // routinely spill outside the 1400×700 box.
+  const t0 = d3.zoomTransform(svg.node());
+  if (mode === "force" && nodes.length && t0.k === 1 && !t0.x && !t0.y) {
+    const xs = nodes.map(n => pos[n.id].x), ys = nodes.map(n => pos[n.id].y);
+    svg.call(zoom.transform, fitTransform(d3.min(xs), d3.min(ys), d3.max(xs), d3.max(ys), 0.9, 1.5));
+  }
   vp.attr("transform", d3.zoomTransform(svg.node()));
 
   if (mode === "columns") {
     const x = d3.scalePoint(cols, [90, W-90]);
-    vp.selectAll(".colhead").data(cols).join("text").attr("class","colhead")
+    vp.append("g").selectAll(".colhead").data(cols).join("text").attr("class","colhead")
       .attr("x", d=>x(d)).attr("y", 20).attr("text-anchor","middle").text(d=>d);
   }
-  vp.selectAll(".link").data(edges).join("path").attr("class","link")
-    .attr("d", e => { const s=pos[e.subject], t=pos[e.object]; if(!s||!t) return "";
-      const mx=(s.x+t.x)/2; return `M${s.x},${s.y} C${mx},${s.y} ${mx},${t.y} ${t.x},${t.y}`; })
-    .attr("stroke","#718096").attr("stroke-opacity", e=>0.12+0.88*e.confidence)
-    .attr("stroke-width", e=>0.5+2.5*e.confidence);
-  // hover a node: emphasize it + directly-connected nodes/edges, dim rest
-  const neighbors = new Map();
-  edges.forEach(e => {
-    (neighbors.get(e.subject) || neighbors.set(e.subject, new Set()).get(e.subject)).add(e.object);
-    (neighbors.get(e.object) || neighbors.set(e.object, new Set()).get(e.object)).add(e.subject);
-  });
-  const linkSel = vp.selectAll(".link");
-  const nodeG = vp.selectAll(".nodeg").data(nodes).join("g").attr("class","nodeg")
-    .attr("transform", d=>`translate(${pos[d.id].x},${pos[d.id].y})`)
-    .style("cursor", d=>d.url?"pointer":"default")
-    .on("click", (e,d)=>{ if(d.url) window.open(d.url,"_blank"); })
-    .on("mouseenter", (e,d) => {
-      const nb = neighbors.get(d.id) || new Set();
-      nodeG.classed("dim", n => n.id !== d.id && !nb.has(n.id));
-      linkSel.classed("link-dim", l => l.subject !== d.id && l.object !== d.id)
-             .classed("link-hi", l => l.subject === d.id || l.object === d.id);
-    })
-    .on("mouseleave", () => {
-      nodeG.classed("dim", false);
-      linkSel.classed("link-dim", false).classed("link-hi", false);
-    });
-  nodeG.append("circle").attr("class","node").attr("r",5)
-    .attr("fill", d=>COLORS[d.type]||"#999");
-  nodeG.append("text").attr("class","nodelabel").attr("x",7).attr("y",3)
-    .text(d=>ellipsize(d.label||d.id));
-  nodeG.append("title").text(d=>`${d.label||d.id}\n${d.id} (${d.type})${d.url?"\nclick to open":""}`);
+  vp.append("g").attr("class","links");
+  vp.append("g").attr("class","nodes");
+
+  // Adaptive labels: label every node only when its column has enough vertical
+  // room for 9px text; dense columns get labels on hover/click instead.
+  const labelAlways = new Set();
+  if (mode === "columns") {
+    const byT = d3.group(nodes, n => n.type);
+    byT.forEach(ns => { if (ns.length && (H-75)/ns.length >= 12) ns.forEach(n => labelAlways.add(n.id)); });
+  }
+
+  const byId = Object.fromEntries(nodes.map(n=>[n.id,n]));
+  SELECTED = null;
+  detailEl.hidden = true;
+  LAST = {nodes, edges, pos, mode, byId, labelAlways};
+  drawScene();
+  overviewChart(nodes, edges);
 
   // legend: colors for the types actually present
   const typesPresent = [...new Set(nodes.map(n => n.type))];
@@ -302,7 +697,6 @@ function render(g) {
     .map(t => `<span class="leg"><i style="background:${COLORS[t]||"#999"}"></i>${esc(t)}</span>`)
     .join("");
 
-  const byId = Object.fromEntries(nodes.map(n=>[n.id,n]));
   const cell = id => byId[id] ? link(byId[id]) : esc(id);
   sortable("edges", edges, [
     {label:"subject", val:e=>e.subject, render:e=>cell(e.subject)},
@@ -317,11 +711,11 @@ function render(g) {
     {label:"namespace", val:n=>n.id_namespace, render:n=>esc(n.id_namespace)},
     {label:"", val:n=>"", render:n=>n.type==="Gene" ? `<a href="#" class="resolve-next" data-id="${esc(n.id)}">resolve →</a>` : ""},
   ], 1, 1);
-  // Wire resolve → buttons (delegated so they survive re-sorts/filters).
-  document.querySelector("#nodes tbody").addEventListener("click", e => {
+  // Wire resolve → buttons (.onclick so re-renders don't stack listeners).
+  document.querySelector("#nodes tbody").onclick = e => {
     const a = e.target.closest(".resolve-next");
     if (a) { e.preventDefault(); resolveNext(byId[a.dataset.id]); }
-  });
+  };
 }
 </script>
 </body>
