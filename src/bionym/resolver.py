@@ -1762,15 +1762,51 @@ class Resolver:
         if not items:
             return
 
+        # Cap the triage pool per kind before spending JEV calls — a
+        # well-cited gene can yield thousands of publication nodes, and
+        # every item is embedded in JEV's state. Rank by best in-edge
+        # confidence (measured_in/cited_in were already scored upstream);
+        # sort is stable, so ties keep insertion order.
+        in_conf: dict[str, float] = {}
+        for e in graph.edges:
+            if e.confidence > in_conf.get(e.object, 0.0):
+                in_conf[e.object] = e.confidence
+        per_kind: dict[str, list[dict[str, Any]]] = {}
+        for it in items:
+            per_kind.setdefault(it["kind"], []).append(it)
+        items = [
+            it
+            for kind_items in per_kind.values()
+            for it in sorted(
+                kind_items,
+                key=lambda x: in_conf.get(x["node"], 0.0),
+                reverse=True,
+            )[: proposals.TRIAGE_PER_KIND]
+        ]
+
+        # Chunked asks keep each state's item list small — see
+        # proposals.TRIAGE_CHUNK. A failed chunk's items score 0 below.
         triage_items = [
             {**it, "text": it["text"][: proposals.TRIAGE_TEXT_CHARS]}
             for it in items
         ]
-        triage_ans = self.jev.ask(
-            proposals.build_triage_state(match, triage_items),
-            proposals.build_triage_questions(triage_items),
-            stage="proposals_triage",
-        )
+        triage_ans: dict[str, dict[str, Any]] = {}
+        for start in range(0, len(triage_items), proposals.TRIAGE_CHUNK):
+            chunk = triage_items[start : start + proposals.TRIAGE_CHUNK]
+            try:
+                batch = self.jev.ask(
+                    proposals.build_triage_state(match, chunk),
+                    proposals.build_triage_questions(chunk),
+                    stage="proposals_triage",
+                )
+            except JevError as e:
+                log.warning("proposals_triage chunk %d failed: %s", start, e)
+                batch = {}
+            for i, ans in batch.items():
+                # Question ids are chunk-local (triage_0, triage_1…);
+                # rekey to the global item index.
+                local = int(i.rsplit("_", 1)[1])
+                triage_ans[f"triage_{start + local}"] = ans
         n_levels = len(proposals.TRIAGE_LEVELS)
         scored = sorted(
             (
@@ -1838,13 +1874,29 @@ class Resolver:
                 for p, label in zip(flat, labels):
                     p["claim"] = label
 
-        for it, props in zip(keep, per_node):
-            if not props:
-                continue
+        # Verify asks are per-node and independent — run them in
+        # parallel, then apply edges serially (graph mutation isn't
+        # thread-safe). Sequential asks made full mode crawl on
+        # publication-dense genes.
+        def _verify(
+            it: dict[str, Any], props: list[dict[str, Any]]
+        ) -> dict[str, dict[str, Any]]:
             text = it["text"][: proposals.PROMPT_TEXT_CHARS]
-            state = proposals.build_state({it["node"]: text}, props)
-            questions = proposals.build_questions(props)
-            answers = self.jev.ask(state, questions, stage="proposals")
+            try:
+                return self.jev.ask(
+                    proposals.build_state({it["node"]: text}, props),
+                    proposals.build_questions(props),
+                    stage="proposals",
+                )
+            except JevError as e:
+                log.warning("proposal verify failed for %s: %s",
+                            it["node"], e)
+                return {}
+
+        pending = [(it, p) for it, p in zip(keep, per_node) if p]
+        with ThreadPoolExecutor(max_workers=self.proposal_concurrency) as ex:
+            verified = list(ex.map(lambda t: _verify(*t), pending))
+        for (it, props), answers in zip(pending, verified):
             for i, p in enumerate(props):
                 ans = answers.get(f"prop_{i}", {})
                 if it["kind"] == "dataset":
@@ -1920,9 +1972,13 @@ class Resolver:
         condition labels."""
         values = match.get("dataset_values") or {}
         symbol = match.get("symbol") or match.get("locus_tag")
-        for it in keep:
-            if it["kind"] != "dataset":
-                continue
+
+        def _work(
+            it: dict[str, Any],
+        ) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]], int]:
+            """value fetch + LLM + JEV verify for one dataset -> (props,
+            answers, n_rows). Runs in a worker thread — all network calls,
+            no graph mutation."""
             dsid = it["node"].split(":", 1)[1]
             rows = values.get(dsid)
             if rows is None and symbol:
@@ -1931,7 +1987,7 @@ class Resolver:
                 )
                 values[dsid] = rows
             if not rows:
-                continue
+                return [], {}, 0
             node = graph.nodes.get(it["node"])
             meta = {
                 "label": node.label if node else it["node"],
@@ -1946,18 +2002,31 @@ class Resolver:
                 log.warning(
                     "LLM data proposal failed for %s: %s", it["node"], e
                 )
-                continue
+                return [], {}, 0
             props = [
                 {"node": it["node"], "kind": "dataset", **p}
                 for p in proposals.parse(content)
             ]
             if not props:
-                continue
-            answers = self.jev.ask(
-                proposals.build_data_state(meta, data_text, props),
-                proposals.build_data_questions(props),
-                stage="data_proposals",
-            )
+                return [], {}, 0
+            try:
+                answers = self.jev.ask(
+                    proposals.build_data_state(meta, data_text, props),
+                    proposals.build_data_questions(props),
+                    stage="data_proposals",
+                )
+            except JevError as e:
+                log.warning(
+                    "data proposal verify failed for %s: %s",
+                    it["node"], e,
+                )
+                return [], {}, 0
+            return props, answers, len(rows)
+
+        datasets = [it for it in keep if it["kind"] == "dataset"]
+        with ThreadPoolExecutor(max_workers=self.proposal_concurrency) as ex:
+            results = list(ex.map(_work, datasets))
+        for it, (props, answers, n_rows) in zip(datasets, results):
             for i, p in enumerate(props):
                 self._add_proposal_edge(
                     graph,
@@ -1971,7 +2040,7 @@ class Resolver:
                         f"LLM data claim for {it['node']}, JEV-verified "
                         "against per-sample values"
                     ),
-                    extra_payload={"n_rows": len(rows)},
+                    extra_payload={"n_rows": n_rows},
                 )
 
     @staticmethod

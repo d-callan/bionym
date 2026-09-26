@@ -590,3 +590,48 @@ def test_s5_expression_caps_and_chunks_candidate_flood():
     assert not any("E-MOUS" in n for n in datasets)
     assert "dataset:GSE12345" in g.nodes  # GEO always survives
     assert len([e for e in g.edges if e.predicate == "measured_in"]) == S5_MAX_CANDIDATES
+
+
+def test_proposals_triage_caps_and_chunks_item_flood():
+    """A well-cited gene yields thousands of publication nodes, and every
+    triage item is embedded in JEV's state — one giant ask overflows the
+    context (BRCA1: 7.7k questions → recursive splitting multiplied the
+    same state into a 429 storm). The pool is pre-capped per kind and
+    asked in TRIAGE_CHUNK-sized batches."""
+    import math
+
+    from bionym.graph import Edge, KnowledgeGraph, Node, NodeType
+    from bionym.proposals import TRIAGE_CHUNK, TRIAGE_PER_KIND
+
+    g = KnowledgeGraph(metadata={"query": "BRCA1"})
+    g.add_node(Node(id="gene", type=NodeType.GENE, label="BRCA1"))
+    for i in range(TRIAGE_PER_KIND + 50):  # over the pre-cap
+        pid = f"pubmed:{i}"
+        g.add_node(
+            Node(id=pid, type=NodeType.PUBLICATION, label=f"Study {i}")
+        )
+        g.add_edge(
+            Edge(subject="gene", predicate="cited_in", object=pid,
+                 confidence=0.5)
+        )
+
+    jev = JevClient(mock=True)
+    r = Resolver(
+        jev=jev,
+        ncbi=FakeNcbi(),
+        veupathdb=FakeVeuPathDB(),
+        oma=FakeOma(),
+        uniprot=FakeUniProt(),
+        gxa=FakeGxa(),
+        kegg=FakeKegg(),
+        llm=LlmClient(mock=True),
+    )
+    r._propose_claims(g, {"symbol": "BRCA1", "organism": "Homo sapiens"})
+
+    triage_calls = [
+        u for u in jev.usage_log if u["stage"] == "proposals_triage"
+    ]
+    # pool pre-capped to TRIAGE_PER_KIND, chunked at TRIAGE_CHUNK
+    assert len(triage_calls) == math.ceil(TRIAGE_PER_KIND / TRIAGE_CHUNK)
+    assert all(u["n_questions"] <= TRIAGE_CHUNK for u in triage_calls)
+    assert sum(u["n_questions"] for u in triage_calls) == TRIAGE_PER_KIND

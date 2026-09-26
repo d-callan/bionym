@@ -77,8 +77,17 @@ def _extract_json(content: str, key: str = "proposals") -> dict | None:
             data, _ = decoder.raw_decode(content, i)
         except json.JSONDecodeError:
             continue
-        if isinstance(data, dict) and isinstance(data.get(key), list):
+        if not isinstance(data, dict):
+            continue
+        if isinstance(data.get(key), list):
             return data
+        # The model sometimes misspells the payload key (observed:
+        # "propososals", "propositals") — accept a key sharing the
+        # expected prefix and re-key it so callers see the canonical
+        # shape.
+        for k, v in data.items():
+            if k.startswith(key[:6]) and isinstance(v, list):
+                return {key: v}
     return None
 
 
@@ -112,6 +121,14 @@ PROMPT_TEXT_CHARS = 8000
 # Cap on datasets/publications that survive triage — each one costs an
 # LLM call + JEV verification, and a deep graph can yield hundreds.
 MAX_ITEMS_PER_KIND = 100
+# Every triage item is embedded in JEV's state, so a single ask over a
+# big pool overflows the context (BRCA1 → ~7.7k publications: recursive
+# question-splitting can't shrink the state, only multiply it). Asks are
+# chunked, and the pool is pre-capped per kind — TRIAGE_PER_KIND keeps a
+# 4x headroom over the post-triage survivor cap so the judge still has
+# selection room.
+TRIAGE_CHUNK = 50
+TRIAGE_PER_KIND = MAX_ITEMS_PER_KIND * 4
 
 
 def build_triage_state(
