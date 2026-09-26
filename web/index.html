@@ -83,6 +83,24 @@
   #stackmode { font-size: .75rem; color: var(--muted); margin-left: .8rem; }
   #stackmode select { font-size: .75rem; padding: .1rem .3rem; }
   #clustwrap { font-weight: normal; font-size: .8rem; margin-left: .8rem; }
+  header { position: relative; }
+  #info-btn { position: absolute; top: 1.1rem; right: 2rem; width: 1.8rem; height: 1.8rem; padding: 0;
+    border-radius: 50%; background: #fff; color: var(--muted); border: 1.5px solid var(--line);
+    font-size: .85rem; font-weight: 700; line-height: 1; }
+  #info-btn:hover { color: var(--ink); border-color: var(--muted); }
+  dialog#about { border: 1px solid var(--line); border-radius: 10px; padding: 0; max-width: 42rem;
+    width: min(42rem, 92vw); box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+  dialog#about::backdrop { background: rgba(15,20,30,.4); }
+  dialog#about .a-body { padding: 1rem 1.4rem 1.2rem; font-size: .85rem; }
+  dialog#about h2 { margin: 0 0 .4rem; font-size: 1.05rem; }
+  dialog#about h3 { margin: .9rem 0 .3rem; font-size: .85rem; }
+  dialog#about table { border-collapse: collapse; width: 100%; font-size: .8rem; }
+  dialog#about th, dialog#about td { border: 1px solid var(--line); padding: .35rem .5rem; text-align: left; vertical-align: top; }
+  dialog#about th { background: var(--bg); font-size: .72rem; text-transform: uppercase; letter-spacing: .03em; color: var(--muted); }
+  dialog#about ul { margin: .2rem 0 0; padding-left: 1.15rem; }
+  dialog#about li { margin-bottom: .3rem; }
+  dialog#about .a-close { float: right; background: none; border: 0; color: var(--muted); font-size: 1.05rem; padding: .2rem; }
+  dialog#about code { font-size: .78rem; background: var(--bg); padding: 0 .25em; border-radius: 3px; }
 </style>
 </head>
 <body>
@@ -97,6 +115,7 @@
     </span>
     <label>min conf <input type="range" id="minconf" min="0" max="1" step="0.05" value="0" style="width:8rem;vertical-align:middle"><span id="minconfv">0.00</span></label>
   </form>
+  <button id="info-btn" type="button" title="How this works" aria-haspopup="dialog">i</button>
 </header>
 <div id="status">Enter an identifier to resolve.</div>
 <main>
@@ -104,6 +123,12 @@
     <summary>Summary</summary>
     <ul id="summarylist"></ul>
   </details>
+  <div id="overview-wrap" hidden>
+    <label id="stackmode">stack by predicate (node as)
+      <select id="stacksel"><option value="off" selected>off</option><option value="subject">subject</option><option value="object">object</option></select>
+    </label>
+    <svg id="overview"></svg>
+  </div>
   <h2>Network
     <label>layout
       <select id="layout">
@@ -117,12 +142,6 @@
     <label id="clustwrap" hidden title="Group crowded nodes into a single pie glyph when zoomed out (force-directed layout only)"><input type="checkbox" id="clustergroup" checked> cluster nearby nodes</label>
     <span class="hint">scroll to zoom · drag to pan · hover a node to highlight its neighborhood</span>
   </h2>
-  <div id="overview-wrap" hidden>
-    <label id="stackmode">stack by predicate (node as)
-      <select id="stacksel"><option value="off" selected>off</option><option value="subject">subject</option><option value="object">object</option></select>
-    </label>
-    <svg id="overview"></svg>
-  </div>
   <svg id="net" viewBox="0 0 1400 700" preserveAspectRatio="xMidYMid meet"></svg>
   <div id="tip"></div>
   <aside id="detail" hidden></aside>
@@ -131,6 +150,38 @@
   <div class="tablewrap"><table id="edges"><thead><tr><th>subject</th><th>predicate</th><th>object</th><th>conf</th></tr></thead><tbody></tbody></table></div>
   <h2>Nodes <input class="tfilter" data-for="nodes" placeholder="filter…"></h2>
   <div class="tablewrap"><table id="nodes"><thead><tr><th>id</th><th>type</th><th>label</th><th>namespace</th><th></th></tr></thead><tbody></tbody></table></div>
+  <dialog id="about">
+    <div class="a-body">
+      <h2>How this works <button class="a-close" type="button" title="close">✕</button></h2>
+      <table>
+        <thead><tr><th>Step</th><th>Done by</th><th>How to read it</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Identify the gene; fetch assemblies, orthologs, GO/KEGG/UniProt annotations; search expression datasets</td>
+            <td><b>Programmatic</b> lookups — NCBI, OMA, UniProt, KEGG, GEO, Expression Atlas</td>
+            <td>Facts straight from the source DBs — take at face value (but only as complete as those DBs)</td>
+          </tr>
+          <tr>
+            <td>Pick the right record when several match; score every edge 0–1; rank datasets</td>
+            <td><b>JEV judge</b> (TypeSafe.ai) sees candidates + evidence</td>
+            <td>Confidence = judge's plausibility score — good for ranking, not a measured error rate</td>
+          </tr>
+          <tr>
+            <td>Draft claims from node text; write the summary (Full analysis only)</td>
+            <td><b>LLM</b> proposes → JEV verifies each claim</td>
+            <td>Grain of salt — claims scoring &lt; 0.5 are dropped, but kept claims can still be wrong</td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>Fine print</h3>
+      <ul>
+        <li>Confidence is a score, not a probability — use it to triage, not to conclude.</li>
+        <li><code>absent_in</code> edges mean "no ortholog found" — could be annotation gaps, not true absence.</li>
+        <li>Very well-studied genes overflow the dataset search: results are capped at the top 250 (exact-species first, then score).</li>
+        <li>Click a node for its evidence trail and source links; hover for context; the edges/nodes tables are the same data in tabular form.</li>
+      </ul>
+    </div>
+  </dialog>
 </main>
 <script>
 const COLS = ["IdType","Gene","Organism","Assembly","OrthologGroup","Transcript","Protein","Domain","GOTerm","Pathway","Dataset","Condition","Publication"];
@@ -254,6 +305,10 @@ $("#layout").addEventListener("change", () => {
 });
 $("#clustergroup").addEventListener("change", () => { if (LAST) drawScene(); });
 $("#stacksel").addEventListener("change", () => { if (LAST) overviewChart(LAST.nodes, LAST.edges); });
+const aboutDlg = $("#about");
+$("#info-btn").addEventListener("click", () => aboutDlg.showModal());
+aboutDlg.querySelector(".a-close").addEventListener("click", () => aboutDlg.close());
+aboutDlg.addEventListener("click", e => { if (e.target === aboutDlg) aboutDlg.close(); });
 
 // Node positions: {id: {x, y}}. "columns" = multi-partite by type;
 // "force" = synchronous d3.forceSimulation (cloned data — forceLink
