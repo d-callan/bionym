@@ -1,0 +1,26 @@
+{
+  "name": "@bionym/components",
+  "version": "0.1.0",
+  "description": "Standalone vanilla JS/D3 components for bionym knowledge graphs",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./palettes": "./src/palettes.js",
+    "./styles.css": "./src/styles.css"
+  },
+  "sideEffects": [
+    "*.css",
+    "./src/styles.css"
+  ],
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "dependencies": {
+    "d3": "^7.9.0"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

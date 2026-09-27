@@ -1,0 +1,63 @@
+/* @bionym/components — scoped component styles.
+ * All selectors are .bn-* namespaced; override freely or pass {colors}
+ * to components instead. CSS vars: --bn-ink, --bn-muted, --bn-line, --bn-bg. */
+
+.bn-net-wrap, .bn-ov-wrap, .bn-detail {
+  --bn-ink: #1a202c; --bn-muted: #4a5568; --bn-line: #cbd5e0; --bn-bg: #f7fafc;
+}
+
+/* ---- network ---------------------------------------------------------- */
+.bn-net-wrap { position: relative; }
+.bn-net { display: block; width: 100%; height: auto; cursor: grab; }
+.bn-net:active { cursor: grabbing; }
+
+.bn-net .node { stroke: #fff; stroke-width: 1px; cursor: default; }
+.bn-net .nodelabel { font-size: 9px; pointer-events: none; opacity: 0; transition: opacity .1s; }
+.bn-net .nodelabel.on { opacity: 1; }
+.bn-net .link { fill: none; }
+.bn-net .link.link-dim { stroke-opacity: .04; }
+.bn-net .link.link-hi { stroke-opacity: .95; stroke: #2b6cb0; }
+.bn-net .colhead { font-size: 11px; font-weight: 600; fill: var(--bn-muted); }
+.bn-net .nodeg.dim { opacity: .12; }
+.bn-net .nodeg:focus { outline: none; }
+.bn-net .nodeg:focus .node { stroke: #2b6cb0; stroke-width: 2px; }
+.bn-net .cluster { cursor: pointer; }
+
+/* tooltip — absolutely positioned element inside the container */
+.bn-tip {
+  position: fixed; z-index: 10; pointer-events: none;
+  background: #fff; border: 1px solid var(--bn-line); border-radius: 6px;
+  padding: .4rem .6rem; font-size: .78rem; max-width: 22rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12); color: var(--bn-ink);
+}
+.bn-tip .bn-t-title { font-weight: 600; margin-bottom: .15rem; }
+.bn-tip .bn-t-sub { color: var(--bn-muted); }
+
+/* legend */
+.bn-legend {
+  display: flex; flex-wrap: wrap; gap: .4rem 1rem;
+  padding: .4rem .2rem; font-size: .75rem; color: var(--bn-muted);
+}
+.bn-legend .leg { display: inline-flex; align-items: center; gap: .3rem; }
+.bn-legend .leg i { width: .7rem; height: .7rem; border-radius: 50%; display: inline-block; }
+
+/* ---- overview bar chart ------------------------------------------------ */
+.bn-ov { display: block; width: 100%; height: auto; }
+.bn-ov text { font-size: 9px; fill: var(--bn-muted); }
+.bn-ov .seg { stroke: #fff; stroke-width: .5px; }
+.bn-ov .bar:hover { opacity: .85; }
+
+/* ---- detail panel -------------------------------------------------------
+ * Positioning is the consumer's — component only styles the box. Put it in
+ * an <aside> or wherever fits your layout. */
+.bn-detail {
+  background: #fff; border: 1px solid var(--bn-line); border-radius: 8px;
+  padding: .7rem .9rem; font-size: .8rem; color: var(--bn-ink);
+  box-shadow: 0 4px 14px rgba(0,0,0,.15);
+}
+.bn-detail h3 { margin: 0 0 .3rem; font-size: .9rem; }
+.bn-detail .bn-d-sub { color: var(--bn-muted); font-size: .72rem; word-break: break-all; }
+.bn-detail ul { margin: .4rem 0 0; padding-left: 1.1rem; }
+.bn-detail .bn-d-close { float: right; background: none; border: 0; color: var(--bn-muted); font-size: 1rem; padding: 0; cursor: pointer; }
+.bn-detail .bn-d-actions a { margin-right: .8rem; font-size: .78rem; }
+.bn-conf { color: var(--bn-muted); font-size: .78rem; font-variant-numeric: tabular-nums; }

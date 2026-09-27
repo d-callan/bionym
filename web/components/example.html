@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>@bionym/components — example</title>
+<link rel="stylesheet" href="src/styles.css">
+<style>
+  body { font-family: system-ui, sans-serif; margin: 2rem; color: #1a202c; }
+  h1 { font-size: 1.1rem; }
+  h2 { font-size: .95rem; margin: 2rem 0 .5rem; }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .card { border: 1px solid #cbd5e0; border-radius: 8px; padding: .6rem; flex: 1; min-width: 24rem; }
+  .controls { margin-bottom: .5rem; }
+  .controls button { font-size: .75rem; padding: .2rem .6rem; margin-right: .3rem;
+    border: 1px solid #cbd5e0; border-radius: 5px; background: #edf2f7; cursor: pointer; }
+  .controls select { font-size: .8rem; }
+  #detail { position: fixed; right: 1rem; top: 6rem; width: 18rem; max-height: 60vh; overflow: auto; }
+  svg { border: 1px solid #cbd5e0; border-radius: 8px; }
+</style>
+<script type="importmap">
+  { "imports": { "d3": "https://cdn.jsdelivr.net/npm/d3@7/+esm" } }
+</script>
+</head>
+<body>
+<h1>@bionym/components — standalone demo</h1>
+<p>Components rendered from <code>example-graph.json</code>; controls below are
+consumer-written — the components expose methods, not chrome.</p>
+
+<div class="row">
+  <div class="card">
+    <h2>Network — multi-partite</h2>
+    <div class="controls">
+      <button id="zin">zoom in</button>
+      <button id="zout">zoom out</button>
+      <button id="fit">fit</button>
+      <select id="layout">
+        <option value="columns">multi-partite</option>
+        <option value="force">force-directed</option>
+      </select>
+      <label><input type="checkbox" id="cluster" checked> cluster</label>
+    </div>
+    <div id="net"></div>
+  </div>
+  <div class="card">
+    <h2>Overview</h2>
+    <div class="controls">
+      <select id="stack">
+        <option value="off">flat</option>
+        <option value="subject">stack by predicate (subject)</option>
+        <option value="object">stack by predicate (object)</option>
+      </select>
+    </div>
+    <div id="ov"></div>
+    <h2>Edges (via edgesToRows)</h2>
+    <table id="et" style="font-size:.8rem"></table>
+  </div>
+</div>
+
+<aside id="detail"></aside>
+
+<script type="module">
+import { BionymNetwork, BionymOverview, BionymDetail, edgesToRows, esc } from "./src/index.js";
+
+const graph = await (await fetch("example-graph.json")).json();
+
+const detail = BionymDetail(document.getElementById("detail"), {
+  onResolve: n => alert(`would resolve: ${n.id}`),
+});
+const net = BionymNetwork(document.getElementById("net"), graph, {
+  onSelect: (n, ctx) => n ? detail.show(n, ctx) : detail.hide(),
+});
+const ov = BionymOverview(document.getElementById("ov"), graph);
+
+document.getElementById("zin").onclick = () => net.zoomBy(1.4);
+document.getElementById("zout").onclick = () => net.zoomBy(1 / 1.4);
+document.getElementById("fit").onclick = () => net.fit();
+document.getElementById("layout").onchange = e => net.setLayout(e.target.value);
+document.getElementById("cluster").onchange = e => net.setCluster(e.target.checked);
+document.getElementById("stack").onchange = e => ov.setStackBy(e.target.value);
+
+// consumer's own table, fed by the data helper
+document.getElementById("et").innerHTML =
+  "<tr><th>subject</th><th>predicate</th><th>object</th><th>conf</th></tr>" +
+  edgesToRows(graph).map(r =>
+    `<tr><td>${esc(r.subjectLabel)}</td><td>${esc(r.predicate)}</td>` +
+    `<td>${esc(r.objectLabel)}</td><td>${r.confidence.toFixed(2)}</td></tr>`
+  ).join("");
+</script>
+</body>
+</html>
