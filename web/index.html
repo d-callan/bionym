@@ -175,7 +175,7 @@ $("#f").addEventListener("submit", async e => {
   $("#go").disabled = true;
   try {
     const mode = document.querySelector('input[name=mode]:checked').value;
-    const r = await fetch(`${BACKEND}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${DEPTH}&propose=${mode === "full"}&summarize=${mode === "full"}`);
+    const r = await fetch(`${BACKEND}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${DEPTH[mode]}&propose=${mode === "full"}&summarize=${mode === "full"}`);
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
     GRAPH = await r.json();
     renderFiltered();
