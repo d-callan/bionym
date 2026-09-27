@@ -27,14 +27,29 @@ load_dotenv()
 
 app = FastAPI(title="bionym", version="0.1.0")
 
-# Static frontend is served from a different origin (file://, GH Pages, or
-# a separate port) — allow all origins for local dev; tighten on deploy.
+# CORS: comma-separated origins via BIONYM_CORS_ORIGINS; defaults to the
+# local dev frontend. Set to "*" explicitly if needed, not by default.
+_origins = os.environ.get(
+    "BIONYM_CORS_ORIGINS",
+    "http://localhost:8080,http://127.0.0.1:8080",
+).split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[o.strip() for o in _origins if o.strip()],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
+
+# Mock mode is for offline dev/tests only — off unless explicitly enabled
+# on the server so a public deployment can't be flipped by clients.
+_MOCK_ALLOWED = os.environ.get("BIONYM_ALLOW_MOCK") == "1"
+
+
+def _check_mock(mock_jev: bool) -> None:
+    if mock_jev and not _MOCK_ALLOWED:
+        raise HTTPException(
+            403, "mock_jev is disabled on this server (BIONYM_ALLOW_MOCK=1 to allow)"
+        )
 
 _cache_dir = os.environ.get("BIONYM_CACHE_DIR") or None
 
@@ -65,6 +80,7 @@ def resolve(
     propose: bool = Query(True),
     mock_jev: bool = Query(False),
 ):
+    _check_mock(mock_jev)
     if not mock_jev and not os.environ.get("TYPESAFE_API_KEY"):
         raise HTTPException(500, "TYPESAFE_API_KEY not configured on server")
     resolver = _resolver(mock_jev=mock_jev)
@@ -79,6 +95,7 @@ def resolve(
 def summarize(graph: dict, mock_jev: bool = Query(False)):
     """Run the LLM+JEV summary pass over a previously returned graph
     (e.g. a Quick scan result the user wants summarized after the fact)."""
+    _check_mock(mock_jev)
     if not mock_jev and not os.environ.get("TYPESAFE_API_KEY"):
         raise HTTPException(500, "TYPESAFE_API_KEY not configured on server")
     g = KnowledgeGraph.model_validate(graph)

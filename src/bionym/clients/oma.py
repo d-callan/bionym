@@ -27,6 +27,9 @@ BASE = "https://omabrowser.org/api"
 class OmaClient:
     def __init__(self, timeout: float = 30.0, cache_dir: str | None = None) -> None:
         self.timeout = timeout
+        # shared client: keep-alive/connection pooling across calls
+        # (and across threads — resolver prefetches run in workers).
+        self._http = httpx.Client()
         self._cache = None
         if cache_dir:
             import diskcache
@@ -103,7 +106,7 @@ class OmaClient:
         if self._cache is not None and url in self._cache:
             return self._cache[url]
         try:
-            resp = httpx.get(
+            resp = self._http.get(
                 url, headers={"Accept": "application/json"}, timeout=self.timeout
             )
             if resp.status_code != 200:

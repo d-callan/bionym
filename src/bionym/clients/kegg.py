@@ -25,6 +25,9 @@ BASE = "https://rest.kegg.jp"
 class KeggClient:
     def __init__(self, timeout: float = 30.0, cache_dir: str | None = None) -> None:
         self.timeout = timeout
+        # shared client: keep-alive/connection pooling across calls
+        # (and across threads — resolver prefetches run in workers).
+        self._http = httpx.Client()
         self._cache = None
         if cache_dir:
             import diskcache
@@ -89,7 +92,7 @@ class KeggClient:
         if self._cache is not None and url in self._cache:
             return self._cache[url]
         try:
-            resp = httpx.get(url, timeout=self.timeout)
+            resp = self._http.get(url, timeout=self.timeout)
             if resp.status_code != 200:
                 log.info("KEGG %s -> %s", url, resp.status_code)
                 return ""

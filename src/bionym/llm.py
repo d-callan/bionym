@@ -46,6 +46,9 @@ class LlmClient:
         self.model = model or os.environ.get("LLM_MODEL") or ""
         self.mock = mock
         self.timeout = timeout
+        # shared client: keep-alive/connection pooling across calls
+        # (and across threads — resolver prefetches run in workers).
+        self._http = httpx.Client()
         self.usage_log: list[dict[str, Any]] = []
         self._api_key = api_key or os.environ.get("LLM_API_KEY") or ""
         self._cache = None
@@ -78,7 +81,7 @@ class LlmClient:
         if self._cache is not None and key in self._cache:
             return self._cache[key]
 
-        resp = httpx.post(
+        resp = self._http.post(
             f"{self.base_url}/chat/completions",
             headers={
                 "Authorization": f"Bearer {self._api_key}",

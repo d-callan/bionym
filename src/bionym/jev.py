@@ -42,6 +42,9 @@ class JevClient:
         self.model = model
         self.mock = mock
         self.timeout = timeout
+        # shared client: keep-alive/connection pooling across calls
+        # (and across threads — resolver prefetches run in workers).
+        self._http = httpx.Client()
         self.usage_log: list[dict[str, Any]] = []
         self._api_key = api_key or os.environ.get("TYPESAFE_API_KEY", "")
         self._cache = None
@@ -134,7 +137,7 @@ class JevClient:
         resp = None
         for attempt in range(3):
             try:
-                resp = httpx.post(
+                resp = self._http.post(
                     API_URL,
                     headers={
                         "Authorization": f"Bearer {self._api_key}",

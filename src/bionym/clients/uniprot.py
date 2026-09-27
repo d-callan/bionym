@@ -39,6 +39,9 @@ DEFAULT_GO_CONFIDENCE = 0.60
 class UniProtClient:
     def __init__(self, timeout: float = 30.0, cache_dir: str | None = None) -> None:
         self.timeout = timeout
+        # shared client: keep-alive/connection pooling across calls
+        # (and across threads — resolver prefetches run in workers).
+        self._http = httpx.Client()
         self._cache = None
         if cache_dir:
             import diskcache
@@ -144,7 +147,7 @@ class UniProtClient:
         if self._cache is not None and cache_key in self._cache:
             return self._cache[cache_key]
         try:
-            resp = httpx.get(url, params=params, timeout=self.timeout)
+            resp = self._http.get(url, params=params, timeout=self.timeout)
             if resp.status_code != 200:
                 log.info("UniProt %s -> %s", url, resp.status_code)
                 return {}

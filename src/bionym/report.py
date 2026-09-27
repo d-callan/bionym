@@ -102,9 +102,9 @@ __COMPONENT_CSS__
 
 def render_html(graph: KnowledgeGraph) -> str:
     graph_json = graph.model_dump_json()
-    # keep literal "</" out of the inline JSON so embedded strings can't
-    # terminate the <script> element early
-    graph_json = graph_json.replace("</", "<\\/")
+    # keep literal "<" out of the inline JSON so embedded strings can't
+    # terminate the <script> element early or open a comment ("<!--")
+    graph_json = graph_json.replace("<", "\\u003c")
 
     meta = graph.metadata
     usage = (meta.get("jev_usage") or {}).get("total") or {}

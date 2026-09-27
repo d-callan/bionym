@@ -105,6 +105,9 @@ class VEuPathDBClient:
     ) -> None:
         self.api_key = api_key or os.environ.get("VEUPATHDB_API_KEY") or None
         self.timeout = timeout
+        # shared client: keep-alive/connection pooling across calls
+        # (and across threads — resolver prefetches run in workers).
+        self._http = httpx.Client()
         self._cache = None
         if cache_dir:
             import diskcache
@@ -449,7 +452,7 @@ class VEuPathDBClient:
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
         try:
-            resp = httpx.post(url, json=body, headers=headers, timeout=self.timeout)
+            resp = self._http.post(url, json=body, headers=headers, timeout=self.timeout)
             if resp.status_code == 401 and not self.api_key:
                 log.info(
                     "VEuPathDB requires an API key (register at "

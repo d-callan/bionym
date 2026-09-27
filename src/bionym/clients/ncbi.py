@@ -11,6 +11,7 @@ import gzip
 import logging
 import os
 import re
+import threading
 import time
 from typing import Any
 
@@ -33,7 +34,13 @@ class NcbiClient:
     ) -> None:
         self.api_key = api_key or os.environ.get("NCBI_API_KEY") or None
         self.timeout = timeout
+        # shared client: keep-alive/connection pooling across calls
+        # (and across threads — resolver prefetches run in workers).
+        self._http = httpx.Client()
         self._last_request = 0.0
+        # Parallel resolver fetches can call _get from several threads;
+        # the lock keeps _last_request updates + pacing atomic.
+        self._throttle_lock = threading.Lock()
         self._min_interval = 0.1 if self.api_key else 0.34  # 10/s vs 3/s
         self._retmax = 20
         self._cache = None
@@ -319,7 +326,7 @@ class NcbiClient:
             f"{prefix}/{accession}/soft/{accession}.soft.gz"
         )
         try:
-            resp = httpx.get(
+            resp = self._http.get(
                 url, timeout=self.timeout, follow_redirects=True
             )
             if resp.status_code != 200:
@@ -522,12 +529,13 @@ class NcbiClient:
         if self._cache is not None and cache_key in self._cache:
             return self._cache[cache_key]
 
-        wait = self._min_interval - (time.monotonic() - self._last_request)
-        if wait > 0:
-            time.sleep(wait)
-        self._last_request = time.monotonic()
+        with self._throttle_lock:
+            wait = self._min_interval - (time.monotonic() - self._last_request)
+            if wait > 0:
+                time.sleep(wait)
+            self._last_request = time.monotonic()
 
-        resp = httpx.get(url, params=params, timeout=self.timeout)
+        resp = self._http.get(url, params=params, timeout=self.timeout)
         if resp.status_code != 200:
             log.warning("NCBI %s -> %s: %s", url, resp.status_code, resp.text[:200])
             return {} if parse == "json" else ""

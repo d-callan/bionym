@@ -171,6 +171,53 @@ class Resolver:
         }
         return graph
 
+    @staticmethod
+    def _map(fn, items, workers: int = 8) -> list:
+        """Run remote fetches concurrently; callers apply results serially.
+
+        Order is preserved, so each site keeps its serial semantics: only
+        the I/O overlaps. Mutations (graph nodes/edges, JEV bookkeeping)
+        stay on the calling thread.
+        """
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            return list(ex.map(fn, items))
+
+    @staticmethod
+    def _par(*calls) -> list:
+        """Run heterogeneous zero-arg fetches concurrently, in order."""
+        with ThreadPoolExecutor(max_workers=len(calls)) as ex:
+            return [f.result() for f in [ex.submit(c) for c in calls]]
+
+    def _ask_chunks(
+        self, items, chunk_size, state_fn, questions_fn, stage
+    ) -> list[tuple[int, list, dict]]:
+        """Chunked JEV asks, chunks concurrent, results in order.
+
+        Chunks exist because a full item list overflows JEV's context —
+        each ask is independent, so they fly in parallel. A failed chunk
+        returns {} rather than killing the resolve; callers decide
+        whether an empty batch means skip or unscored.
+
+        Returns (start_offset, chunk, answers) triples.
+        """
+        chunks = [
+            (s, items[s : s + chunk_size])
+            for s in range(0, len(items), chunk_size)
+        ]
+
+        def _ask(sc):
+            start, chunk = sc
+            try:
+                batch = self.jev.ask(
+                    state_fn(chunk), questions_fn(chunk), stage=stage
+                )
+            except JevError as e:
+                log.warning("%s chunk %d failed: %s", stage, start, e)
+                batch = {}
+            return start, chunk, batch
+
+        return self._map(_ask, chunks)
+
     # -- S0 ----------------------------------------------------------------
 
     def _s0_classify(
@@ -506,22 +553,30 @@ class Resolver:
         # fields (ncbi_datasets, or an eutils hit upgraded in S1).
         genomic = match.get("genomic_accessions") or []
         gene_groups = match.get("gene_groups")
-        if match.get("locus_tag") is None:
-            reports, rep_ev = self.ncbi.gene_by_id(gene_id)
-            if reports:
-                rep = reports[0]
-                genomic = rep.get("genomic_accessions") or []
-                gene_groups = rep.get("gene_groups")
-                evidence = evidence + rep_ev
-                # enrich the bridged node with report metadata
-                node = graph.nodes.get(parent)
-                if node is not None:
-                    node.attrs["gene_type"] = rep.get("gene_type")
-                    node.attrs["gene_groups"] = gene_groups
-                # write assembly fields back so S2 can hang related
-                # assemblies off the real source assembly
-                match.setdefault("assembly_accession", rep.get("assembly_accession"))
-                match.setdefault("assembly_accessions", rep.get("assembly_accessions"))
+        # All three fetches are independent — overlap them. The report call
+        # is conditional (no-op lambda): bridged matches lack the Datasets
+        # report fields; locus_tag presence means they're already on match.
+        need_report = match.get("locus_tag") is None
+        (reports, rep_ev), (products, prod_ev), (links, pm_ev) = self._par(
+            (lambda: self.ncbi.gene_by_id(gene_id)) if need_report
+            else (lambda: ([], [])),
+            lambda: self.ncbi.gene_products(gene_id),
+            lambda: self.ncbi.gene_pubmed(gene_id),
+        )
+        if reports:
+            rep = reports[0]
+            genomic = rep.get("genomic_accessions") or []
+            gene_groups = rep.get("gene_groups")
+            evidence = evidence + rep_ev
+            # enrich the bridged node with report metadata
+            node = graph.nodes.get(parent)
+            if node is not None:
+                node.attrs["gene_type"] = rep.get("gene_type")
+                node.attrs["gene_groups"] = gene_groups
+            # write assembly fields back so S2 can hang related
+            # assemblies off the real source assembly
+            match.setdefault("assembly_accession", rep.get("assembly_accession"))
+            match.setdefault("assembly_accessions", rep.get("assembly_accessions"))
 
         for acc in genomic:
             acc_node = f"nuccore:{acc}"
@@ -534,7 +589,6 @@ class Resolver:
                      confidence=1.0, evidence=evidence)
             )
 
-        products, prod_ev = self.ncbi.gene_products(gene_id)
         for acc in products.get("transcripts", []):
             acc_node = f"nuccore:{acc}"
             graph.add_node(
@@ -556,7 +610,6 @@ class Resolver:
                      confidence=1.0, evidence=prod_ev)
             )
 
-        links, pm_ev = self.ncbi.gene_pubmed(gene_id)
         for link in links:
             pmid = link.get("pubmed_id")
             if not pmid:
@@ -818,14 +871,19 @@ class Resolver:
                 + [match.get("locus_tag"), match.get("symbol")]
                 + [v for db, v in pairs if not db.startswith("Uniprot/")]
             )
-            for alt in list(
+            # Probe aliases concurrently — a missing OMA entry fails
+            # slow (read timeout), so serial retries could cost ~4 ×
+            # timeout. First hit in priority order wins.
+            alts = list(
                 dict.fromkeys(r for r in retries if r and r != identifier)
-            )[:4]:
-                candidates, ev2 = self.oma.orthologs(alt)
+            )[:4]
+            for alt, (cands, ev2) in zip(
+                alts, self._map(self.oma.orthologs, alts)
+            ):
                 evidence += ev2
-                if candidates:
+                if cands and not candidates:
+                    candidates = cands
                     oma_id_used = alt
-                    break
 
         anchor = match.get("anchor") or identifier
 
@@ -910,19 +968,31 @@ class Resolver:
         questions = s3_orthologs.build_questions(candidates, uncovered)
         answers = self.jev.ask(state, questions, stage="s3_orthologs")
 
+        # Two prefetch waves overlap what used to be ~2 serial round-trips
+        # per candidate: OMA xrefs → resolvable SourceID (often a VEuPathDB
+        # locus tag — the canonical ID is a UniProt accession that db=gene
+        # indexes poorly), then the NCBI db=gene lookup per candidate.
+        xref_lists = self._map(
+            lambda c: self.oma.xrefs(c["entry_nr"]) if c.get("entry_nr") else [],
+            candidates,
+        )
+        resolve_ids = [
+            next(
+                (xr["xref"] for xr in xrs if xr.get("source") == "SourceID"),
+                c.get("canonical_id") or c.get("omaid"),
+            )
+            for c, xrs in zip(candidates, xref_lists)
+        ]
+        ncbi_hits = self._map(
+            lambda rid: self.ncbi.find_gene(rid) if rid else ([], []),
+            resolve_ids,
+        )
+
         for i, c in enumerate(candidates):
             cid = c.get("canonical_id") or c.get("omaid")
             if not cid:
                 continue
-            # OMA canonical IDs are UniProt accessions, which resolve poorly
-            # via NCBI gene. Fetch cross-references and prefer the SourceID
-            # (often a VEuPathDB locus tag) as the resolvable identifier.
-            resolve_id = cid
-            if c.get("entry_nr"):
-                for xr in self.oma.xrefs(c["entry_nr"]):
-                    if xr.get("source") == "SourceID":
-                        resolve_id = xr["xref"]
-                        break
+            resolve_id = resolve_ids[i]
             node_id = f"gene:{cid}"
             graph.add_node(
                 Node(
@@ -949,7 +1019,10 @@ class Resolver:
                     evidence=evidence,
                 )
             )
-            self._link_to_ncbi(graph, node_id, resolve_id, c.get("tax_id"))
+            self._link_to_ncbi(
+                graph, node_id, resolve_id, c.get("tax_id"),
+                fetched=ncbi_hits[i],
+            )
 
         for j, org in enumerate(uncovered):
             org_node = f"organism:{org}"
@@ -974,14 +1047,18 @@ class Resolver:
         gene_node: str,
         resolve_id: str,
         tax_id: Any,
+        fetched: tuple | None = None,
     ) -> None:
         """Resolve an OMA ortholog to its NCBI Gene page.
 
         resolve_id is the SourceID xref (often a locus tag), which
         db=gene indexes well. A verified hit gives the ncbigene node —
         S6 then attaches real annotated_in assembly edges to it.
+
+        fetched: optional (records, evidence) from a prefetch wave — the
+        caller did the find_gene already so this is apply-only.
         """
-        records, ev = self.ncbi.find_gene(resolve_id)
+        records, ev = fetched if fetched is not None else self.ncbi.find_gene(resolve_id)
         if not records:
             return
         hit, confidence, qid = self._pick_ncbi_hit(resolve_id, records, tax_id)
@@ -1042,7 +1119,20 @@ class Resolver:
                 m.get("core_peripheral") != "Core",
             ),
         )
-        for m in members:
+        # Two fetch waves replace what was ≤4 serial round-trips per
+        # member: probe each member's VEuPathDB gene record (≤3
+        # suffix-stripped lookups, first hit wins), then db=gene for the
+        # hits only. All node/edge mutation stays serial below.
+        fids = [m.get("full_id") for m in members]
+        probes = self._map(
+            lambda f: self._probe_omclseq(f) if f else None, fids
+        )
+        ncbi_hits = self._map(
+            lambda p: self.ncbi.find_gene(p[0]["gene_id"]) if p else ([], []),
+            probes,
+        )
+
+        for m, hit, ncbi_hit in zip(members, probes, ncbi_hits):
             fid = m.get("full_id")
             if not fid:
                 continue
@@ -1070,31 +1160,9 @@ class Resolver:
                     evidence=evidence,
                 )
             )
-            self._link_omclseq_to_veupathdb(graph, node_id, fid)
-
-    def _link_omclseq_to_veupathdb(
-        self, graph: KnowledgeGraph, omclseq_node: str, full_id: str
-    ) -> None:
-        """Resolve an OrthoMCL member to its VEuPathDB gene page.
-
-        full_id is a transcript/protein-level id (e.g. PF3D7_1444800-T1,
-        AAEL005766-PB); stripping the suffix gives the gene PK, which
-        lookup_gene verifies against the WDK record — a real linkout,
-        not an inference. Non-VEuPathDB ids (GenBank, piped) simply miss
-        the lookup.
-        """
-        # full_id is sequence-level: PF3D7_1444800-T1, PCOAH_00046700-t30_1-p1,
-        # PKA1H_120042300.1-p1, AAEL005766-PB. Try the dash-stripped form
-        # first (keeps dotted gene ids like Tb927.10.12345 intact), then the
-        # raw id, then the dot-stripped form for .N-pN suffixes.
-        candidates = dict.fromkeys(
-            (full_id.split("-")[0], full_id, full_id.split(".")[0])
-        )
-        for cand in candidates:
-            records, ev = self.veupathdb.lookup_gene(cand)
-            if not records:
+            if not hit:
                 continue
-            rec = records[0]
+            rec, ev = hit
             vpd_node = f"veupathdb:{rec['gene_id']}"
             graph.add_node(
                 Node(
@@ -1111,7 +1179,7 @@ class Resolver:
             )
             graph.add_edge(
                 Edge(
-                    subject=omclseq_node,
+                    subject=node_id,
                     predicate="same_as",
                     object=vpd_node,
                     confidence=0.9,  # suffix strip verified by the lookup hit
@@ -1120,8 +1188,29 @@ class Resolver:
             )
             # the member gene's locus tag resolves in db=gene — bridge to
             # ncbigene so S6 can attach verified annotated_in edges
-            self._link_to_ncbi(graph, vpd_node, rec["gene_id"], rec.get("tax_id"))
-            return
+            self._link_to_ncbi(
+                graph, vpd_node, rec["gene_id"], rec.get("tax_id"),
+                fetched=ncbi_hit,
+            )
+
+    def _probe_omclseq(self, full_id: str) -> tuple[dict, list] | None:
+        """First-hit VEuPathDB lookup for an OrthoMCL member id.
+
+        full_id is sequence-level: PF3D7_1444800-T1, PCOAH_00046700-t30_1-p1,
+        PKA1H_120042300.1-p1, AAEL005766-PB. Try the dash-stripped form
+        first (keeps dotted gene ids like Tb927.10.12345 intact), then the
+        raw id, then the dot-stripped form for .N-pN suffixes. Returns
+        (record, evidence) of the first hit — the lookup verifies the
+        stripped id against the WDK record, so the linkout is real, not an
+        inference. Pure fetch: safe to call from a worker thread.
+        """
+        for cand in dict.fromkeys(
+            (full_id.split("-")[0], full_id, full_id.split(".")[0])
+        ):
+            records, ev = self.veupathdb.lookup_gene(cand)
+            if records:
+                return records[0], ev
+        return None
 
     # -- S4 ----------------------------------------------------------------
 
@@ -1315,17 +1404,13 @@ class Resolver:
         # is skipped rather than killing the resolve; its candidates are
         # left unscored and sort to the bottom below.
         scored: list[tuple[dict[str, Any], dict[str, Any], str]] = []
-        for start in range(0, len(candidates), S5_ASK_CHUNK):
-            chunk = candidates[start : start + S5_ASK_CHUNK]
-            try:
-                batch = self.jev.ask(
-                    s5_expression.build_state(identifier, match, chunk),
-                    s5_expression.build_questions(chunk),
-                    stage="s5_expression",
-                )
-            except JevError as e:
-                log.warning("s5_expression chunk %d failed: %s", start, e)
-                batch = {}
+        for start, chunk, batch in self._ask_chunks(
+            candidates,
+            S5_ASK_CHUNK,
+            lambda c: s5_expression.build_state(identifier, match, c),
+            s5_expression.build_questions,
+            "s5_expression",
+        ):
             scored.extend(
                 (c, batch.get(f"relevant_{i}", {}), f"relevant_{start + i}")
                 for i, c in enumerate(chunk)
@@ -1617,15 +1702,19 @@ class Resolver:
         report — actual NCBI annotation evidence, replacing the
         species-name guess for those members.
         """
-        for e in list(graph.edges):
-            if (
-                e.predicate != "same_as"
-                or not e.object.startswith("ncbigene:")
-                or e.subject == graph.metadata["input"]
-            ):
-                continue
-            uid = e.object.split(":", 1)[1]
-            reports, ev = self.ncbi.gene_by_id(uid)
+        targets = [
+            e
+            for e in list(graph.edges)
+            if e.predicate == "same_as"
+            and e.object.startswith("ncbigene:")
+            and e.subject != graph.metadata["input"]
+        ]
+        # one Datasets report per ortholog uid — prefetch concurrently
+        fetched = self._map(
+            lambda e: self.ncbi.gene_by_id(e.object.split(":", 1)[1]),
+            targets,
+        )
+        for e, (reports, ev) in zip(targets, fetched):
             if not reports:
                 continue
             rep = reports[0]
@@ -1791,17 +1880,13 @@ class Resolver:
             for it in items
         ]
         triage_ans: dict[str, dict[str, Any]] = {}
-        for start in range(0, len(triage_items), proposals.TRIAGE_CHUNK):
-            chunk = triage_items[start : start + proposals.TRIAGE_CHUNK]
-            try:
-                batch = self.jev.ask(
-                    proposals.build_triage_state(match, chunk),
-                    proposals.build_triage_questions(chunk),
-                    stage="proposals_triage",
-                )
-            except JevError as e:
-                log.warning("proposals_triage chunk %d failed: %s", start, e)
-                batch = {}
+        for start, chunk, batch in self._ask_chunks(
+            triage_items,
+            proposals.TRIAGE_CHUNK,
+            lambda c: proposals.build_triage_state(match, c),
+            proposals.build_triage_questions,
+            "proposals_triage",
+        ):
             for i, ans in batch.items():
                 # Question ids are chunk-local (triage_0, triage_1…);
                 # rekey to the global item index.
@@ -2180,16 +2265,14 @@ class Resolver:
         # One ask per chunk: a deep graph can produce hundreds of pairs and
         # a single ask overflows JEV's max_tokens. A failed chunk is skipped
         # rather than killing the resolve — these are speculative edges.
-        for start in range(0, len(pairs), 50):
-            chunk = pairs[start : start + 50]
-            try:
-                answers = self.jev.ask(
-                    s6_remap.build_candidate_state(chunk),
-                    s6_remap.build_candidate_questions(chunk),
-                    stage="s6_candidates",
-                )
-            except JevError as e:
-                log.warning("s6_candidates chunk %d failed: %s", start, e)
+        for start, chunk, answers in self._ask_chunks(
+            pairs,
+            50,
+            s6_remap.build_candidate_state,
+            s6_remap.build_candidate_questions,
+            "s6_candidates",
+        ):
+            if not answers:
                 continue
             for i, p in enumerate(chunk):
                 self._add_candidate_edge(graph, p, answers.get(f"candidate_{i}", {}), start + i)
