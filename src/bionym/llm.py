@@ -38,14 +38,14 @@ class LlmClient:
         model: str | None = None,
         mock: bool = False,
         cache_dir: str | None = None,
-        timeout: float = 60.0,
+        timeout: float = 180.0,
     ) -> None:
         self.base_url = (
             base_url or os.environ.get("LLM_BASE_URL") or DEFAULT_BASE_URL
         ).rstrip("/")
         self.model = model or os.environ.get("LLM_MODEL") or ""
         self.mock = mock
-        self.timeout = timeout
+        self.timeout = float(os.environ.get("LLM_TIMEOUT") or timeout)
         # shared client: keep-alive/connection pooling across calls
         # (and across threads — resolver prefetches run in workers).
         self._http = httpx.Client()
@@ -65,7 +65,7 @@ class LlmClient:
     def complete(self, system: str, user: str) -> str:
         """One chat completion -> raw content string (expected JSON)."""
         if self.mock:
-            return '{"proposals": [{"claim": "mock proposal", "quote": "mock"}]}'
+            return '{"proposals": [{"claim": "mock proposal", "quote": "mock"}], "answer": "mock answer", "cited_nodes": []}'
         body = {
             "model": self.model,
             "messages": [
@@ -81,15 +81,18 @@ class LlmClient:
         if self._cache is not None and key in self._cache:
             return self._cache[key]
 
-        resp = self._http.post(
-            f"{self.base_url}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {self._api_key}",
-                "Content-Type": "application/json",
-            },
-            json=body,
-            timeout=self.timeout,
-        )
+        try:
+            resp = self._http.post(
+                f"{self.base_url}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {self._api_key}",
+                    "Content-Type": "application/json",
+                },
+                json=body,
+                timeout=self.timeout,
+            )
+        except httpx.HTTPError as e:
+            raise LlmError(f"LLM request failed: {e}") from e
         if resp.status_code != 200:
             raise LlmError(f"LLM API error {resp.status_code}: {resp.text[:500]}")
         data = resp.json()

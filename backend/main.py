@@ -15,27 +15,27 @@ from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from bionym.ask import ask_graph
 from bionym.clients.ncbi import NcbiClient
 from bionym.clients.oma import OmaClient
 from bionym.clients.veupathdb import VEuPathDBClient
 from bionym.graph import KnowledgeGraph
 from bionym.jev import JevClient, JevError
-from bionym.llm import LlmClient
+from bionym.llm import LlmClient, LlmError
 from bionym.resolver import Resolver
 
 load_dotenv()
 
 app = FastAPI(title="bionym", version="0.1.0")
 
-# CORS: comma-separated origins via BIONYM_CORS_ORIGINS; defaults to the
-# local dev frontend. Set to "*" explicitly if needed, not by default.
-_origins = os.environ.get(
-    "BIONYM_CORS_ORIGINS",
-    "http://localhost:8080,http://127.0.0.1:8080",
-).split(",")
+# CORS: comma-separated origins via BIONYM_CORS_ORIGINS; default allows any
+# localhost/127.0.0.1 origin (covers dev servers and browser-preview
+# proxies, which use random ports). Set env to restrict, "*" not default.
+_origins = os.environ.get("BIONYM_CORS_ORIGINS", "").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in _origins if o.strip()],
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
@@ -59,6 +59,13 @@ def _jev_error(_: Request, exc: JevError) -> JSONResponse:
     # JEV upstream failures (max_tokens, 5xx after retries) otherwise
     # surface as a bare 500 the frontend can't decode.
     return JSONResponse(status_code=502, content={"detail": f"JEV upstream error: {exc}"})
+
+
+@app.exception_handler(LlmError)
+def _llm_error(_: Request, exc: LlmError) -> JSONResponse:
+    # Same for LLM failures — unhandled exceptions bypass the CORS
+    # middleware and the browser reports only "failed to fetch".
+    return JSONResponse(status_code=502, content={"detail": f"LLM upstream error: {exc}"})
 
 
 def _resolver(mock_jev: bool = False) -> Resolver:
@@ -102,6 +109,30 @@ def summarize(graph: dict, mock_jev: bool = Query(False)):
     resolver = _resolver(mock_jev=mock_jev)
     resolver.summarize(g)  # match derived from the graph itself
     return {"summary": g.metadata.get("summary") or []}
+
+
+@app.post("/api/ask")
+def ask(payload: dict, mock_jev: bool = Query(False)):
+    """Answer a free-form question over a previously resolved graph.
+
+    LLM generates the answer from the graph JSON; JEV scores it
+    (accuracy/completeness no-uls). Experimental — one-shot questions,
+    no conversation state.
+    """
+    _check_mock(mock_jev)
+    if not mock_jev and not os.environ.get("TYPESAFE_API_KEY"):
+        raise HTTPException(500, "TYPESAFE_API_KEY not configured on server")
+    question = (payload.get("question") or "").strip()
+    if not question:
+        raise HTTPException(422, "question is required")
+    try:
+        g = KnowledgeGraph.model_validate(payload.get("graph"))
+    except Exception as e:
+        raise HTTPException(422, f"invalid graph: {e}")
+    resolver = _resolver(mock_jev=mock_jev)
+    if not resolver.llm.enabled:
+        raise HTTPException(503, "LLM not configured on server (LLM_API_KEY/LLM_MODEL)")
+    return ask_graph(resolver.jev, resolver.llm, question, g)
 
 
 @app.get("/api/health")

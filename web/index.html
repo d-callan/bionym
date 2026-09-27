@@ -47,6 +47,18 @@
   details#summary ul { margin: .6rem 0 .2rem; padding-left: 1.2rem; font-size: .88rem; }
   details#summary li { margin-bottom: .35rem; }
   .sumconf { color: var(--muted); font-size: .78rem; }
+  details#ask { margin-top: 1.4rem; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: .6rem 1rem; }
+  details#ask > summary { cursor: pointer; font-size: 1.05rem; font-weight: 600; }
+  details#ask form { margin: .7rem 0 .3rem; }
+  #asklist .qa { margin-top: .7rem; padding: .5rem .7rem; border: 1px solid var(--line); border-radius: 6px; background: #f8fafc; }
+  #asklist details.qa summary { cursor:pointer; font-weight:600; }
+  #asklist details.qa[open] summary { margin-bottom:.4rem; padding-bottom:.4rem; border-bottom:1px dashed var(--line); }
+  #asklist .qa .a { white-space:pre-wrap; font-size:.9rem; }
+  #asklist .qa .cites { font-size:.75rem; color:var(--muted); margin-top:.5rem; }
+  #asklist .qa .badge { display:inline-block; font-size:.66rem; font-weight:600; line-height:1.5;
+    padding:0 .45rem; border-radius:.6rem; background:#e2e8f0; color:#4a5568;
+    margin-left:.35rem; vertical-align:.1em; }
+  #asklist .qa .badge.cat { background:#dbeafe; color:#2b6cb0; }
   aside#detail { position: fixed; right: 1rem; top: 8rem; z-index: 9; width: 19rem;
     max-height: 60vh; overflow: auto; }
   #overview-wrap { margin: .2rem 0 .6rem; }
@@ -93,10 +105,20 @@
     <summary>Summary</summary>
     <ul id="summarylist"></ul>
   </details>
+  <details id="ask" hidden>
+    <summary>Ask the graph <span class="hint">experimental — LLM answers, JEV scores accuracy &amp; completeness</span></summary>
+    <form id="askf">
+      <input type="text" id="askq" placeholder="e.g. which assemblies likely contain an ortholog?" required>
+      <button id="askgo" type="submit">Ask</button>
+    </form>
+    <div id="asklist"></div>
+  </details>
   <div id="overview-wrap" hidden>
-    <label id="stackmode">stack by predicate (node as)
-      <select id="stacksel"><option value="off" selected>off</option><option value="subject">subject</option><option value="object">object</option></select>
-    </label>
+    <h2>Overview
+      <label id="stackmode">stack by predicate (node as)
+        <select id="stacksel"><option value="off" selected>off</option><option value="subject">subject</option><option value="object">object</option></select>
+      </label>
+    </h2>
     <div id="ov"></div>
   </div>
   <h2>Network
@@ -175,7 +197,7 @@ $("#f").addEventListener("submit", async e => {
   $("#go").disabled = true;
   try {
     const mode = document.querySelector('input[name=mode]:checked').value;
-    const r = await fetch(`${BACKEND}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${DEPTH[mode]}&propose=${mode === "full"}&summarize=${mode === "full"}`);
+    const r = await fetch(`${BACKEND}/api/resolve?identifier=${encodeURIComponent(id)}&depth=${DEPTH[mode] || 6}&propose=${mode === "full"}&summarize=${mode === "full"}`);
     if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
     GRAPH = await r.json();
     renderFiltered();
@@ -252,6 +274,8 @@ function render(g) {
   net.update(g);
   ov.update(g);
   $("#overview-wrap").hidden = !g.nodes.length;
+  $("#ask").hidden = !g.nodes.length;
+  $("#askgo").disabled = !g.nodes.length;
 
   const byId = Object.fromEntries(g.nodes.map(n => [n.id, n]));
   const cell = id => byId[id] ? link(byId[id]) : esc(id);
@@ -284,6 +308,52 @@ $("#layout").addEventListener("change", () => {
 });
 $("#clustergroup").addEventListener("change", () => net.setCluster($("#clustergroup").checked));
 $("#stacksel").addEventListener("change", () => ov.setStackBy($("#stacksel").value));
+
+// ---- ask the graph (experimental): LLM answer + JEV scores, stacked ------
+$("#askf").addEventListener("submit", async e => {
+  e.preventDefault();
+  const q = $("#askq").value.trim();
+  if (!q || !GRAPH) return;
+  $("#askgo").disabled = true;
+  // collapse older answers; the newest question stays open
+  document.querySelectorAll("#asklist details[open]").forEach(d => d.removeAttribute("open"));
+  const card = document.createElement("details");
+  card.className = "qa pending";
+  card.setAttribute("open", "");
+  card.innerHTML = `<summary>${esc(q)}</summary><div class="a">asking…</div>`;
+  $("#asklist").prepend(card);
+  $("#askq").value = "";
+  try {
+    const r = await fetch(`${BACKEND}/api/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: q, graph: GRAPH }),
+    });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+    const res = await r.json();
+    const s = res.scores || {};
+    const badge = (k, label) =>
+      s[k] != null ? `<span class="badge">${label || k} ${(+s[k]).toFixed(2)}</span>` : "";
+    const catbadges = (res.categories || [])
+      .map(c => `<span class="badge cat">${esc(c)}</span>`).join("");
+    const invalid = new Set(res.invalid_cited_nodes || []);
+    const cites = (res.cited_nodes || []).map(c =>
+      invalid.has(c)
+        ? `<span style="color:#c53030">${esc(String(c))}</span>`
+        : esc(String(c)));
+    card.classList.remove("pending");
+    card.innerHTML =
+      `<summary>${esc(res.question || q)} ${catbadges}${badge("accuracy")}${badge("completeness")}${badge("citation_fidelity", "cites")}</summary>` +
+      `<div class="a">${esc(res.answer || "(empty answer)")}</div>` +
+      (res.warning ? `<div class="cites" style="color:#b7791f">⚠ ${esc(res.warning)}</div>` : "") +
+      (cites.length ? `<div class="cites">cites: ${cites.join(", ")}${invalid.size ? " — <b>red ids are not in the graph</b>" : ""}</div>` : "");
+  } catch (err) {
+    card.classList.remove("pending");
+    card.innerHTML = `<summary>${esc(q)}</summary><div class="a" style="color:#c53030">Error: ${esc(err.message)}</div>`;
+  } finally {
+    $("#askgo").disabled = !GRAPH;
+  }
+});
 
 const aboutDlg = $("#about");
 const openAbout = e => { e.preventDefault(); aboutDlg.showModal(); };

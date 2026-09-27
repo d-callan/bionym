@@ -10,11 +10,12 @@ from typing import Optional
 import typer
 from dotenv import load_dotenv
 
+from .ask import ask_graph
 from .clients.ncbi import NcbiClient
 from .clients.veupathdb import VEuPathDBClient
 from .graph import KnowledgeGraph
 from .jev import JevClient, JevError
-from .llm import LlmClient
+from .llm import LlmClient, LlmError
 from .resolver import Resolver
 
 app = typer.Typer(
@@ -139,6 +140,63 @@ def summarize(
     dest = out or graph_json
     graph.to_json(dest)
     typer.echo(f"wrote {dest}")
+
+
+@app.command()
+def ask(
+    graph_json: Path = typer.Argument(
+        ..., help="Existing graph JSON from `bionym resolve`."
+    ),
+    question: str = typer.Argument(..., help="Free-form question over the graph."),
+    mock_jev: bool = typer.Option(False, "--mock-jev", help="Offline dev: no API key needed."),
+    mock_llm: bool = typer.Option(False, "--mock-llm", help="Offline dev: canned LLM answer."),
+    verbose: bool = typer.Option(False, "-v", "--verbose"),
+) -> None:
+    """Ask a free-form question over an existing graph JSON.
+
+    JEV classifies the question into graph categories; the LLM answers
+    over just that slice and JEV scores accuracy/completeness. Questions
+    outside the categories are answered unscored with a warning.
+    """
+    load_dotenv()
+    logging.basicConfig(
+        level=logging.DEBUG if verbose else logging.WARNING,
+        format="%(levelname)s %(name)s: %(message)s",
+    )
+    cache = _cache_dir()
+    try:
+        jev = JevClient(mock=mock_jev, cache_dir=cache)
+    except JevError as e:
+        typer.secho(str(e), err=True, fg=typer.colors.RED)
+        raise typer.Exit(2)
+
+    graph = KnowledgeGraph.from_json(graph_json)
+    try:
+        res = ask_graph(
+            jev, LlmClient(mock=mock_llm, cache_dir=cache), question, graph
+        )
+    except (JevError, LlmError) as e:
+        typer.secho(str(e), err=True, fg=typer.colors.RED)
+        raise typer.Exit(2)
+
+    if res["categories"]:
+        typer.echo(f"categories: {', '.join(res['categories'])}")
+    typer.echo(res["answer"])
+    if res["cited_nodes"]:
+        cites = ", ".join(str(c) for c in res["cited_nodes"])
+        typer.echo(f"cites: {cites}")
+    if res["invalid_cited_nodes"]:
+        typer.secho(
+            "not in graph: " + ", ".join(str(c) for c in res["invalid_cited_nodes"]),
+            fg=typer.colors.RED,
+        )
+    if res["scores"]:
+        scores = ", ".join(
+            f"{k} {v:.2f}" for k, v in res["scores"].items() if v is not None
+        )
+        typer.echo(f"scores: {scores}")
+    if res["warning"]:
+        typer.secho(f"warning: {res['warning']}", fg=typer.colors.YELLOW)
 
 
 if __name__ == "__main__":
