@@ -165,6 +165,9 @@ class Resolver:
                 self.summarize(graph, match)
                 graph.mark_stage("summary")
 
+        # resolved = S1 found a real record; refused = classify found
+        # no gene match (wrong namespace, garbage id, unknown entity)
+        graph.metadata["outcome"] = "resolved" if match else "refused"
         graph.metadata["jev_usage"] = {
             "total": self.jev.total_usage(),
             "by_stage": self.jev.usage_log,

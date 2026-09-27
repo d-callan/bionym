@@ -1,0 +1,113 @@
+# BioNym eval corpus — real IDs, real runs.
+# expect.outcome: resolved | refused | error
+# IDs marked "# verify" should be eyeballed once before the first run;
+# everything else is already known-good or deliberately bad.
+
+# ------------------------------------------------------------------ T1 smoke
+# Cheap, quick-scan. Run on every change.
+- id: abc123
+  tier: t1
+  name: garbage-string
+  quick: true
+  expect: { outcome: refused }
+
+- id: K00001                 # KEGG ortholog entry — valid ID, not a gene
+  tier: t1
+  name: kegg-not-a-gene
+  quick: true
+  expect: { outcome: refused }
+
+- id: "10.1038/s41586-020-2649-2"   # DOI
+  tier: t1
+  name: doi-not-a-gene
+  quick: true
+  expect: { outcome: refused }
+
+- id: GCA_000002765.2        # P. falciparum 3D7 assembly accession — not a gene. verify
+  tier: t1
+  name: assembly-not-a-gene
+  quick: true
+  expect: { outcome: refused }
+
+- id: PF3D7_0710100          # verified e2e — locus tag happy path
+  tier: t1
+  name: veupathdb-happy-quick
+  quick: true
+  expect: { outcome: resolved, anchor_ns: veupathdb }
+
+# ------------------------------------------------------------------ T2 core
+# Namespace coverage + edge cases, quick mode.
+- id: "2655077"              # NCBI GeneID — exercises the locus_tag bridge
+  tier: t2
+  name: ncbi-geneid-bridge   # expected to land on veupathdb:PF3D7_0710100
+  quick: true
+  expect: { outcome: resolved, anchor_ns: veupathdb }
+
+- id: PF3D7_1343700          # kelch13 — rich annotations/datasets
+  tier: t2
+  name: veupathdb-k13
+  quick: true
+  expect: { outcome: resolved, anchor_ns: veupathdb, min_nodes: 10 }
+
+- id: MAL7P1.27              # deprecated alias of pfcrt (PF3D7_0709000)
+  tier: t2
+  name: deprecated-alias     # VEuPathDB resolves previous IDs transparently
+  quick: true
+  expect: { outcome: resolved, anchor_ns: veupathdb }
+
+- id: P38398                 # BRCA1_HUMAN UniProt accession
+  tier: t2
+  name: uniprot-human
+  quick: true
+  expect: { outcome: resolved }
+
+- id: ENSG00000012048        # BRCA1 Ensembl
+  tier: t2
+  name: ensembl-human
+  quick: true
+  expect: { outcome: resolved }
+
+- id: BRCA1                  # bare symbol — needs an organism guess path
+  tier: t2
+  name: bare-symbol
+  quick: true
+  expect: { outcome: resolved }    # verify: may need organism hint support
+
+- id: ama1                   # ambiguous across apicomplexans — verify behavior
+  tier: t2
+  name: ambiguous-symbol
+  quick: true
+  expect: { outcome: resolved }    # verify: resolver picks one or refuses — record which
+
+- id: cgd2_1810              # CryptoDB locus — candidate for "in VEuPathDB but
+  tier: t2
+  name: veupath-only         #  not NCBI" edge. verify this ID exists + has no
+  quick: true                #  NCBI Gene record before trusting the case
+  expect: { outcome: resolved, anchor_ns: veupathdb }
+
+- id: PVX_081515             # P. vivax locus — vivax coverage. verify ID
+  tier: t2
+  name: veupathdb-vivax
+  quick: true
+  expect: { outcome: resolved }
+
+# ------------------------------------------------------------------ T3 deep
+# Full analysis (propose+summarize). Slow + costs tokens — run sparingly.
+- id: PF3D7_1343700
+  tier: t3
+  name: deep-k13             # resistance gene — should attract real claims
+  quick: false
+  expect: { outcome: resolved, min_nodes: 30,
+            predicates: [measured_in, ortholog_of, reports] }
+
+- id: PF3D7_1444800
+  tier: t3
+  name: deep-time-series     # known to have time-series datasets + claims
+  quick: false               #  (exercised the ask-the-graph pipeline)
+  expect: { outcome: resolved, predicates: [measured_in, has_factor] }
+
+- id: PF3D7_0710100
+  tier: t3
+  name: deep-verified        # previously: 41 dataset nodes + 20 assemblies
+  quick: false               #  at depth 5 — regression anchor for node counts
+  expect: { outcome: resolved, min_nodes: 40 }

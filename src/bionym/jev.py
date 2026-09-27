@@ -23,6 +23,12 @@ import httpx
 log = logging.getLogger(__name__)
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
+
+# JEV_BASE_URL may be an origin ("http://127.0.0.1:8009") or a full
+# endpoint ("https://api.laya.studio/v1/systemone") — both accepted.
+def _endpoint(base: str) -> str:
+    base = base.rstrip("/")
+    return base if base.endswith("/v1/systemone") else f"{base}/v1/systemone"
 DEFAULT_MODEL = "jev-latest"
 
 
@@ -35,6 +41,7 @@ class JevClient:
         self,
         api_key: str | None = None,
         model: str = DEFAULT_MODEL,
+        base_url: str | None = None,
         mock: bool = False,
         cache_dir: str | None = None,
         timeout: float = 60.0,
@@ -42,6 +49,12 @@ class JevClient:
         self.model = model
         self.mock = mock
         self.timeout = timeout
+        # /v1/systemone-compatible backends (Laya, Kev, CLM, ...) —
+        # JEV_BASE_URL repoints the client; auth header env is per
+        # backend but TYPESAFE_API_KEY works as the generic key slot.
+        self.url = _endpoint(
+            base_url or os.environ.get("JEV_BASE_URL") or API_URL
+        )
         # shared client: keep-alive/connection pooling across calls
         # (and across threads — resolver prefetches run in workers).
         self._http = httpx.Client()
@@ -138,7 +151,7 @@ class JevClient:
         for attempt in range(3):
             try:
                 resp = self._http.post(
-                    API_URL,
+                    self.url,
                     headers={
                         "Authorization": f"Bearer {self._api_key}",
                         "Content-Type": "application/json",

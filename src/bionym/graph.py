@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, PrivateAttr, computed_field
 
 from .evidence import Evidence
 
@@ -114,6 +115,7 @@ class Edge(BaseModel):
 
 class KnowledgeGraph(BaseModel):
     nodes: dict[str, Node] = Field(default_factory=dict)
+    _stage_t: float = PrivateAttr(default_factory=time.monotonic)
     edges: list[Edge] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -136,7 +138,15 @@ class KnowledgeGraph(BaseModel):
 
     def mark_stage(self, name: str) -> None:
         """Record a completed pipeline stage and log it — the only
-        progress signal while a resolve is in flight."""
+        progress signal while a resolve is in flight. Wall time lands
+        in metadata["stage_times"] (stages stays a plain name list —
+        report/web join it as strings)."""
+        now = time.monotonic()
+        if self._stage_t is not None:
+            self.metadata.setdefault("stage_times", {})[name] = round(
+                now - self._stage_t, 2
+            )
+        self._stage_t = now
         self.metadata.setdefault("stages", []).append(name)
         log.info("[%s] stage %s", self.metadata.get("input"), name)
 
