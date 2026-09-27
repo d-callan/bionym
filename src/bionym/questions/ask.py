@@ -65,9 +65,10 @@ CATEGORIES: dict[str, dict[str, Any]] = {
         "predicates": {"has_go_term", "has_domain", "in_pathway"},
         "types": {"GOTerm", "Domain", "Pathway"},
     },
-    "expression": {
-        "desc": "expression datasets and experimental conditions likely "
-        "relevant to the gene",
+    "datasets": {
+        "desc": "datasets associated with the gene — expression, "
+        "phenotypic, variant, or other measurements — and their "
+        "experimental conditions",
         "predicates": {"measured_in", "has_factor"},
         "types": {"Dataset", "Condition"},
     },
@@ -77,10 +78,17 @@ CATEGORIES: dict[str, dict[str, Any]] = {
         "types": {"Publication"},
     },
     "claims": {
-        "desc": "AI-proposed claims or the generated summary (full "
-        "analysis only)",
-        "predicates": set(),
-        "types": {"Claim"},
+        "desc": "AI-proposed claims about the gene or its datasets "
+        "and publications, or the generated summary (full analysis "
+        "only) — anything LLM-proposed and JEV-verified",
+        # `reports` attaches claims to whatever they were proposed
+        # about (gene/dataset/publication); `has_condition` attaches
+        # proposed conditions to datasets. Including the predicates
+        # pulls the claim's subject node into the slice as an
+        # endpoint — without them a claims-only question sees orphan
+        # Claim nodes and zero edges.
+        "predicates": {"reports", "has_condition"},
+        "types": {"Claim", "Condition"},
     },
 }
 
