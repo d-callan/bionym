@@ -84,11 +84,10 @@
   #stackmode select { font-size: .75rem; padding: .1rem .3rem; }
   #clustwrap { font-weight: normal; font-size: .8rem; margin-left: .8rem; }
   header { position: relative; }
-  #info-btn { position: absolute; top: 1.05rem; right: 2rem; display: inline-flex; align-items: center;
-    gap: .35rem; padding: .3rem .7rem; border-radius: 999px; background: #fff; color: var(--muted);
-    border: 1.5px solid var(--line); font-size: .75rem; font-weight: 600; cursor: pointer; }
-  #info-btn svg { flex: none; }
-  #info-btn:hover { color: var(--ink); border-color: var(--muted); background: var(--bg); }
+  #info-btn { position: absolute; top: 1.1rem; right: 2rem; width: 1.8rem; height: 1.8rem; padding: 0;
+    border-radius: 50%; background: #fff; color: var(--muted); border: 1.5px solid var(--line);
+    font-size: .85rem; font-weight: 700; line-height: 1; }
+  #info-btn:hover { color: var(--ink); border-color: var(--muted); }
   dialog#about { border: 1px solid var(--line); border-radius: 10px; padding: 0; max-width: 42rem;
     width: min(42rem, 92vw); box-shadow: 0 10px 40px rgba(0,0,0,.25); }
   dialog#about::backdrop { background: rgba(15,20,30,.4); }
@@ -106,7 +105,7 @@
 </head>
 <body>
 <header>
-  <h1>BioNym <span class="tagline">identifiers → confidence-scored knowledge graphs, judged by <a href="https://typesafe.ai" target="_blank" rel="noopener">JEV (TypeSafe.ai)</a></span></h1>
+  <h1>BioNym <span class="tagline">identifiers → confidence-scored knowledge graphs · <a href="#" id="more-link" aria-haspopup="dialog">read more</a></span></h1>
   <form id="f">
     <input type="text" id="id" placeholder="identifier — e.g. PF3D7_0710100, 672, BRCA1" required>
     <button id="go" type="submit">Resolve</button>
@@ -116,12 +115,7 @@
     </span>
     <label>min conf <input type="range" id="minconf" min="0" max="1" step="0.05" value="0" style="width:8rem;vertical-align:middle"><span id="minconfv">0.00</span></label>
   </form>
-  <button id="info-btn" type="button" title="How this works" aria-haspopup="dialog" aria-label="How this works">
-    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
-    </svg>
-    How this works
-  </button>
+  <button id="info-btn" type="button" title="How this works" aria-haspopup="dialog">i</button>
 </header>
 <div id="status">Enter an identifier to resolve.</div>
 <main>
@@ -313,7 +307,9 @@ $("#layout").addEventListener("change", () => {
 $("#clustergroup").addEventListener("change", () => { if (LAST) drawScene(); });
 $("#stacksel").addEventListener("change", () => { if (LAST) overviewChart(LAST.nodes, LAST.edges); });
 const aboutDlg = $("#about");
-$("#info-btn").addEventListener("click", () => aboutDlg.showModal());
+const openAbout = e => { e.preventDefault(); aboutDlg.showModal(); };
+$("#info-btn").addEventListener("click", openAbout);
+$("#more-link").addEventListener("click", openAbout);
 aboutDlg.querySelector(".a-close").addEventListener("click", () => aboutDlg.close());
 aboutDlg.addEventListener("click", e => { if (e.target === aboutDlg) aboutDlg.close(); });
 
