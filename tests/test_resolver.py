@@ -635,3 +635,24 @@ def test_proposals_triage_caps_and_chunks_item_flood():
     assert len(triage_calls) == math.ceil(TRIAGE_PER_KIND / TRIAGE_CHUNK)
     assert all(u["n_questions"] <= TRIAGE_CHUNK for u in triage_calls)
     assert sum(u["n_questions"] for u in triage_calls) == TRIAGE_PER_KIND
+
+
+def test_resolve_records_outcome_and_stage_times():
+    """metadata.outcome + stage_times are the evals contract."""
+    g = _resolver().resolve("672", depth=1)
+    assert g.metadata["outcome"] == "resolved"
+    times = g.metadata["stage_times"]
+    assert times and set(times) <= set(g.metadata["stages"])
+    assert all(isinstance(v, float) and v >= 0 for v in times.values())
+    # never serialized: the timing clock is a PrivateAttr, not metadata
+    assert "_stage_t" not in g.metadata
+
+
+def test_resolve_records_refused_outcome():
+    r = _resolver()
+    # every candidate-lookup path misses -> refused, not error
+    r.ncbi.find_gene = lambda term: ([], [])
+    r.ncbi.gene_by_id = lambda gid: ([], [])
+    r.veupathdb.lookup_gene = lambda gid: ([], [])
+    g = r.resolve("672", depth=1)
+    assert g.metadata["outcome"] == "refused"
