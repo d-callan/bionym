@@ -85,6 +85,24 @@ def resolve(
 
 
 @app.command()
+def report(
+    graph_json: Path = typer.Argument(
+        ..., help="Existing graph JSON from `bionym resolve`."
+    ),
+    out: Optional[Path] = typer.Option(
+        None, "-o", "--out", help="Output path (default: input with .html)."
+    ),
+) -> None:
+    """Render a self-contained HTML report from an existing graph JSON."""
+    from .report import write_report
+
+    graph = KnowledgeGraph.from_json(graph_json)
+    dest = out or graph_json.with_suffix(".html")
+    write_report(graph, dest)
+    typer.echo(f"wrote {dest}")
+
+
+@app.command()
 def summarize(
     graph_json: Path = typer.Argument(
         ..., help="Existing graph JSON from `bionym resolve`."
