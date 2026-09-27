@@ -24,8 +24,13 @@ claims over per-gene measurements (VEuPathDB ExpressionGraphs, GEO GDS SOFT
 files, GXA baseline/differential TSVs). A third pass can synthesize a
 JEV-verified gene summary into `metadata.summary`.
 
-Interfaces: CLI (`bionym resolve`, `bionym summarize`), FastAPI backend
-(`backend/`), static web frontend (`web/`, D3 multi-partite network).
+Interfaces: CLI (`bionym resolve`, `bionym summarize`, `bionym ask`), FastAPI backend (`backend/`), static web frontend (`web/`, D3 multi-partite network).
+
+`ask` answers a free-form question over a resolved graph: JEV first
+classifies the question into graph categories, the matching subgraph
+is sliced out, the LLM answers over that slice (citing node ids), and
+JEV scores accuracy/completeness — deterministic citation fidelity
+checked against the full graph on top.
 
 ## Install
 
@@ -52,6 +57,12 @@ cp .env.example .env   # then edit
 - `BIONYM_PROPOSAL_MIN_SCORE` (default 0.5) — JEV triage score a
   dataset/publication needs before the LLM spends a call on it.
 - `BIONYM_PROPOSAL_CONCURRENCY` (default 8) — max simultaneous LLM calls.
+- `JEV_BASE_URL` — optional; repoint the systemone endpoint at any
+  compatible backend (Laya, Kev, CLM all speak `POST /v1/systemone`).
+- `LLM_TIMEOUT` — optional, seconds (default 180); whole-graph asks
+  can exceed the old 60s on slow models.
+- `BIONYM_ALLOW_MOCK` — server only; `=1` permits `mock_jev=true`
+  on API requests (offline dev/evals). Off by default.
 
 ## Usage
 
@@ -65,6 +76,8 @@ bionym resolve 672 --summarize          # + JEV-verified summary in metadata
 bionym resolve 672 --mock-jev           # offline dev, no API key
 
 bionym summarize graph.json           # summary pass on an existing graph
+bionym ask graph.json "what datasets are associated?"
+                                     # classify → slice → LLM answer → JEV scores
 ```
 
 > **`--mock-jev` is for development only.** It returns deterministic
@@ -78,8 +91,9 @@ bionym summarize graph.json           # summary pass on an existing graph
 Output: a JSON knowledge graph — `nodes` (typed: Gene, Organism, Assembly,
 IdType, ...; each with an external `url`), `edges` (claims with
 `confidence`, `probabilities`, `jev_question_id`, `evidence[]`), and
-`metadata` (`stages`, `jev_usage` per-stage token counts, optional
-`summary`: JEV-verified claim list with `claim`/`quote`/`confidence`).
+`metadata` (`outcome`: `resolved|refused`, `stages` + `stage_times`,
+`jev_usage` per-stage token counts, optional `summary`: JEV-verified
+claim list with `claim`/`quote`/`confidence`).
 
 ## Web app
 
@@ -96,8 +110,9 @@ The UI offers **Quick scan** (`propose=false` — deterministic stages + JEV
 edge scoring only, seconds) vs **Full analysis** (`propose+summarize`,
 minutes). The verified summary renders in a collapsible section above the
 network. API: `GET /api/resolve?identifier=…&depth=…&propose=…&summarize=…`,
-plus `POST /api/summarize` which runs the summary pass over a previously
-returned graph body.
+`POST /api/summarize` (summary pass over a previously returned graph),
+and `POST /api/ask` (ask-the-graph over a previously returned graph —
+powers the collapsible Q&A panel in the UI).
 
 ## Design rules
 
@@ -124,16 +139,22 @@ returned graph body.
 
 ```
 src/bionym/       core library + CLI (no web deps)
-  jev.py          systemone client: batch questions, token logging, mock mode
-  llm.py          proposal/summary LLM client (mock mode for dev)
+  jev.py          systemone client: batch questions, token logging,
+                  mock mode, JEV_BASE_URL for Laya/Kev/CLM backends
+  llm.py          proposal/summary/ask LLM client (mock mode for dev)
+  ask.py          ask-the-graph orchestration (classify→slice→answer→score)
   evidence.py     Evidence records
   graph.py        KnowledgeGraph: nodes/edges/confidence, url + filtering
   proposals.py    LLM propose-then-JEV-verify: prompts, serializers, parsers
-  questions/      staged JEV question builders (s0–s6)
+  questions/      staged JEV question builders (s0–s6) + ask
+                  classify/slice builders
   clients/        one thin client per data source
   resolver.py     stage orchestration + proposal/summary passes
   report.py       self-contained HTML report (D3 network + tables)
 backend/          FastAPI deployable
 web/              static frontend (D3 multi-partite network)
-tests/            pytest; JEV mocked, clients faked
+evals/            corpus + runner + differ for real-ID eval runs
+                  (see evals/README.md; results committed as JSONL)
+tests/            pytest; JEV/LLM mocked or faked, backend via
+                  TestClient
 ```
