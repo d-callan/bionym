@@ -40,18 +40,19 @@ class JevClient:
     def __init__(
         self,
         api_key: str | None = None,
-        model: str = DEFAULT_MODEL,
+        model: str | None = None,
         base_url: str | None = None,
         mock: bool = False,
         cache_dir: str | None = None,
         timeout: float = 60.0,
     ) -> None:
-        self.model = model
         self.mock = mock
         self.timeout = timeout
         # /v1/systemone-compatible backends (Laya, Kev, CLM, ...) —
-        # JEV_BASE_URL repoints the client; auth header env is per
-        # backend but TYPESAFE_API_KEY works as the generic key slot.
+        # JEV_BASE_URL repoints the endpoint, JEV_MODEL the model
+        # string; auth header env is per backend but TYPESAFE_API_KEY
+        # works as the generic key slot.
+        self.model = model or os.environ.get("JEV_MODEL") or DEFAULT_MODEL
         self.url = _endpoint(
             base_url or os.environ.get("JEV_BASE_URL") or API_URL
         )

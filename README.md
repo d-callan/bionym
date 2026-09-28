@@ -59,6 +59,8 @@ cp .env.example .env   # then edit
 - `BIONYM_PROPOSAL_CONCURRENCY` (default 8) — max simultaneous LLM calls.
 - `JEV_BASE_URL` — optional; repoint the systemone endpoint at any
   compatible backend (Laya, Kev, CLM all speak `POST /v1/systemone`).
+- `JEV_MODEL` — optional (default `jev-latest`); model string sent in
+  the request — set it when pointing at a non-jev backend.
 - `LLM_TIMEOUT` — optional, seconds (default 180); whole-graph asks
   can exceed the old 60s on slow models.
 - `BIONYM_ALLOW_MOCK` — server only; `=1` permits `mock_jev=true`
