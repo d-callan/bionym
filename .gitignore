@@ -12,3 +12,6 @@ graph.json
 report.html
 REVIEW.md
 node_modules/
+.coverage
+coverage.xml
+htmlcov/
