@@ -31,8 +31,19 @@ function layoutNodes(nodes, edges, mode, W, H) {
       .force("center", d3.forceCenter(W / 2, H / 2))
       .force("collide", d3.forceCollide(16))
       .stop();
-    for (let i = 0; i < 300; i++) sim.tick();
-    return [Object.fromEntries(simNodes.map(n => [n.id, { x: n.x, y: n.y }])), []];
+    // Ticks run in chunks off the critical path — 300 synchronous ticks
+    // froze the main thread for seconds on 8k-node graphs (review P2).
+    // Returns a Promise; the columns branch below stays synchronous.
+    const TICKS = 300, CHUNK = 30;
+    return new Promise(res => {
+      let i = 0;
+      const step = () => {
+        for (let k = 0; k < CHUNK && i < TICKS; k++, i++) sim.tick();
+        if (i < TICKS) setTimeout(step, 0);
+        else res([Object.fromEntries(simNodes.map(n => [n.id, { x: n.x, y: n.y }])), []]);
+      };
+      step();
+    });
   }
   const byType = d3.group(nodes, d => d.type);
   // known types in TYPE_ORDER, then any unknown types appended so a new
@@ -81,16 +92,17 @@ function clusterPoints(nodes, pos, edges, t) {
     ({ key: members.length > 1 ? `c:${r}` : `s:${members[0].id}`, members }));
 }
 
-function nodeTipHtml(n, edges) {
-  const inc = edges.filter(e => e.subject === n.id || e.object === n.id);
+// inc = n's incident edges, precomputed once per drawScene — filtering
+// the full edge list here re-scanned O(E) on every mousemove frame (P2).
+function nodeTipHtml(n, inc) {
   const preds = [...d3.rollup(inc, v => v.length, e => e.predicate).entries()].sort((a, b) => b[1] - a[1]);
   return `<div class="bn-t-title">${esc(n.label || n.id)}</div>` +
     `<div class="bn-t-sub">${esc(n.id)} · ${esc(n.type)} · click for details</div>` +
     (inc.length ? `<div class="bn-t-sub">${inc.length} edges · ${preds.map(([p, c]) => `${esc(p)}×${c}`).join(" ")}</div>` : "");
 }
 
-function clusterTipHtml(c, edges) {
-  if (c.count === 1) return nodeTipHtml(c.members[0], edges);
+function clusterTipHtml(c, incOf) {
+  if (c.count === 1) return nodeTipHtml(c.members[0], incOf(c.members[0].id));
   const types = [...d3.rollup(c.members, v => v.length, m => m.type).entries()].sort((a, b) => b[1] - a[1]);
   const names = c.members.slice(0, 5).map(m => esc(m.label || m.id));
   return `<div class="bn-t-title">${c.count} nodes — click to zoom in</div>` +
@@ -142,6 +154,8 @@ export function BionymNetwork(el, graph, opts = {}) {
   let data = null;        // filtered {nodes, edges, byId, pos, mode, labelAlways}
   let selected = null;    // pinned node id — ego highlight survives mouseleave
   let sceneQueued = false;
+  let renderSeq = 0;      // guards async force layout — stale tick loops
+                          // must not draw over a newer render
   const W = o.width, H = o.height;
 
   const zoom = d3.zoom().scaleExtent([ZMIN, ZMAX]).on("zoom", e => {
@@ -187,12 +201,15 @@ export function BionymNetwork(el, graph, opts = {}) {
     vp.select(".links").selectAll("*").remove();
     vp.select(".nodes").selectAll("*").remove();
 
-    const neighbors = new Map();
+    const neighbors = new Map(), incident = new Map();
     edges.forEach(e => {
       (neighbors.get(e.subject) || neighbors.set(e.subject, new Set()).get(e.subject)).add(e.object);
       (neighbors.get(e.object) || neighbors.set(e.object, new Set()).get(e.object)).add(e.subject);
+      (incident.get(e.subject) || incident.set(e.subject, []).get(e.subject)).push(e);
+      (incident.get(e.object) || incident.set(e.object, []).get(e.object)).push(e);
     });
     const nb = id => neighbors.get(id) || new Set();
+    const incOf = id => incident.get(id) || [];
 
     if (o.interactive) svg.on("click.bg", ev => {
       if (ev.target.closest && ev.target.closest(".nodeg")) return;
@@ -237,10 +254,10 @@ export function BionymNetwork(el, graph, opts = {}) {
       .style("cursor", "pointer")
       .on("click", (e, n) => pin(n))
       .on("keydown", (e, n) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pin(n); } })
-      .on("mouseenter", (e, n) => { applyEgo(n.id); o.onHover?.(n); showTip(e, nodeTipHtml(n, edges)); })
-      .on("mousemove", (e, n) => showTip(e, nodeTipHtml(n, edges)))
+      .on("mouseenter", (e, n) => { applyEgo(n.id); o.onHover?.(n); showTip(e, nodeTipHtml(n, incOf(n.id))); })
+      .on("mousemove", (e, n) => showTip(e, nodeTipHtml(n, incOf(n.id))))
       .on("mouseleave", () => { restoreSel(); hideTip(); o.onHover?.(null); })
-      .on("focus", (e, n) => { const p = pos[n.id]; showTip(focusTipPoint(p.x, p.y), nodeTipHtml(n, edges)); applyEgo(n.id); })
+      .on("focus", (e, n) => { const p = pos[n.id]; showTip(focusTipPoint(p.x, p.y), nodeTipHtml(n, incOf(n.id))); applyEgo(n.id); })
       .on("blur", () => { hideTip(); restoreSel(); })
       : g => g;
 
@@ -330,10 +347,10 @@ export function BionymNetwork(el, graph, opts = {}) {
       .style("cursor", "pointer")
       .on("click", (e, c) => activate(c))
       .on("keydown", (e, c) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); activate(c); } })
-      .on("mouseenter", (e, c) => { applyC(c); showTip(e, clusterTipHtml(c, edges)); })
-      .on("mousemove", (e, c) => showTip(e, clusterTipHtml(c, edges)))
+      .on("mouseenter", (e, c) => { applyC(c); showTip(e, clusterTipHtml(c, incOf)); })
+      .on("mousemove", (e, c) => showTip(e, clusterTipHtml(c, incOf)))
       .on("mouseleave", () => { restoreC(); hideTip(); })
-      .on("focus", (e, c) => { applyC(c); showTip(focusTipPoint(c.x, c.y), clusterTipHtml(c, edges)); })
+      .on("focus", (e, c) => { applyC(c); showTip(focusTipPoint(c.x, c.y), clusterTipHtml(c, incOf)); })
       .on("blur", () => { restoreC(); hideTip(); })
       : g => g;
 
@@ -372,8 +389,15 @@ export function BionymNetwork(el, graph, opts = {}) {
     const mode = o.layout;
 
     svg.selectAll("*").remove();
-    const [pos, cols] = layoutNodes(nodes, edges, mode, W, H);
+    const seq = ++renderSeq;
+    const layout = layoutNodes(nodes, edges, mode, W, H);
+    // force resolves asynchronously (chunked ticks); columns is immediate
+    const done = ([pos, cols]) =>
+      seq === renderSeq && finishRender(filtered, mode, pos, cols);
+    if (layout instanceof Promise) layout.then(done); else done(layout);
+  }
 
+  function finishRender({ nodes, edges, byId }, mode, pos, cols) {
     const vp = svg.append("g").attr("class", "viewport");
     const t0 = d3.zoomTransform(svg.node());
     // fresh graph (identity transform): fit force layouts to node bounds —

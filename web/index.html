@@ -37,6 +37,7 @@
   #zin, #zout { width: 1.8rem; }
   .hint { font-size: .72rem; font-weight: normal; color: var(--muted); margin-left: .6rem; }
   th { cursor: pointer; user-select: none; }
+  tr.rowcap td { color: var(--muted); font-style: italic; text-align: center; }
   th:hover { background: #e2e8f0; }
   .modes { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
   .modes label { padding: .4rem .8rem; cursor: pointer; font-size: .85rem; color: var(--ink); background: #fff; }
@@ -178,6 +179,8 @@ let GRAPH = null;  // raw API response {nodes: {id: node}, edges, metadata}
 // Admin-configurable: point at the deployed backend. Not user-facing.
 const BACKEND = "http://localhost:8001";
 const DEPTH = 6;  // full pipeline
+const ROW_CAP = 500;  // sortable tables: 12k-row innerHTML reflows are
+                      // measurable; cap + summary row (review P2)
 
 const detail = BionymDetail($("#detail"), { onResolve: resolveNext });
 const net = BionymNetwork($("#net"), null, {
@@ -218,6 +221,10 @@ $("#minconf").addEventListener("input", e => {
   if (GRAPH) renderFiltered();
 });
 
+// Test hook: headless UI tests (tests/test_ui.mjs) drive the page
+// without a backend. Not part of the app flow.
+window.__bionym = { net, ov, detail, setGraph(g) { GRAPH = g; renderFiltered(); } };
+
 function link(n) {
   return n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.label || n.id)}</a>` : esc(n.label || n.id);
 }
@@ -250,7 +257,11 @@ function sortable(tableId, rows, cols, initKey = null, initDir = 1) {
         return (typeof x === "number" && typeof y === "number" ? x - y : String(x ?? "").localeCompare(String(y ?? ""))) * state.dir;
       });
     }
-    tbody.innerHTML = rs.map(r => "<tr>" + cols.map(c => `<td class="${c.cls || ""}">${c.render(r)}</td>`).join("") + "</tr>").join("");
+    const shown = rs.slice(0, ROW_CAP);
+    tbody.innerHTML = shown.map(r => "<tr>" + cols.map(c => `<td class="${c.cls || ""}">${c.render(r)}</td>`).join("") + "</tr>").join("") +
+      (rs.length > shown.length
+        ? `<tr class="rowcap"><td colspan="${cols.length}">showing ${shown.length.toLocaleString()} of ${rs.length.toLocaleString()} — use the filter to narrow</td></tr>`
+        : "");
     ths.forEach((th, i) => th.textContent = cols[i].label + (state.key === i ? (state.dir > 0 ? " ▲" : " ▼") : ""));
   }
   draw();
