@@ -37,6 +37,19 @@ def _categories(
     return picked, flags
 
 
+def _parse_payload(text: str) -> dict | None:
+    """Strict JSON, else the outermost {...} span — models often wrap
+    the payload in a ```json fence or add prose around it."""
+    try:
+        v = json.loads(text)
+    except json.JSONDecodeError:
+        try:
+            v = json.loads(text[text.index("{"):text.rindex("}") + 1])
+        except (json.JSONDecodeError, ValueError):
+            return None
+    return v if isinstance(v, dict) else None
+
+
 def _llm_answer(
     llm: LlmClient, projection: dict, question: str, excerpt: bool
 ) -> tuple[str, list]:
@@ -44,12 +57,20 @@ def _llm_answer(
         json.dumps(projection), question, excerpt=excerpt
     )
     raw = llm.complete(system, user)
-    try:
-        payload = json.loads(raw)
-        return payload.get("answer") or "", payload.get("cited_nodes") or []
-    except json.JSONDecodeError:
+    payload = _parse_payload(raw)
+    if payload is None:
         # model ignored the JSON contract — keep the prose, flag no cites
         return raw, []
+    answer = payload.get("answer") or ""
+    if isinstance(answer, str):
+        # tolerate double-encoding: answer is itself a JSON string
+        inner = _parse_payload(answer)
+        if inner and isinstance(inner.get("answer"), str) and inner["answer"]:
+            answer = inner["answer"]
+    else:
+        answer = json.dumps(answer)
+    cited = payload.get("cited_nodes")
+    return answer, cited if isinstance(cited, list) else []
 
 
 def ask_graph(

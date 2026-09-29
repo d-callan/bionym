@@ -1,5 +1,7 @@
 """ask_graph paths: scored, 'other' unscored, JEV scoring failure,
 citation fidelity, disabled LLM. All offline — FakeJev/FakeLlm."""
+import json
+
 import pytest
 
 from bionym.ask import ask_graph
@@ -85,3 +87,32 @@ def test_prose_answer_survives_broken_json():
     )
     assert res["answer"] == "plain prose, not JSON"
     assert res["cited_nodes"] == []
+
+
+def test_fenced_json_payload_still_parses():
+    """```json-wrapped responses used to fall into the raw fallback and
+    render as a JSON blob in the UI."""
+
+    class FenceLlm(FakeLlm):
+        def complete(self, system, user):
+            return ('Here is my answer:\n```json\n{"answer": "fenced ok",'
+                    ' "cited_nodes": ["ds:EXP001"]}\n```')
+
+    res = ask_graph(
+        FakeJev(cats=[]), FenceLlm(), "q", mini_graph()
+    )
+    assert res["answer"] == "fenced ok"
+    assert res["cited_nodes"] == ["ds:EXP001"]
+
+
+def test_double_encoded_answer_unwraps():
+    """answer field that is itself a JSON string -> unwrap, don't show
+    the JSON to the user."""
+    inner = {"answer": "unwrapped", "cited_nodes": []}
+    res = ask_graph(
+        FakeJev(cats=[]),
+        FakeLlm({"answer": json.dumps(inner), "cited_nodes": []}),
+        "q",
+        mini_graph(),
+    )
+    assert res["answer"] == "unwrapped"
