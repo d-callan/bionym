@@ -32,6 +32,10 @@ jobs:
           cache-dependency-path: web/components/package-lock.json
       - run: npm ci
         working-directory: web/components
+      # bundle must match a fresh build (mtime check can't work on a checkout)
+      - run: npm run build:report
+        working-directory: web/components
+      - run: git diff --exit-code src/bionym/_static/
       # playwright-core + the runner's preinstalled Chrome — no browser download
       - env:
           CHROME: /usr/bin/google-chrome

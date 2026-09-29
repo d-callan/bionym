@@ -9,6 +9,7 @@ These guard the two ways report generation silently breaks:
 """
 
 import json
+import os
 import time
 from pathlib import Path
 
@@ -64,9 +65,11 @@ def test_static_assets_not_stale():
     """_static bundle must not be older than web/components sources.
 
     Only meaningful inside a dev checkout — skips if the source tree
-    isn't present (e.g. tests run from an sdist).
+    isn't present (e.g. tests run from an sdist), or under CI, where a
+    fresh checkout restores all files at near-identical mtimes. CI
+    verifies the bundle by rebuilding and diffing instead (ci.yml ui job).
     """
-    if not COMPONENTS_SRC.is_dir():
+    if os.environ.get("CI") or not COMPONENTS_SRC.is_dir():
         return
     srcs = list(COMPONENTS_SRC.glob("*.js")) + list(COMPONENTS_SRC.glob("*.css"))
     newest_src = max(f.stat().st_mtime for f in srcs)
