@@ -35,6 +35,12 @@ checked against the full graph on top.
 ## Install
 
 ```bash
+pip install bionym
+```
+
+From source (editable, with test/dev dependencies):
+
+```bash
 conda create -n bionym python=3.11 -y
 conda activate bionym
 pip install -e '.[dev]'
