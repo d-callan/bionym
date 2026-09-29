@@ -24,7 +24,7 @@ claims over per-gene measurements (VEuPathDB ExpressionGraphs, GEO GDS SOFT
 files, GXA baseline/differential TSVs). A third pass can synthesize a
 JEV-verified gene summary into `metadata.summary`.
 
-Interfaces: CLI (`bionym resolve`, `bionym summarize`, `bionym ask`), FastAPI backend (`backend/`), static web frontend (`web/`, D3 multi-partite network).
+Interfaces: CLI (`bionym resolve`, `bionym summarize`, `bionym ask`), self-contained HTML report (`--report`), FastAPI backend (`backend/`), static web frontend (`web/`, D3 multi-partite network). The pip/conda package ships the CLI + library + report; the backend and frontend are in this repo only.
 
 `ask` answers a free-form question over a resolved graph: JEV first
 classifies the question into graph categories, the matching subgraph
