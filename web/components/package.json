@@ -29,5 +29,10 @@
   },
   "scripts": {
     "build:report": "esbuild src/index.js --bundle --minify --format=iife --global-name=BionymComponents --outfile=../../src/bionym/_static/components.iife.js && cp src/styles.css ../../src/bionym/_static/components.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d-callan/bionym.git",
+    "directory": "web/components"
   }
 }
