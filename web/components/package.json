@@ -1,6 +1,6 @@
 {
   "name": "bionym-components",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Standalone vanilla JS/D3 components for bionym knowledge graphs",
   "type": "module",
   "exports": {
