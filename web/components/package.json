@@ -1,5 +1,5 @@
 {
-  "name": "@bionym/components",
+  "name": "bionym-components",
   "version": "0.1.0",
   "description": "Standalone vanilla JS/D3 components for bionym knowledge graphs",
   "type": "module",

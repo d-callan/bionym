@@ -2,7 +2,7 @@
  * BioNym network component — renders a bionym graph as an interactive
  * multi-partite ("columns") or force-directed ("force") SVG network.
  *
- *   import { BionymNetwork } from "@bionym/components";
+ *   import { BionymNetwork } from "bionym-components";
  *   const net = BionymNetwork(el, graph, opts);
  *   net.zoomBy(1.4); net.fit(); net.setLayout("force"); net.destroy();
  *
@@ -121,7 +121,7 @@ function clusterTipHtml(c, incOf) {
  *   legend:        render a type-color legend     (default true)
  *   interactive:   bind pan/zoom/hover/click      (default true)
  *   palette:       {type: hex} — merged over TYPE_PALETTE; import
- *                  TYPE_PALETTE from "@bionym/components/palettes" to extend ours
+ *                  TYPE_PALETTE from "bionym-components/palettes" to extend ours
  *   onSelect:      (node|null, {edges, byId}) — click-to-pin; consumer renders details
  *   onHover:       (node|null)
  * @returns instance {update, setLayout, setCluster, setMinConfidence,

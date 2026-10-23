@@ -1,5 +1,5 @@
 /**
- * @bionym/components — standalone vanilla JS/D3 components for bionym
+ * bionym-components — standalone vanilla JS/D3 components for bionym
  * knowledge graphs. See README.md for usage.
  */
 export { BionymNetwork } from "./network.js";
@@ -17,7 +17,7 @@ export {
   esc,
   TYPE_ORDER,
 } from "./data.js";
-// palettes also ship at the "@bionym/components/palettes" subpath
+// palettes also ship at the "bionym-components/palettes" subpath
 export {
   TYPE_PALETTE,
   FALLBACK_COLOR,

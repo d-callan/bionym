@@ -1,5 +1,5 @@
 """Self-contained HTML report — renders a graph JSON with the same
-@bionym/components modules the web UI uses, fully inlined so the output
+bionym-components modules the web UI uses, fully inlined so the output
 file has zero network dependencies (safe for Galaxy datasets, offline
 viewing, email attachments).
 

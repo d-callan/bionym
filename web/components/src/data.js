@@ -14,7 +14,7 @@ export const TYPE_ORDER = [
   "Publication",
 ];
 
-// Palettes live in ./palettes.js (also importable as "@bionym/components/palettes").
+// Palettes live in ./palettes.js (also importable as "bionym-components/palettes").
 // Re-exported here and from ./index.js for convenience.
 export {
   TYPE_PALETTE as PALETTE,

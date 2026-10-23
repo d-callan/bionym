@@ -1,4 +1,4 @@
-# @bionym/components
+# bionym-components
 
 Standalone vanilla JS/D3 components for rendering
 [bionym](https://github.com/d-callan/bionym) knowledge graphs.
@@ -8,7 +8,7 @@ and legend — you own the page layout, controls, and styling.
 ## Install
 
 ```bash
-npm install @bionym/components d3
+npm install bionym-components d3
 ```
 
 No build step required — plain ES modules. For a no-bundler page, use an
@@ -22,8 +22,8 @@ Interactive SVG network in two layouts — `"columns"` (multi-partite by
 node type) or `"force"` (force-directed, with semantic-zoom clustering).
 
 ```js
-import { BionymNetwork } from "@bionym/components";
-import "@bionym/components/styles.css";
+import { BionymNetwork } from "bionym-components";
+import "bionym-components/styles.css";
 
 const net = BionymNetwork(el, graph, {
   layout: "columns",      // "columns" | "force"
@@ -93,7 +93,7 @@ For tables or your own visualizations, the JSON → tabular helpers are
 exported from the root:
 
 ```js
-import { nodesToRows, edgesToRows, typeCounts } from "@bionym/components";
+import { nodesToRows, edgesToRows, typeCounts } from "bionym-components";
 
 nodesToRows(graph);  // [{id, type, label, namespace, url, degree}, ...]
 edgesToRows(graph);  // [{subject, subjectLabel, predicate, object, objectLabel, confidence}, ...]
@@ -108,7 +108,7 @@ Also: `parseGraph` (dict→array normalization), `filterByConfidence`,
 Palettes ship as their own module — drop in yours or extend ours:
 
 ```js
-import { TYPE_PALETTE, PREDICATE_PALETTE, BAR_COLOR, mergePalette } from "@bionym/components/palettes";
+import { TYPE_PALETTE, PREDICATE_PALETTE, BAR_COLOR, mergePalette } from "bionym-components/palettes";
 // (also re-exported from the package root)
 
 // full replacement — unknown types fall back to FALLBACK_COLOR
