@@ -42,6 +42,8 @@ UNSAFE_URLS = [
     "https://example.org[1]/x",
     "https://",  # no host: would override a working template url
     "https:foo",
+    "https://:443/path",  # netloc but no hostname
+    "https://user@/path",
     "",
     42,
 ]

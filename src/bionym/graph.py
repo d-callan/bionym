@@ -58,7 +58,7 @@ class Node(BaseModel):
                 parts = urlsplit(explicit)
             except ValueError:  # malformed host, e.g. "http://[broken"
                 parts = None
-            if parts and parts.scheme == "https" and parts.netloc:
+            if parts and parts.scheme == "https" and parts.hostname:
                 return explicit
         ns, nid = self.id_namespace, self.id
         if ":" in nid:
