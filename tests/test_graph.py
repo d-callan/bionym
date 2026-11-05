@@ -44,6 +44,8 @@ UNSAFE_URLS = [
     "https:foo",
     "https://:443/path",  # netloc but no hostname
     "https://user@/path",
+    "https://example.org:invalid/path",  # malformed port
+    "https://example.org:99999/path",
     "",
     42,
 ]

@@ -105,8 +105,8 @@ Also: `parseGraph` (dict→array normalization), `filterByConfidence`,
 
 Graph JSON is untrusted input, and `esc()` alone does not stop a
 `javascript:` or `data:` URL from running when its link is clicked. Before
-putting a node `url` in an `href`, pass it through `safeHref(url)` (the URL if
-it is `https:`, else `null`), or build the anchor with
+putting a node `url` in an `href`, pass it through `safeHref(url)` (the normalized
+absolute URL if it is `https:`, else `null`), or build the anchor with
 `externalLink(url, text, className?)`, which falls back to the escaped text.
 
 ## Palettes

@@ -28,13 +28,16 @@ export const esc = s =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 /**
- * `url` if it is an absolute https: URL, else null. esc() alone does not stop
- * a javascript:/data: href from running on click; parsing matches the browser's.
+ * `url` as a normalized absolute https: URL, else null. esc() alone does not
+ * stop a javascript:/data: href from running on click. Returns the parsed
+ * href, not the input: an href resolves against the page, so "https:host/x"
+ * would otherwise land on this site instead of the host that was checked.
  */
 export function safeHref(url) {
   if (typeof url !== "string") return null;
   try {
-    return new URL(url).protocol === "https:" ? url : null;
+    const u = new URL(url);
+    return u.protocol === "https:" ? u.href : null;
   } catch {
     return null; // relative or malformed
   }

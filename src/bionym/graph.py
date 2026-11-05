@@ -56,7 +56,8 @@ class Node(BaseModel):
         if isinstance(explicit, str):
             try:
                 parts = urlsplit(explicit)
-            except ValueError:  # malformed host, e.g. "http://[broken"
+                parts.port  # urlsplit validates the port only when it is read
+            except ValueError:  # malformed host or port, e.g. "http://[broken"
                 parts = None
             if parts and parts.scheme == "https" and parts.hostname:
                 return explicit

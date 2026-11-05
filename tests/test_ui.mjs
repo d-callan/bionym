@@ -148,7 +148,9 @@ try {
     "data:text/html,<script>alert(1)</script>", "//example.org/x", "", null,
   ];
   const HTTPS = "https://plasmodb.org/plasmo/app/record/gene/PF3D7_1343700";
-  const urlChecks = await page.evaluate(async ([unsafe, https]) => {
+  // no slashes: valid on its own, but as a raw href it resolves against the page
+  const SLASHLESS = "https:example.org/record/1";
+  const urlChecks = await page.evaluate(async ([unsafe, https, slashless]) => {
     const { safeHref, nodesToRows } = await import("./components/src/index.js");
     const d = window.__bionym.detail;
     const sourceHref = url => {
@@ -161,10 +163,12 @@ try {
       helperKeeps: safeHref(https) === https,
       detailLinked: unsafe.filter(u => sourceHref(u) !== null),
       detailHttps: sourceHref(https),
+      helperSlashless: safeHref(slashless),
+      detailSlashless: sourceHref(slashless),
       rowUrls: nodesToRows({ nodes: [...unsafe, https].map((url, i) =>
         ({ id: `r:${i}`, type: "Dataset", url })), edges: [] }).map(r => r.url),
     };
-  }, [UNSAFE, HTTPS]);
+  }, [UNSAFE, HTTPS, SLASHLESS]);
   check("safeHref rejects non-https urls",
     urlChecks.helperRejects.length === 0, urlChecks.helperRejects.join(", "));
   check("safeHref keeps https urls", urlChecks.helperKeeps);
@@ -172,6 +176,12 @@ try {
     urlChecks.detailLinked.length === 0, urlChecks.detailLinked.join(", "));
   check("detail panel: links https url", urlChecks.detailHttps === HTTPS,
     String(urlChecks.detailHttps));
+  check("safeHref returns the normalized absolute url",
+    urlChecks.helperSlashless === "https://example.org/record/1",
+    String(urlChecks.helperSlashless));
+  check("detail panel: link goes to the validated host",
+    urlChecks.detailSlashless === "https://example.org/record/1",
+    String(urlChecks.detailSlashless));
   check("nodesToRows: url is https or null",
     JSON.stringify(urlChecks.rowUrls) ===
       JSON.stringify([...UNSAFE.map(() => null), HTTPS]),
