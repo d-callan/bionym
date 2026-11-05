@@ -46,6 +46,8 @@ UNSAFE_URLS = [
     "https://user@/path",
     "https://example.org:invalid/path",  # malformed port
     "https://example.org:99999/path",
+    "https://exa mple.org/x",  # hostnames the browser rejects
+    "https://%/x",
     "",
     42,
 ]

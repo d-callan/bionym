@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from enum import Enum
 from pathlib import Path
@@ -15,6 +16,10 @@ from pydantic import BaseModel, Field, PrivateAttr, computed_field
 from .evidence import Evidence
 
 log = logging.getLogger(__name__)
+
+# hostnames the browser's URL parser also accepts; urlsplit is more lenient
+# (spaces, "%"), and a url the browser rejects would hide the template link
+_HOST_RE = re.compile(r"[a-z0-9._-]+|[0-9a-f:.]+")  # name, or IPv6 (brackets stripped)
 
 
 class NodeType(str, Enum):
@@ -59,7 +64,8 @@ class Node(BaseModel):
                 parts.port  # urlsplit validates the port only when it is read
             except ValueError:  # malformed host or port, e.g. "http://[broken"
                 parts = None
-            if parts and parts.scheme == "https" and parts.hostname:
+            if (parts and parts.scheme == "https" and parts.hostname
+                    and _HOST_RE.fullmatch(parts.hostname)):
                 return explicit
         ns, nid = self.id_namespace, self.id
         if ":" in nid:
