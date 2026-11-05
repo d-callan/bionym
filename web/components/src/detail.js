@@ -9,7 +9,7 @@
  *     onSelect: (node, ctx) => node ? detail.show(node, ctx) : detail.hide(),
  *   });
  */
-import { esc } from "./data.js";
+import { esc, safeHref, externalLink } from "./data.js";
 
 /**
  * @param {HTMLElement} el  the panel element — component fills its innerHTML
@@ -38,7 +38,8 @@ export function BionymDetail(el, opts = {}) {
             `${esc(on ? on.label || other : other)} ` +
             `<span class="bn-conf">${e.confidence.toFixed(2)}</span></li>`;
         }).join("") + `</ul><div class="bn-d-actions">` +
-        (n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">source ↗</a>` : "") +
+        // outer check hides the label too; externalLink alone would show bare text
+        (safeHref(n.url) ? externalLink(n.url, "source ↗", "bn-d-source") : "") +
         (o.onResolve && n.type === "Gene" ? `<a href="#" class="bn-d-resolve">resolve →</a>` : "") +
         `</div>`;
       el.hidden = false;

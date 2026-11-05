@@ -95,13 +95,19 @@ exported from the root:
 ```js
 import { nodesToRows, edgesToRows, typeCounts } from "bionym-components";
 
-nodesToRows(graph);  // [{id, type, label, namespace, url, degree}, ...]
+nodesToRows(graph);  // [{id, type, label, namespace, url, degree}, ...] — url is https: or null
 edgesToRows(graph);  // [{subject, subjectLabel, predicate, object, objectLabel, confidence}, ...]
 typeCounts(graph);   // [{type, count}, ...] — powers the overview chart
 ```
 
 Also: `parseGraph` (dict→array normalization), `filterByConfidence`,
 `predicateColors`, `resolveId`, `TYPE_ORDER`, and the palette constants below.
+
+Graph JSON is untrusted input, and `esc()` alone does not stop a
+`javascript:` or `data:` URL from running when its link is clicked. Before
+putting a node `url` in an `href`, pass it through `safeHref(url)` (the URL if
+it is `https:`, else `null`), or build the anchor with
+`externalLink(url, text, className?)`, which falls back to the escaped text.
 
 ## Palettes
 

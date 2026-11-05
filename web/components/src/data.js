@@ -27,6 +27,27 @@ export const esc = s =>
   String(s ?? "").replace(/[&<>"]/g, c =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+/**
+ * `url` if it is an absolute https: URL, else null. esc() alone does not stop
+ * a javascript:/data: href from running on click; parsing matches the browser's.
+ */
+export function safeHref(url) {
+  if (typeof url !== "string") return null;
+  try {
+    return new URL(url).protocol === "https:" ? url : null;
+  } catch {
+    return null; // relative or malformed
+  }
+}
+
+/** Escaped `<a target="_blank">` to `url` if it is https:, else just the escaped text. */
+export function externalLink(url, text, className = "") {
+  const href = safeHref(url);
+  if (!href) return esc(text);
+  const cls = className ? ` class="${esc(className)}"` : "";
+  return `<a href="${esc(href)}" target="_blank" rel="noopener"${cls}>${esc(text)}</a>`;
+}
+
 export const ellipsize = (s, n = 26) =>
   s.length > n ? s.slice(0, n - 1) + "…" : s;
 
@@ -63,7 +84,7 @@ export function nodesToRows(graph) {
     type: n.type,
     label: n.label || n.id,
     namespace: n.id_namespace,
-    url: n.url,
+    url: safeHref(n.url), // rows feed consumers' own links
     degree: n.degree,
   }));
 }

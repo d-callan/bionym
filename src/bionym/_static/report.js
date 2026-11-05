@@ -4,7 +4,7 @@
  * Expects: window.BionymComponents (bundle), window.__GRAPH__ (JSON).
  */
 (function () {
-  const { BionymNetwork, BionymOverview, BionymDetail, parseGraph, esc } =
+  const { BionymNetwork, BionymOverview, BionymDetail, parseGraph, esc, externalLink } =
     window.BionymComponents;
   const graph = window.__GRAPH__;
   const $ = s => document.querySelector(s);
@@ -40,9 +40,7 @@
   $("#stacksel").addEventListener("change", () => ov.setStackBy($("#stacksel").value));
 
   // ---- sortable + filterable tables ----------------------------------------
-  const link = n => n.url
-    ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.label || n.id)}</a>`
-    : esc(n.label || n.id);
+  const link = n => externalLink(n.url, n.label || n.id);
   const cell = id => byId[id] ? link(byId[id]) : esc(id);
 
   function sortable(tableId, rows, cols, initKey = null, initDir = 1) {

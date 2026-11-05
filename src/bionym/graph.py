@@ -8,6 +8,7 @@ import time
 from enum import Enum
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field, PrivateAttr, computed_field
 
@@ -46,12 +47,19 @@ class Node(BaseModel):
         """External database page for this entity, derived from id/namespace.
 
         Single source of truth — flows to CLI JSON, API, web UI and HTML
-        report automatically via model_dump.
+        report automatically via model_dump. Only https: URLs are returned;
+        ``attrs["url"]`` stays as raw upstream data and is not safe to link.
         """
         # an explicit url recorded on the node wins (e.g. VEuPathDB
-        # project-specific gene pages, OrthoMCL sequence_link)
-        if self.attrs.get("url"):
-            return self.attrs["url"]
+        # project-specific gene pages, OrthoMCL sequence_link) if it is https:
+        explicit = self.attrs.get("url")
+        if isinstance(explicit, str):
+            try:
+                parts = urlsplit(explicit)
+            except ValueError:  # malformed host, e.g. "http://[broken"
+                parts = None
+            if parts and parts.scheme == "https" and parts.netloc:
+                return explicit
         ns, nid = self.id_namespace, self.id
         if ":" in nid:
             prefix, _, rest = nid.partition(":")
