@@ -16,7 +16,11 @@ identifier matches), the graph records it with provenance — JEV only
 arbitrates genuine ambiguity (multi-candidate picks, fuzzy hits, lineage
 rank) and verifies LLM-proposed claims against their sources. Negative
 claims are never model-guessed: an edge exists only when evidence
-supports it.
+supports it. Confidence is therefore two-band: **1.0 = asserted** (an
+API states the edge, or deterministic inference produced it — the edge's
+evidence states how, e.g. `matched_on`, GO evidence codes, OMA
+`rel_type`), **<1.0 = JEV judged it** (`jev_question_id` records which
+question). Sub-1.0 scores are comparable only to each other.
 
 ## Status
 
@@ -24,7 +28,7 @@ All pipeline stages implemented: S0 (ID classification), S1 (entity
 resolution → organism + assembly), S2 (related assemblies from the taxon
 report; supersession = accession version bumps only), S3 (orthologs via
 OMA, asserted as-is), S4 (UniProt
-annotation: GO evidence-code confidence, KEGG, InterPro/Pfam), S5
+annotation: GO terms with evidence-code provenance, KEGG, InterPro/Pfam), S5
 (expression: GEO + Expression Atlas, JEV-scored), S6 (cross-assembly
 presence: `annotated_in` + evidence-verified `ortholog_present`;
 unverified assemblies get no edge — no model-guessed presence).

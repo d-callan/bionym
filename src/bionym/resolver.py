@@ -16,7 +16,7 @@ from .clients.expression import ExpressionAtlasClient
 from .clients.kegg import KeggClient
 from .clients.ncbi import NcbiClient
 from .clients.oma import OmaClient
-from .clients.uniprot import GO_EVIDENCE_CONFIDENCE, DEFAULT_GO_CONFIDENCE, UniProtClient
+from .clients.uniprot import UniProtClient
 from .clients.veupathdb import VEuPathDBClient
 from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
@@ -279,7 +279,7 @@ class Resolver:
         # only arbitrates when multiple namespaces match. (A wrong pick
         # still fails cleanly downstream: S1 finds no records and refuses.)
         if len(candidates) == 1:
-            ans = {"choice": candidates[0], "confidence": 0.8}
+            ans = {"choice": candidates[0], "confidence": 1.0}
         else:
             state = s0_classify.build_state(identifier, hints)
             questions = s0_classify.build_questions(candidates)
@@ -335,7 +335,7 @@ class Resolver:
         # hits and genuine multi-candidate ambiguity.
         exact = _exact_id_matches(identifier, candidates)
         if len(exact) == 1:
-            match, confidence, probabilities = exact[0], 0.9, {}
+            match, confidence, probabilities = exact[0], 1.0, {}
         else:
             pool = exact or candidates
             state = s1_resolve.build_state(identifier, pool)
@@ -432,7 +432,7 @@ class Resolver:
                     subject=identifier,
                     predicate="same_as",
                     object=node_id,
-                    confidence=0.9,  # NCBI's locus_tag assertion, not VEuPathDB's
+                    confidence=1.0,  # NCBI's locus_tag assertion, not VEuPathDB's
                     evidence=vpd_ev,
                 )
             )
@@ -545,21 +545,21 @@ class Resolver:
     ) -> tuple[dict[str, Any] | None, float, str]:
         """Choose which find_gene hit `query` refers to.
 
-        A unique tax_id match is strong deterministic evidence (0.9).
-        When it doesn't decide — no tax_id, no matching hit, or several
-        same-taxon hits — JEV picks (choice) or confirms (noul), and can
-        reject all hits via 'none'.
+        A unique tax_id match is deterministic evidence — asserted, so
+        1.0. When it doesn't decide — no tax_id, no matching hit, or
+        several same-taxon hits — JEV picks (choice) or confirms (noul),
+        and can reject all hits via 'none'.
         """
         # Exact identifier agreement is already verified by the API.
         exact = _exact_id_matches(query, records)
         if len(exact) == 1:
-            return exact[0], 0.9, ""
+            return exact[0], 1.0, ""
         pool = exact or records
         matched = [
             r for r in pool if tax_id and str(r.get("tax_id")) == str(tax_id)
         ]
         if len(matched) == 1:
-            return matched[0], 0.9, ""
+            return matched[0], 1.0, ""
         pool = matched or pool
         state = s1_resolve.build_state(query, pool)
         questions = s1_resolve.build_questions(pool)
@@ -891,7 +891,7 @@ class Resolver:
                     subject=source_node_id,
                     predicate="related_assembly",
                     object=node_id,
-                    confidence=0.9,
+                    confidence=1.0,
                     evidence=evidence,
                 )
             )
@@ -905,7 +905,7 @@ class Resolver:
                         subject=source_node_id,
                         predicate="superseded_by",
                         object=node_id,
-                        confidence=0.9,
+                        confidence=1.0,
                         evidence=evidence,
                     )
                 )
@@ -982,7 +982,7 @@ class Resolver:
                     subject=identifier,
                     predicate="same_as",
                     object=oma_node,
-                    confidence=0.9,
+                    confidence=1.0,
                     evidence=pi_ev,
                 )
             )
@@ -1053,16 +1053,16 @@ class Resolver:
                     },
                 )
             )
-            # OMA itself asserts the orthology — carry its rel_type as
-            # the confidence (1:1 is the strong form; n:m orthologs
-            # include paralogs). No absent_in edges: missing from OMA's
-            # index is not evidence of biological absence.
+            # OMA asserts the orthology — asserted edge, 1.0; rel_type
+            # is an attribute of the claim (1:1 vs n:m), carried on the
+            # node's attrs, not a confidence tier. No absent_in edges:
+            # missing from OMA's index is not evidence of absence.
             graph.add_edge(
                 Edge(
                     subject=oma_subject,
                     predicate="ortholog_of",
                     object=node_id,
-                    confidence=0.9 if c.get("rel_type") == "1:1" else 0.7,
+                    confidence=1.0,
                     evidence=evidence,
                 )
             )
@@ -1212,7 +1212,7 @@ class Resolver:
                     subject=node_id,
                     predicate="same_as",
                     object=vpd_node,
-                    confidence=0.9,  # suffix strip verified by the lookup hit
+                    confidence=1.0,  # suffix strip verified by the lookup hit
                     evidence=ev,
                 )
             )
@@ -1276,9 +1276,9 @@ class Resolver:
         id_exact = _exact_id_matches(identifier, records)
         sym_exact = _exact_id_matches(symbol, records)
         if id_exact:
-            rec, confidence = id_exact[0], 0.9
+            rec, confidence = id_exact[0], 1.0
         elif len(sym_exact) == 1:
-            rec, confidence = sym_exact[0], 0.9
+            rec, confidence = sym_exact[0], 1.0
         else:
             pool = sym_exact or records
             state = s4_annotate.build_pick_state(match, pool)
@@ -1340,29 +1340,53 @@ class Resolver:
                 )
             )
 
+        # One edge per GO term: UniProt asserts the annotation (1.0).
+        # The GO evidence code behind each assertion is provenance on
+        # the edge — a code tier, not a confidence tier.
+        by_go: dict[str, list[dict[str, Any]]] = {}
         for t in rec.get("go_terms", []):
-            go_id = t.get("id")
-            if not go_id:
-                continue
+            if t.get("id"):
+                by_go.setdefault(t["id"], []).append(t)
+        for go_id, terms in by_go.items():
             node_id = f"go:{go_id}"
             graph.add_node(
                 Node(
                     id=node_id,
                     type=NodeType.GO_TERM,
-                    label=t.get("term") or go_id,
+                    label=terms[0].get("term") or go_id,
                     id_namespace="go",
-                    attrs={"aspect": t.get("aspect")},
+                    attrs={"aspect": terms[0].get("aspect")},
                 )
             )
+            go_ev = evidence + [
+                Evidence(
+                    source="uniprot",
+                    endpoint=(
+                        f"https://rest.uniprot.org/uniprotkb/{acc}"
+                        if acc
+                        else "uniprot search"
+                    ),
+                    summary=(
+                        f"GO:{go_id} asserted "
+                        f"({t.get('evidence') or 'no code'})"
+                    ),
+                    payload={
+                        "accession": acc,
+                        "go_id": go_id,
+                        "evidence_code": t.get("evidence"),
+                        "term": t.get("term"),
+                        "aspect": t.get("aspect"),
+                    },
+                )
+                for t in terms
+            ]
             graph.add_edge(
                 Edge(
                     subject=up_node,
                     predicate="has_go_term",
                     object=node_id,
-                    confidence=GO_EVIDENCE_CONFIDENCE.get(
-                        t.get("evidence", ""), DEFAULT_GO_CONFIDENCE
-                    ),
-                    evidence=evidence,
+                    confidence=1.0,
+                    evidence=go_ev,
                 )
             )
 
@@ -1384,7 +1408,7 @@ class Resolver:
                     subject=identifier,
                     predicate="same_as",
                     object=node_id,
-                    confidence=0.9,
+                    confidence=1.0,
                     evidence=evidence,
                 )
             )
@@ -1405,7 +1429,7 @@ class Resolver:
                         subject=node_id,
                         predicate="in_pathway",
                         object=pw_node,
-                        confidence=0.9,
+                        confidence=1.0,
                         evidence=pw_ev,
                     )
                 )
@@ -1429,7 +1453,7 @@ class Resolver:
                         subject=up_node,
                         predicate="has_domain",
                         object=node_id,
-                        confidence=0.8,
+                        confidence=1.0,
                         evidence=evidence,
                     )
                 )
@@ -1647,7 +1671,7 @@ class Resolver:
                     subject=subject,
                     predicate="annotated_in",
                     object=node_id,
-                    confidence=0.95,
+                    confidence=1.0,
                     evidence=evidence,
                 )
             )
@@ -1696,7 +1720,7 @@ class Resolver:
                     subject=subject,
                     predicate="ortholog_present",
                     object=n.id,
-                    confidence=0.9,
+                    confidence=1.0,
                     evidence=[
                         Evidence(
                             source="derived",
@@ -1757,7 +1781,7 @@ class Resolver:
                         subject=e.object,
                         predicate="annotated_in",
                         object=asm_id,
-                        confidence=0.95,
+                        confidence=1.0,
                         evidence=ev,
                     )
                 )
@@ -1792,7 +1816,7 @@ class Resolver:
                         subject=members[0],
                         predicate="same_as",
                         object=m,
-                        confidence=0.9,
+                        confidence=1.0,
                         evidence=ev,
                     )
                 )
@@ -2299,10 +2323,11 @@ class Resolver:
                 subject=p["assembly"],
                 predicate="has_candidate_gene",
                 object=p["gene"],
-                # Exact tax_id agreement is stronger than a name match
-                # (strain/subspecies naming is fuzzy); both stay below
-                # verified edges because the gene may not be encoded.
-                confidence=0.7 if p["matched_on"] == "tax_id" else 0.5,
+                # Deterministic species-join inference — the matched_on
+                # basis (tax_id vs name match) is stated in the edge
+                # evidence, and the claim itself is only "candidate", so
+                # asserted-claim 1.0 is honest; no tier needed.
+                confidence=1.0,
                 evidence=[
                     Evidence(
                         source="bionym",

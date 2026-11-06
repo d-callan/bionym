@@ -452,9 +452,20 @@ def test_depth_four_adds_annotation():
     assert "domain:IPR001357" in g.nodes
     predicates = {e.predicate for e in g.edges}
     assert {"same_as", "has_go_term", "in_pathway", "has_domain"} <= predicates
-    # IDA evidence should outscore IEA
-    conf = {e.object: e.confidence for e in g.edges if e.predicate == "has_go_term"}
-    assert conf["go:GO:0003677"] > conf["go:GO:0006281"]
+    # GO assertions are all 1.0 — the evidence code rides in edge
+    # evidence as provenance, not a confidence tier.
+    go_edges = {e.object: e for e in g.edges if e.predicate == "has_go_term"}
+    assert all(e.confidence == 1.0 for e in go_edges.values())
+    codes = {
+        go: [
+            ev.payload.get("evidence_code")
+            for ev in e.evidence
+            if ev.payload.get("go_id") == go.split(":", 1)[1]
+        ]
+        for go, e in go_edges.items()
+    }
+    assert codes["go:GO:0003677"] == ["IDA"]
+    assert codes["go:GO:0006281"] == ["IEA"]
 
 
 def test_depth_five_adds_expression():

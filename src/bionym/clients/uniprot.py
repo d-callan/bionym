@@ -21,20 +21,8 @@ log = logging.getLogger(__name__)
 BASE = "https://rest.uniprot.org/uniprotkb/search"
 ENTRY = "https://rest.uniprot.org/uniprotkb"
 
-# GO evidence code -> confidence. Deterministic provenance scoring: these
-# annotations are already curated assertions, so confidence reflects the
-# strength of the underlying evidence type rather than a JEV judgment.
-GO_EVIDENCE_CONFIDENCE = {
-    "EXP": 0.95, "IDA": 0.95,
-    "IPI": 0.85, "IMP": 0.85, "IGI": 0.85, "IEP": 0.85,
-    "HTP": 0.85, "HDA": 0.85, "HMP": 0.85, "HGI": 0.85, "HEP": 0.85,
-    "TAS": 0.80,
-    "ISS": 0.70, "ISO": 0.70, "ISA": 0.70, "ISM": 0.70, "IGC": 0.70,
-    "IBA": 0.70, "IBD": 0.70, "IKR": 0.70, "IRD": 0.70, "RCA": 0.70,
-    "IC": 0.65, "NAS": 0.60,
-    "IEA": 0.50, "ND": 0.40,
-}
-DEFAULT_GO_CONFIDENCE = 0.60
+# GO evidence codes (IDA/TAS/IEA/...) are carried as per-assertion
+# provenance on has_go_term edges — a code tier, not a confidence tier.
 
 
 class UniProtClient:

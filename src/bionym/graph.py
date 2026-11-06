@@ -102,7 +102,12 @@ class Node(BaseModel):
 
 
 class Edge(BaseModel):
-    """A claim: subject --predicate--> object, with JEV confidence + evidence."""
+    """A claim: subject --predicate--> object, with confidence + evidence.
+
+    Confidence is two-band: 1.0 means asserted — an API states the edge
+    or deterministic inference produced it (the how lives in evidence);
+    sub-1.0 means JEV judged it (jev_question_id records the question).
+    """
 
     subject: str
     predicate: str  # e.g. "is_a", "resolved_to", "in_organism", "in_assembly"
