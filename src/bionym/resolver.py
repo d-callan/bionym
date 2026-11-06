@@ -216,7 +216,10 @@ class Resolver:
                 self._propose_claims(graph, match)
                 graph.mark_stage("proposals")
             if summarize:
-                self.summarize(graph, match)
+                try:
+                    self.summarize(graph, match)
+                except JevError as e:  # best-effort inside resolve
+                    log.warning("summary verification failed: %s", e)
                 graph.mark_stage("summary")
 
         # resolved = S1 found a real record; refused = classify found
@@ -2008,6 +2011,18 @@ class Resolver:
             numbered, it["units"] = proposals.numbered_sentences(
                 it["text"][: proposals.PROMPT_TEXT_CHARS]
             )
+            if (
+                len(it["text"]) > proposals.PROMPT_TEXT_CHARS
+                and it["units"]
+                and not it["units"][-1].endswith((".", "!", "?"))
+            ):
+                # The cap can cut mid-sentence — a dangling last unit
+                # would still be citable, so drop it: a quote must be
+                # a complete span (PR #10). A unit ending in sentence
+                # punctuation survived the cut cleanly and stays.
+                numbered, it["units"] = proposals.numbered_lines(
+                    "\n".join(it["units"][:-1])
+                )
             it["text"] = numbered
 
         def _propose(it: dict[str, Any]) -> list[dict[str, Any]]:
@@ -2273,15 +2288,15 @@ class Resolver:
         props = proposals.parse(content, units)
         if not props:
             return
-        try:
-            answers = self.jev.ask(
-                proposals.build_summary_state(match, graph_text, props),
-                proposals.build_summary_questions(props),
-                stage="summary",
-            )
-        except JevError as e:  # unverified -> no summary, don't kill resolve
-            log.warning("summary verification failed: %s", e)
-            return
+        # JevError propagates: the standalone /api/summarize endpoint
+        # must surface a failed verification rather than return a
+        # silent [] (or a stale summary on a reposted graph). resolve()
+        # catches it at the call site — inside resolve it's best-effort.
+        answers = self.jev.ask(
+            proposals.build_summary_state(match, graph_text, props),
+            proposals.build_summary_questions(props),
+            stage="summary",
+        )
         graph.metadata["summary"] = [
             {
                 "claim": p["claim"],

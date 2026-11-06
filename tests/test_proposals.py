@@ -93,9 +93,12 @@ def test_parse_drops_claims_citing_nonexistent_units():
         '{"proposals": [{"claim": "c", "citations": [2, 99]}]}', units
     )
     assert out[0]["quote"] == "u2"
-    # no citation field -> claim survives with an empty quote
-    out = proposals.parse('{"proposals": [{"claim": "c"}]}', units)
-    assert out[0]["quote"] == ""
+    # no citation field -> dropped like an empty list: citations are
+    # required (PR #10) — an unquoted claim can't be verbatim-verified
+    assert proposals.parse('{"proposals": [{"claim": "c"}]}', units) == []
+    assert proposals.parse(
+        '{"proposals": [{"claim": "c", "citations": []}]}', units
+    ) == []
 
 
 def test_parse_normalized_tolerates_misspelled_key():

@@ -85,9 +85,9 @@ def numbered_lines(text: str) -> tuple[str, list[str]]:
 def _valid_citations(raw: Any, n_units: int) -> list[int] | None:
     """Citation field -> 0-based unit indices that exist.
 
-    None = no citation field at all (claim kept, empty quote). A list
-    whose entries all miss the unit range -> [] (claim dropped: it
-    cites things that don't exist). Nested groups like [[1,2],5] are
+    None = no citation field at all; [] = the list was empty or every
+    index missed the unit range. parse() drops the claim either way —
+    citations are required (PR #10). Nested groups like [[1,2],5] are
     flattened — they carry no information the indices don't (adjacency
     is derivable), and small models may improvise them."""
     if raw is None:
@@ -174,11 +174,11 @@ def parse(content: str, units: list[str]) -> list[dict[str, Any]]:
     `units` is the numbered source the model cited: the quote is
     assembled verbatim from the cited units, so it always appears word
     for word in the source. A freeform 'quote' field is ignored — it
-    can't be verified as verbatim. A claim whose citations are present
-    but all out of range is dropped; one without citations keeps an
-    empty quote (JEV still judges the claim itself). units is
-    required — without it every citing claim would be dropped
-    silently."""
+    can't be verified as verbatim. Citations are required: a missing
+    field, an empty list, or indices all out of range all drop the
+    claim — an unquoted claim can't be shown as verbatim-verified
+    (PR #10). units is required — without it every claim would be
+    dropped silently."""
     data = _extract_json(content or "")
     if data is None:
         log.warning("LLM returned no parseable proposals object: %.200s", content)
@@ -193,13 +193,13 @@ def parse(content: str, units: list[str]) -> list[dict[str, Any]]:
         ):
             continue
         citations = _valid_citations(p.get("citations"), len(units))
-        if citations == []:
+        if not citations:
             continue
         out.append(
             {
                 "claim": " ".join(p["claim"].split()),
-                "quote": _verbatim_quote(units, citations or []),
-                "citations": citations or [],
+                "quote": _verbatim_quote(units, citations),
+                "citations": citations,
             }
         )
     return out

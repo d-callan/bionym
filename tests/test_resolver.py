@@ -1,3 +1,5 @@
+import pytest
+
 from bionym.evidence import Evidence
 from bionym.graph import NodeType
 from bionym.jev import JevClient
@@ -705,6 +707,66 @@ def test_verify_sees_full_numbered_source():
     assert seen, "verify ask never ran"
     # state is a dict: {"source_texts": {node: text}, "proposals": [...]}
     assert any("SENTINEL" in str(s) for s in seen)
+
+
+def test_summarize_standalone_raises_jev_error():
+    # the /api/summarize path: a failed verification must surface — a
+    # silent [] or a stale summary on a reposted graph is wrong (PR #10)
+    from bionym.jev import JevError
+
+    r = _resolver()
+    g = r.resolve("672", depth=1)
+    orig = r.jev.ask
+
+    def fail(state, questions, stage=""):
+        if stage == "summary":
+            raise JevError("boom")
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = fail
+    with pytest.raises(JevError):
+        r.summarize(g, {"symbol": "BRCA2", "organism": "Homo sapiens"})
+
+
+def test_truncated_source_drops_dangling_last_unit():
+    # a source cut at PROMPT_TEXT_CHARS can end mid-sentence — the
+    # dangling fragment is dropped so a quote is always a complete
+    # span of source text (PR #10)
+    from bionym import proposals
+
+    r = _resolver()
+    sents = []
+    while len(" ".join(sents)) < proposals.PROMPT_TEXT_CHARS - 200:
+        sents.append(f"Filler sentence {len(sents):04d} keeps going.")
+    # long trailing sentence with no terminator yet — the cap cuts it
+    # mid-way, leaving a fragment (with the marker inside it) as the
+    # last unit
+    sents.append("Trailing FRAGMENT sentence " + "word " * 300)
+    raw = " ".join(sents)
+    _, units = proposals.numbered_sentences(
+        raw[: proposals.PROMPT_TEXT_CHARS]
+    )
+    # premise: the marker survives the cap inside an incomplete unit
+    assert "FRAGMENT" in units[-1]
+    assert not units[-1].endswith(".")
+
+    details, _ = FakeNcbi().pubmed_details(["26289816"])
+    details["26289816"]["abstract"] = raw
+    r.ncbi.pubmed_details = lambda pmids: (details, _EV)
+
+    orig = r.jev.ask
+    seen = []
+
+    def watch(state, questions, stage=""):
+        if stage == "proposals":
+            seen.append(state)
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = watch
+    r.resolve("672", depth=1)
+    assert seen, "verify ask never ran"
+    # the fragment was dropped — the marker can never be cited/quoted
+    assert not any("FRAGMENT" in str(s) for s in seen)
 
 
 def test_parse_normalized():
