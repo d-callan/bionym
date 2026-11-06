@@ -241,6 +241,8 @@ class FakeUniProt:
                 "go_terms": [
                     {"id": "GO:0003677", "term": "DNA binding", "aspect": "F", "evidence": "IDA"},
                     {"id": "GO:0006281", "term": "DNA repair", "aspect": "P", "evidence": "IEA"},
+                    # real UniProt responses carry the assignment source
+                    {"id": "GO:0005737", "term": "cytoplasm", "aspect": "C", "evidence": "IEA:UniProtKB-SubCell"},
                 ],
                 "kegg": ["hsa:672"],
                 "interpro": [{"id": "IPR001357", "name": "BRCT"}],
@@ -458,14 +460,15 @@ def test_depth_four_adds_annotation():
     assert all(e.confidence == 1.0 for e in go_edges.values())
     codes = {
         go: [
-            ev.payload.get("evidence_code")
+            (ev.payload.get("evidence_code"), ev.payload.get("evidence_source"))
             for ev in e.evidence
             if ev.payload.get("go_id") == go.split(":", 1)[1]
         ]
         for go, e in go_edges.items()
     }
-    assert codes["go:GO:0003677"] == ["IDA"]
-    assert codes["go:GO:0006281"] == ["IEA"]
+    assert codes["go:GO:0003677"] == [("IDA", None)]
+    assert codes["go:GO:0006281"] == [("IEA", None)]
+    assert codes["go:GO:0005737"] == [("IEA", "UniProtKB-SubCell")]
 
 
 def test_depth_five_adds_expression():

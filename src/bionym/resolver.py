@@ -1358,28 +1358,31 @@ class Resolver:
                     attrs={"aspect": terms[0].get("aspect")},
                 )
             )
-            go_ev = evidence + [
-                Evidence(
-                    source="uniprot",
-                    endpoint=(
-                        f"https://rest.uniprot.org/uniprotkb/{acc}"
-                        if acc
-                        else "uniprot search"
-                    ),
-                    summary=(
-                        f"GO:{go_id} asserted "
-                        f"({t.get('evidence') or 'no code'})"
-                    ),
-                    payload={
-                        "accession": acc,
-                        "go_id": go_id,
-                        "evidence_code": t.get("evidence"),
-                        "term": t.get("term"),
-                        "aspect": t.get("aspect"),
-                    },
+            go_ev = list(evidence)
+            for t in terms:
+                # UniProt returns the code with its assignment source
+                # attached ("IEA:UniProtKB-SubCell") — split them so the
+                # bare code is queryable and the source stays recorded.
+                code, _, code_src = str(t.get("evidence") or "").partition(":")
+                go_ev.append(
+                    Evidence(
+                        source="uniprot",
+                        endpoint=(
+                            f"https://rest.uniprot.org/uniprotkb/{acc}"
+                            if acc
+                            else "uniprot search"
+                        ),
+                        summary=f"GO:{go_id} asserted ({code or 'no code'})",
+                        payload={
+                            "accession": acc,
+                            "go_id": go_id,
+                            "evidence_code": code or None,
+                            "evidence_source": code_src or None,
+                            "term": t.get("term"),
+                            "aspect": t.get("aspect"),
+                        },
+                    )
                 )
-                for t in terms
-            ]
             graph.add_edge(
                 Edge(
                     subject=up_node,
