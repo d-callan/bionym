@@ -84,7 +84,12 @@ class FakeNcbi:
         }, _EV
 
     def gene_pubmed(self, gene_id):
-        return [{"pubmed_id": "26289816", "kind": "gene_pubmed"}], _EV
+        # real NCBI overlap: the same PMID under both link kinds —
+        # exercises edge dedup on cited_in
+        return [
+            {"pubmed_id": "26289816", "kind": "gene_pubmed"},
+            {"pubmed_id": "26289816", "kind": "gene_pubmed_rif"},
+        ], _EV
 
     def pubmed_details(self, pmids):
         return {
@@ -714,3 +719,13 @@ def test_nuccore_typed_by_kind():
     g = _resolver().resolve("672", depth=1)
     assert g.nodes["nuccore:NC_000013.11"].type == NodeType.SEQUENCE
     assert g.nodes["nuccore:XM_001348563.4"].type == NodeType.TRANSCRIPT
+
+
+def test_no_duplicate_edges():
+    # issue #6: (subject, predicate, object) names one claim — NCBI
+    # returning a PMID under both link kinds must not produce a
+    # second cited_in edge; both link kinds stay on the node
+    g = _resolver().resolve("672", depth=1)
+    triples = [(e.subject, e.predicate, e.object) for e in g.edges]
+    assert len(triples) == len(set(triples))
+    assert triples.count(("ncbigene:672", "cited_in", "pubmed:26289816")) == 1
