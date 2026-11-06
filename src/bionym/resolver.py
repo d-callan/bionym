@@ -28,10 +28,8 @@ from .questions import (
     s0_classify,
     s1_resolve,
     s2_assemblies,
-    s3_orthologs,
     s4_annotate,
     s5_expression,
-    s6_remap,
 )
 
 log = logging.getLogger(__name__)
@@ -50,6 +48,55 @@ def _score(ans: dict[str, Any]) -> float:
     """JEV answer -> scalar; noul is the confidence proxy used both
     for edge confidence and for ranking candidates under the S5 cap."""
     return ans.get("noul", ans.get("confidence", 0.0))
+
+
+# Identifier fields checked for exact query agreement across record
+# sources (NCBI eutils/Datasets, VEuPathDB, UniProt).
+_ID_FIELDS = (
+    "gene_id",
+    "locus_tag",
+    "symbol",
+    "gene_name",
+    "uniprot_id",
+    "accession",
+    "veupathdb_id",
+)
+
+
+def _exact_id_matches(
+    query: str, records: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Records whose own identifiers equal `query` (case-insensitive).
+
+    An exact identifier agreement means the API already verified the
+    record is what was asked for — no model judgment needed. Aliases
+    count: VEuPathDB resolves previous IDs and synonyms transparently
+    (alias shape varies: dicts with an `alias` key, or plain strings).
+    """
+    q = query.strip().lower()
+    if not q:
+        return []
+    out = []
+    for r in records:
+        ids = [r.get(f) for f in _ID_FIELDS]
+        ids += [
+            a.get("alias") if isinstance(a, dict) else a
+            for a in r.get("aliases") or []
+        ]
+        if any(str(i).lower() == q for i in ids if i):
+            out.append(r)
+    return out
+
+
+def _version_supersedes(source_acc: str, acc: str) -> bool:
+    """Version-bump supersession: same INSDC assembly number, higher
+    version — the only replacement relationship accessions assert."""
+    try:
+        s_num, s_ver = source_acc.split("_", 1)[-1].rsplit(".", 1)
+        c_num, c_ver = acc.split("_", 1)[-1].rsplit(".", 1)
+        return s_num == c_num and int(c_ver) > int(s_ver)
+    except (ValueError, IndexError):
+        return False
 
 
 def _dataset_kind(type_text: str | None) -> str:
@@ -228,10 +275,17 @@ class Resolver:
     ) -> tuple[str, list[Evidence]]:
         hints = s0_classify.regex_hints(identifier)
         candidates = hints or ["locus_tag"]
-        state = s0_classify.build_state(identifier, hints)
-        questions = s0_classify.build_questions(candidates)
-        answers = self.jev.ask(state, questions, stage="s0_classify")
-        ans = answers["id_type"]
+        # A single candidate is a regex assertion, not a judgment — JEV
+        # only arbitrates when multiple namespaces match. (A wrong pick
+        # still fails cleanly downstream: S1 finds no records and refuses.)
+        if len(candidates) == 1:
+            ans = {"choice": candidates[0], "confidence": 0.8}
+        else:
+            state = s0_classify.build_state(identifier, hints)
+            questions = s0_classify.build_questions(candidates)
+            ans = self.jev.ask(state, questions, stage="s0_classify")[
+                "id_type"
+            ]
 
         namespace = ans["choice"]
         graph.add_node(
@@ -276,24 +330,34 @@ class Resolver:
             graph.mark_stage("s1_resolve:no_match")
             return None
 
-        state = s1_resolve.build_state(identifier, candidates)
-        questions = s1_resolve.build_questions(candidates)
-        answers = self.jev.ask(state, questions, stage="s1_resolve")
-        ans = answers["gene_match"]
-
-        if len(candidates) == 1:
-            match = candidates[0]
-            confidence = _score(ans)
-            probabilities = {"yes": ans.get("noul", 0.0)}
+        # An exact identifier agreement is verified by the API itself.
+        # JEV only arbitrates what the API can't settle: fuzzy single
+        # hits and genuine multi-candidate ambiguity.
+        exact = _exact_id_matches(identifier, candidates)
+        if len(exact) == 1:
+            match, confidence, probabilities = exact[0], 0.9, {}
         else:
-            pick = ans["choice"]
-            if pick == "none":
-                log.warning("JEV rejected all candidates for %r", identifier)
-                graph.mark_stage("s1_resolve:no_match")
-                return None
-            match = candidates[int(pick)]
-            confidence = ans.get("confidence", 0.0)
-            probabilities = ans.get("probabilities", {})
+            pool = exact or candidates
+            state = s1_resolve.build_state(identifier, pool)
+            questions = s1_resolve.build_questions(pool)
+            ans = self.jev.ask(state, questions, stage="s1_resolve")[
+                "gene_match"
+            ]
+            if len(pool) == 1:
+                match = pool[0]
+                confidence = _score(ans)
+                probabilities = {"yes": ans.get("noul", 0.0)}
+            else:
+                pick = ans["choice"]
+                if pick == "none":
+                    log.warning(
+                        "JEV rejected all candidates for %r", identifier
+                    )
+                    graph.mark_stage("s1_resolve:no_match")
+                    return None
+                match = pool[int(pick)]
+                confidence = ans.get("confidence", 0.0)
+                probabilities = ans.get("probabilities", {})
 
         # esummary hits lack report fields (locus_tag, assembly_accessions,
         # gene_groups) that the VEuPathDB bridge and S6 need — merge the
@@ -486,12 +550,17 @@ class Resolver:
         same-taxon hits — JEV picks (choice) or confirms (noul), and can
         reject all hits via 'none'.
         """
+        # Exact identifier agreement is already verified by the API.
+        exact = _exact_id_matches(query, records)
+        if len(exact) == 1:
+            return exact[0], 0.9, ""
+        pool = exact or records
         matched = [
-            r for r in records if tax_id and str(r.get("tax_id")) == str(tax_id)
+            r for r in pool if tax_id and str(r.get("tax_id")) == str(tax_id)
         ]
         if len(matched) == 1:
             return matched[0], 0.9, ""
-        pool = matched or records
+        pool = matched or pool
         state = s1_resolve.build_state(query, pool)
         questions = s1_resolve.build_questions(pool)
         ans = self.jev.ask(state, questions, stage="ncbi_link")["gene_match"]
@@ -786,21 +855,18 @@ class Resolver:
             return
 
         source_acc = match.get("assembly_accession")
-        state = s2_assemblies.build_assembly_state(match, candidates)
-        questions = s2_assemblies.build_assembly_questions(
-            candidates, has_source=bool(source_acc)
-        )
-        answers = self.jev.ask(state, questions, stage="s2_assemblies")
 
         # Related edges hang off the source assembly when known, else the
         # resolved gene record (the anchor), never the raw query node.
+        # Every candidate came from the same taxon-group report — the
+        # relationship is an NCBI-asserted fact, not a judgment.
         source_node_id = (
             f"assembly:{source_acc}"
             if source_acc
             else match.get("anchor") or graph.metadata["input"]
         )
         evidence = tax_ev + asm_ev
-        for i, c in enumerate(candidates):
+        for c in candidates:
             acc = c.get("accession")
             if not acc or acc == source_acc:
                 continue
@@ -820,26 +886,26 @@ class Resolver:
                     },
                 )
             )
-            rel = answers.get(f"related_{i}", {})
             graph.add_edge(
                 Edge(
                     subject=source_node_id,
                     predicate="related_assembly",
                     object=node_id,
-                    confidence=rel.get("noul", rel.get("confidence", 0.0)),
-                    jev_question_id=f"related_{i}",
+                    confidence=0.9,
                     evidence=evidence,
                 )
             )
-            if source_acc:
-                sup = answers.get(f"supersedes_{i}", {})
+            # Supersession is claimed only where accessions themselves
+            # assert it — a version bump of the same assembly number
+            # (GCA_...765.2 -> GCA_...765.3). Anything broader (newer
+            # date, refseq preference) would be a model guess.
+            if source_acc and _version_supersedes(source_acc, acc):
                 graph.add_edge(
                     Edge(
                         subject=source_node_id,
                         predicate="superseded_by",
                         object=node_id,
-                        confidence=sup.get("noul", sup.get("confidence", 0.0)),
-                        jev_question_id=f"supersedes_{i}",
+                        confidence=0.9,
                         evidence=evidence,
                     )
                 )
@@ -890,7 +956,7 @@ class Resolver:
 
         anchor = match.get("anchor") or identifier
 
-        # ortholog_of/absent_in are OMA's claims, so they hang off the
+        # ortholog_of is OMA's claim, so it hangs off the
         # query gene's own OMA entry — not the anchor (which would
         # attribute OMA data to VEuPathDB/NCBI).
         oma_subject = anchor
@@ -936,40 +1002,16 @@ class Resolver:
             )
             self._add_orthomcl_group(vpd_node, match["orthomcl_name"], graph)
 
-        # Organisms of related assemblies (S2) minus the source organism.
-        source_key = species_key(match.get("organism"))
-        related_organisms = sorted(
-            {
-                n.attrs["organism"]
-                for n in graph.nodes.values()
-                if n.type == NodeType.ASSEMBLY
-                and n.attrs.get("organism")
-                and species_key(n.attrs["organism"]) != source_key
-            }
-        )
-        covered = {species_key(c.get("species")) for c in candidates}
-        uncovered = [
-            o for o in related_organisms if species_key(o) not in covered
-        ]
-
-        if not candidates and not uncovered:
+        if not candidates:
             graph.mark_stage("s3_orthologs:no_data")
             return
 
         # OMA returns every ortholog across all species — hundreds for a
-        # well-conserved gene, which makes the state alone exceed JEV's
-        # context (question-splitting can't help). Keep the strongest
-        # candidates; `covered`/`uncovered` above already used the full
-        # list, so absence claims stay correct.
+        # well-conserved gene. Cap bounds the per-candidate API fan-out
+        # below (xrefs + db=gene lookups); keep the strongest.
         candidates = sorted(
             candidates, key=lambda c: c.get("score") or 0, reverse=True
         )[:100]
-
-        state = s3_orthologs.build_state(
-            identifier, match, candidates, uncovered
-        )
-        questions = s3_orthologs.build_questions(candidates, uncovered)
-        answers = self.jev.ask(state, questions, stage="s3_orthologs")
 
         # Two prefetch waves overlap what used to be ~2 serial round-trips
         # per candidate: OMA xrefs → resolvable SourceID (often a VEuPathDB
@@ -1011,37 +1053,22 @@ class Resolver:
                     },
                 )
             )
-            ans = answers.get(f"ortholog_{i}", {})
+            # OMA itself asserts the orthology — carry its rel_type as
+            # the confidence (1:1 is the strong form; n:m orthologs
+            # include paralogs). No absent_in edges: missing from OMA's
+            # index is not evidence of biological absence.
             graph.add_edge(
                 Edge(
                     subject=oma_subject,
                     predicate="ortholog_of",
                     object=node_id,
-                    confidence=_score(ans),
-                    jev_question_id=f"ortholog_{i}",
+                    confidence=0.9 if c.get("rel_type") == "1:1" else 0.7,
                     evidence=evidence,
                 )
             )
             self._link_to_ncbi(
                 graph, node_id, resolve_id, c.get("tax_id"),
                 fetched=ncbi_hits[i],
-            )
-
-        for j, org in enumerate(uncovered):
-            org_node = f"organism:{org}"
-            graph.add_node(
-                Node(id=org_node, type=NodeType.ORGANISM, label=org)
-            )
-            ans = answers.get(f"absent_{j}", {})
-            graph.add_edge(
-                Edge(
-                    subject=oma_subject,
-                    predicate="absent_in",
-                    object=org_node,
-                    confidence=_score(ans),
-                    jev_question_id=f"absent_{j}",
-                    evidence=evidence,
-                )
             )
 
     def _link_to_ncbi(
@@ -1221,34 +1248,67 @@ class Resolver:
         self, identifier: str, match: dict[str, Any], graph: KnowledgeGraph
     ) -> None:
         symbol = match.get("symbol") or match.get("locus_tag") or identifier
-        records, evidence = self.uniprot.search_gene(symbol, match.get("tax_id"))
-        if not records and symbol != identifier:
-            records, ev2 = self.uniprot.search_gene(identifier, match.get("tax_id"))
+        records, evidence = self.uniprot.search_gene(
+            symbol, match.get("tax_id"), organism=match.get("organism")
+        )
+        if symbol != identifier:
+            # The symbol alone can miss the canonical entry — UniProt's
+            # primary gene name may be a different alias (kelch13 vs
+            # K13). Merge identifier-search hits too, dedup by accession.
+            recs2, ev2 = self.uniprot.search_gene(
+                identifier,
+                match.get("tax_id"),
+                organism=match.get("organism"),
+            )
             evidence += ev2
+            seen = {r.get("accession") for r in records}
+            records += [r for r in recs2 if r.get("accession") not in seen]
         if not records:
             graph.mark_stage("s4_annotate:no_uniprot")
             return
 
-        # Which UniProt entry is this gene? The search matched on a gene
-        # name that may be a symbol or a locus tag, so a deterministic
-        # name comparison can't decide — JEV picks (or rejects).
-        state = s4_annotate.build_pick_state(match, records)
-        questions = s4_annotate.build_pick_questions(records)
-        ans = self.jev.ask(state, questions, stage="s4_pick")["uniprot_match"]
-        if len(records) == 1:
-            rec = records[0]
-            confidence = _score(ans)
+        # Which UniProt entry is this gene? A record asserting the
+        # query's own identifier (accession or locus name) is an
+        # API-verified claim — duplicates of the same locus aren't
+        # ambiguity, so take the best-ordered match directly. JEV
+        # arbitrates only when nothing's identifiers agree.
+        pick_qid = ""
+        id_exact = _exact_id_matches(identifier, records)
+        sym_exact = _exact_id_matches(symbol, records)
+        if id_exact:
+            rec, confidence = id_exact[0], 0.9
+        elif len(sym_exact) == 1:
+            rec, confidence = sym_exact[0], 0.9
         else:
-            pick = ans.get("choice")
-            if pick == "none":
-                graph.mark_stage("s4_annotate:no_uniprot_match")
-                return
-            try:
-                rec = records[int(pick)]
-            except (TypeError, ValueError, IndexError):
-                graph.mark_stage("s4_annotate:no_uniprot_match")
-                return
-            confidence = ans.get("confidence", 0.0)
+            pool = sym_exact or records
+            state = s4_annotate.build_pick_state(match, pool)
+            questions = s4_annotate.build_pick_questions(pool)
+            ans = self.jev.ask(state, questions, stage="s4_pick")[
+                "uniprot_match"
+            ]
+            if len(pool) == 1:
+                rec = pool[0]
+                confidence = _score(ans)
+            else:
+                pick = ans.get("choice")
+                if pick == "none":
+                    graph.mark_stage("s4_annotate:no_uniprot_match")
+                    return
+                try:
+                    rec = pool[int(pick)]
+                except (TypeError, ValueError, IndexError):
+                    graph.mark_stage("s4_annotate:no_uniprot_match")
+                    return
+                confidence = ans.get("confidence", 0.0)
+            pick_qid = "uniprot_match"
+
+        # Other organism-consistent entries for this gene corroborate
+        # the pick — recorded as evidence on the edge rather than
+        # becoming parallel uniprot nodes.
+        for r in records:
+            if r.get("accession") != rec.get("accession"):
+                evidence.append(self.uniprot.corroborating_evidence(r))
+
         anchor = match.get("anchor") or identifier
 
         # same_as edge: deterministic confidence from identifier agreement.
@@ -1275,7 +1335,7 @@ class Resolver:
                     predicate="same_as",
                     object=up_node,
                     confidence=confidence,
-                    jev_question_id="uniprot_match",
+                    jev_question_id=pick_qid,
                     evidence=evidence,
                 )
             )
@@ -1627,8 +1687,6 @@ class Resolver:
             if n.id in ortholog_asm
             or n.id.split("_", 1)[-1] in ortholog_cores
         ]
-        unverified = [n for n in unannotated if n not in verified]
-
         for n in verified:
             orth = ortholog_asm.get(n.id) or ortholog_cores[
                 n.id.split("_", 1)[-1]
@@ -1650,51 +1708,10 @@ class Resolver:
                 )
             )
 
-        if unverified:
-            # No resolved ortholog verifies presence — JEV judges whether a
-            # member of the gene's orthogroup is likely there anyway. The
-            # subject is the family-level node (orthogroup, else the OMA
-            # entry), not the assembly-specific gene record.
-            family = next(
-                (
-                    n.id
-                    for prefix in ("orthogroup:", "oma:")
-                    for n in graph.nodes.values()
-                    if n.id.startswith(prefix)
-                ),
-                subject,
-            )
-            cands = [
-                {"accession": n.id.removeprefix("assembly:"), **n.attrs}
-                for n in unverified
-            ]
-            state = s6_remap.build_state(match, annotated, cands)
-            questions = s6_remap.build_questions(cands)
-            answers = self.jev.ask(state, questions, stage="s6_remap")
-            for i, c in enumerate(cands):
-                ans = answers.get(f"present_{i}", {})
-                graph.add_edge(
-                    Edge(
-                        subject=family,
-                        predicate="likely_present",
-                        object=f"assembly:{c['accession']}",
-                        confidence=_score(ans),
-                        jev_question_id=f"present_{i}",
-                        evidence=[
-                            Evidence(
-                                source="jev",
-                                endpoint="s6_remap",
-                                summary=(
-                                    "JEV judged orthogroup-member presence "
-                                    f"in {c['accession']} from assembly "
-                                    "metadata (no ortholog verified)"
-                                ),
-                                payload={"assembly": c, "answer": ans},
-                            )
-                        ],
-                    )
-                )
-
+        # Unverified assemblies get no edge — absence of annotation is not
+        # evidence of presence, and asking a model to guess would
+        # fabricate claims. (Previously JEV emitted `likely_present`
+        # guesses here.)
         self._link_candidate_genes(graph)
 
     def _annotate_ortholog_assemblies(self, graph: KnowledgeGraph) -> None:
@@ -2215,7 +2232,8 @@ class Resolver:
         name; assemblies carry an organism. A species match means that
         assembly plausibly encodes that member — a *suspected* gene id for
         the same gene in the other assembly. The join is deterministic
-        (tax_id or species-name match); JEV scores each pair's plausibility.
+        (tax_id or species-name match); confidence is fixed per match
+        type — a candidate label, not a verified claim.
         """
         assemblies = [
             n for n in graph.nodes.values()
@@ -2261,35 +2279,30 @@ class Resolver:
                         "assembly_level": asm.attrs.get("level"),
                         "gene": g.id,
                         "gene_species": g_name,
+                        "matched_on": "tax_id" if same_taxon else "species_name",
                     }
                 )
         if not pairs:
             return
-        # One ask per chunk: a deep graph can produce hundreds of pairs and
-        # a single ask overflows JEV's max_tokens. A failed chunk is skipped
-        # rather than killing the resolve — these are speculative edges.
-        for start, chunk, answers in self._ask_chunks(
-            pairs,
-            50,
-            s6_remap.build_candidate_state,
-            s6_remap.build_candidate_questions,
-            "s6_candidates",
-        ):
-            if not answers:
-                continue
-            for i, p in enumerate(chunk):
-                self._add_candidate_edge(graph, p, answers.get(f"candidate_{i}", {}), start + i)
+        # The join itself is the evidence — a same-taxon match is a real
+        # assertion, a name match weaker. No model scoring: these are
+        # labeled candidates, and JEV can't add information the join
+        # doesn't already carry.
+        for p in pairs:
+            self._add_candidate_edge(graph, p)
 
     def _add_candidate_edge(
-        self, graph: KnowledgeGraph, p: dict[str, Any], ans: dict[str, Any], idx: int
+        self, graph: KnowledgeGraph, p: dict[str, Any]
     ) -> None:
         graph.add_edge(
             Edge(
                 subject=p["assembly"],
                 predicate="has_candidate_gene",
                 object=p["gene"],
-                confidence=_score(ans),
-                jev_question_id=f"candidate_{idx}",
+                # Exact tax_id agreement is stronger than a name match
+                # (strain/subspecies naming is fuzzy); both stay below
+                # verified edges because the gene may not be encoded.
+                confidence=0.7 if p["matched_on"] == "tax_id" else 0.5,
                 evidence=[
                     Evidence(
                         source="bionym",
@@ -2301,6 +2314,7 @@ class Resolver:
                         payload={
                             "assembly": p["assembly"],
                             "gene": p["gene"],
+                            "matched_on": p["matched_on"],
                         },
                     )
                 ],

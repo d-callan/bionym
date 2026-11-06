@@ -4,6 +4,10 @@ Taxon normalization: an assembly's taxon is often tagged at strain/isolate
 rank, so we walk the NCBI lineage up to species before collecting relatives.
 When the resolved taxon sits below species or the lineage contains a
 subspecies rank (e.g. T. brucei), we ask JEV which rank to group at.
+
+Relatedness and supersession are NOT judged: candidates come from the
+taxon-group report (an API fact), and supersession is claimed only for
+accession version bumps (see resolver._version_supersedes).
 """
 
 from __future__ import annotations
@@ -84,51 +88,3 @@ def needs_rank_question(taxon: dict[str, Any]) -> bool:
     if taxon.get("rank") not in (None, "species"):
         return True
     return any(e.get("rank") == "subspecies" for e in taxon.get("lineage", []))
-
-
-def build_assembly_state(
-    match: dict[str, Any], candidates: list[dict[str, Any]]
-) -> dict:
-    return {
-        "source": {
-            "gene": match.get("gene_id"),
-            "organism": match.get("organism"),
-            "assembly_accession": match.get("assembly_accession"),
-        },
-        "candidates": [
-            {
-                "accession": c.get("accession"),
-                "name": c.get("name"),
-                "organism": c.get("organism"),
-                "tax_id": c.get("tax_id"),
-                "level": c.get("level"),
-                "refseq": c.get("refseq"),
-                "submission_date": c.get("submission_date"),
-            }
-            for c in candidates
-        ],
-    }
-
-
-def build_assembly_questions(
-    candidates: list[dict[str, Any]], has_source: bool
-) -> dict:
-    questions: dict[str, Any] = {}
-    for i in range(len(candidates)):
-        questions[f"related_{i}"] = {
-            "type": "noul",
-            "instructions": (
-                f"Is `candidates[{i}]` an assembly of the same organism as "
-                "the source gene's organism (`source.organism`)?"
-            ),
-        }
-        if has_source:
-            questions[f"supersedes_{i}"] = {
-                "type": "noul",
-                "instructions": (
-                    f"Is `candidates[{i}]` a newer or preferred assembly for "
-                    "the same organism, relative to `source.assembly_accession`? "
-                    "Weigh submission_date, refseq status, and assembly level."
-                ),
-            }
-    return questions

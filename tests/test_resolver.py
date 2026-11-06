@@ -63,7 +63,18 @@ class FakeNcbi:
                 "refseq": True,
                 "submission_date": "2025-01-01",
                 "raw": {},
-            }
+            },
+            {
+                # version bump of the source accession (GCF_000001405.40)
+                "accession": "GCF_000001405.41",
+                "name": "ASM1405v41",
+                "organism": "Homo sapiens",
+                "tax_id": tax_id,
+                "level": "Complete Genome",
+                "refseq": True,
+                "submission_date": "2025-06-01",
+                "raw": {},
+            },
         ], []
 
     def gene_products(self, gene_id):
@@ -217,7 +228,7 @@ class FakeUniProt:
     def entry_by_accession(self, accession):
         return None, _EV
 
-    def search_gene(self, symbol, tax_id=None):
+    def search_gene(self, symbol, tax_id=None, organism=None):
         return [
             {
                 "source": "uniprot",
@@ -300,8 +311,9 @@ def test_resolve_numeric_id_mock_jev():
         for e in g.edges
     )
     assert all(e.evidence or e.jev_question_id for e in g.edges)
-    # s0 + s1 + proposals_triage + proposals (pubmed node exists at depth 1)
-    assert g.metadata["jev_usage"]["total"]["calls"] == 4
+    # s0/s1 resolve deterministically (single regex hint, exact gene-id
+    # match) — only proposals_triage + proposals hit JEV at depth 1
+    assert g.metadata["jev_usage"]["total"]["calls"] == 2
 
 
 def test_resolve_veupathdb_id_falls_back_to_ncbi():
@@ -415,7 +427,10 @@ def test_depth_two_adds_related_assembly():
     assert "assembly:GCF_999999999.1" in g.nodes
     predicates = {e.predicate for e in g.edges}
     assert "related_assembly" in predicates
-    assert "superseded_by" in predicates
+    # superseded_by only for accession version bumps: .41 supersedes
+    # source .40; the unrelated GCF_999999999.1 does not
+    sup = [e.object for e in g.edges if e.predicate == "superseded_by"]
+    assert sup == ["assembly:GCF_000001405.41"]
 
 
 def test_depth_three_adds_ortholog():
@@ -458,10 +473,14 @@ def test_depth_six_adds_remap():
     predicates = {e.predicate for e in g.edges}
     # GCF_000001405.40 + GCF_009914755.1 are in the record's annotations
     assert "annotated_in" in predicates
-    # GCF_999999999.1 (S2 fake) is not annotated -> likely_present
-    assert "likely_present" in predicates
-    lp = [e for e in g.edges if e.predicate == "likely_present"]
-    assert lp[0].object == "assembly:GCF_999999999.1"
+    # GCF_999999999.1 (S2 fake) is not annotated and no resolved ortholog
+    # verifies presence -> no edge at all (JEV likely_present guesses removed)
+    assert "likely_present" not in predicates
+    assert not [
+        e for e in g.edges
+        if e.object == "assembly:GCF_999999999.1"
+        and e.predicate in ("likely_present", "ortholog_present")
+    ]
 
 
 def test_llm_proposals_add_gated_claims():
