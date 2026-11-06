@@ -649,11 +649,23 @@ class Resolver:
             # assemblies off the real source assembly
             match.setdefault("assembly_accession", rep.get("assembly_accession"))
             match.setdefault("assembly_accessions", rep.get("assembly_accessions"))
+            # the node must exist too — bridged matches learn the
+            # accession only here, after _materialize_gene ran
+            source_acc = rep.get("assembly_accession")
+            if source_acc:
+                graph.add_node(
+                    Node(
+                        id=f"assembly:{source_acc}",
+                        type=NodeType.ASSEMBLY,
+                        label=source_acc,
+                        id_namespace="insdc",
+                    )
+                )
 
         for acc in genomic:
             acc_node = f"nuccore:{acc}"
             graph.add_node(
-                Node(id=acc_node, type=NodeType.TRANSCRIPT, label=acc,
+                Node(id=acc_node, type=NodeType.SEQUENCE, label=acc,
                      id_namespace="ncbi_nuccore", attrs={"kind": "genomic"})
             )
             graph.add_edge(

@@ -29,6 +29,7 @@ class NodeType(str, Enum):
     CLAIM = "Claim"
     ID_TYPE = "IdType"
     TRANSCRIPT = "Transcript"
+    SEQUENCE = "Sequence"
     PROTEIN = "Protein"
     PUBLICATION = "Publication"
 
@@ -112,7 +113,7 @@ class Edge(BaseModel):
     subject: str
     predicate: str  # e.g. "is_a", "resolved_to", "in_organism", "in_assembly"
     object: str
-    confidence: float = 0.0
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     probabilities: dict[str, float] = Field(default_factory=dict)
     jev_question_id: str = ""
     evidence: list[Evidence] = Field(default_factory=list)

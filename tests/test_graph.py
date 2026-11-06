@@ -27,3 +27,15 @@ def test_edge_roundtrip(tmp_path):
     g2 = KnowledgeGraph.from_json(p)
     assert g2.edges[0].confidence == 0.9
     assert g2.edges[0].evidence[0].source == "regex"
+
+
+def test_edge_confidence_bounds():
+    import pytest
+    from pydantic import ValidationError
+
+    for bad in (-0.1, 1.01, 1.5):
+        with pytest.raises(ValidationError):
+            Edge(subject="a", predicate="p", object="b", confidence=bad)
+    # bounds are inclusive
+    for ok in (0.0, 0.5, 1.0):
+        Edge(subject="a", predicate="p", object="b", confidence=ok)

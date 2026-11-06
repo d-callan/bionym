@@ -398,6 +398,23 @@ def test_summarize_on_existing_graph():
     assert g.metadata["summary"][0]["claim"] == "mock proposal"
 
 
+def test_no_dangling_edges_at_any_depth():
+    # issue #6: every edge endpoint must exist as a node, at every
+    # depth, for both ID sources (bridged VEuPathDB and NCBI)
+    for ident in ("672", "PF3D7_1477700"):
+        for depth in range(1, 7):
+            g = _resolver().resolve(ident, depth=depth)
+            for e in g.edges:
+                assert e.subject in g.nodes and e.object in g.nodes, (
+                    f"{ident} depth {depth}: dangling edge "
+                    f"{e.subject} --{e.predicate}--> {e.object}"
+                )
+    # the reported case: the source assembly learned during the NCBI
+    # bridge must be a real node before S2 hangs edges off it
+    g = _resolver().resolve("PF3D7_1477700", depth=2)
+    assert g.nodes["assembly:GCF_000001405.40"].type == NodeType.ASSEMBLY
+
+
 def test_serialize_rows_sorts_caps_tolerates():
     from bionym import proposals
 
@@ -689,3 +706,11 @@ def test_resolve_records_refused_outcome():
     r.veupathdb.lookup_gene = lambda gid: ([], [])
     g = r.resolve("672", depth=1)
     assert g.metadata["outcome"] == "refused"
+
+
+def test_nuccore_typed_by_kind():
+    # genomic accessions are sequences (NC_*), transcript accessions
+    # stay transcripts (XM_*) — issue #6
+    g = _resolver().resolve("672", depth=1)
+    assert g.nodes["nuccore:NC_000013.11"].type == NodeType.SEQUENCE
+    assert g.nodes["nuccore:XM_001348563.4"].type == NodeType.TRANSCRIPT
