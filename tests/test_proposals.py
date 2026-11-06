@@ -44,11 +44,19 @@ def test_parse_quote_is_verbatim_from_cited_units():
     )
     out = proposals.parse(content, units)
     assert out[0]["quote"] == f"{units[0]} {units[1]}"
+    # citation order follows the source, not the model — [2, 1] emits
+    # unit 1 then unit 2 (PR #10)
     content = (
         '{"proposals": [{"claim": "c", "citations": [2, 1]}]}'
     )
     out = proposals.parse(content, units)
-    assert out[0]["quote"] == f"{units[1]} … {units[0]}"
+    assert out[0]["quote"] == f"{units[0]} {units[1]}"
+    # a repeated citation quotes the unit once, in source position
+    content = (
+        '{"proposals": [{"claim": "c", "citations": [1, 2, 1]}]}'
+    )
+    out = proposals.parse(content, units)
+    assert out[0]["quote"] == f"{units[0]} {units[1]}"
     # improvised nested groups flatten — same claim either way
     content = (
         '{"proposals": [{"claim": "c", "citations": [[1, 2]]}]}'

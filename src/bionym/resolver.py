@@ -581,7 +581,10 @@ class Resolver:
         questions = s1_resolve.build_questions(pool)
         ans = self.jev.ask(state, questions, stage="ncbi_link")["gene_match"]
         if len(pool) == 1:
-            return pool[0], _score(ans), "gene_match"
+            score = _score(ans)
+            if score < SINGLE_HIT_MIN_NOUL:
+                return None, score, "gene_match"
+            return pool[0], score, "gene_match"
         pick = ans.get("choice")
         if pick == "none":
             return None, 0.0, "gene_match"

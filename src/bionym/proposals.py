@@ -115,14 +115,14 @@ def _valid_citations(raw: Any, n_units: int) -> list[int] | None:
 
 
 def _verbatim_quote(units: list[str], citations: list[int]) -> str:
-    """Assemble the quote from cited units. Adjacent units join as one
-    span; a gap inserts ' … ' so disjoint sentences never read as
-    contiguous source text."""
+    """Assemble the quote from cited units in SOURCE order: sorted and
+    deduplicated, so '[3, 2]' or '[1, 2, 1]' can't read as reordered or
+    repeated source text (PR #10). Adjacent units join as one span; a
+    gap inserts ' … ' so disjoint sentences never read as contiguous
+    source text."""
     quote = ""
     prev = None
-    for i in citations:
-        if i == prev:
-            continue  # a repeated citation quotes the unit once
+    for i in sorted(set(citations)):
         if prev is not None:
             quote += " " if i == prev + 1 else " … "
         quote += units[i]
