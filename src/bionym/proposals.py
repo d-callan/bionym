@@ -121,6 +121,8 @@ def _verbatim_quote(units: list[str], citations: list[int]) -> str:
     quote = ""
     prev = None
     for i in citations:
+        if i == prev:
+            continue  # a repeated citation quotes the unit once
         if prev is not None:
             quote += " " if i == prev + 1 else " … "
         quote += units[i]
@@ -166,9 +168,7 @@ def _extract_json(content: str, key: str = "proposals") -> dict | None:
     return None
 
 
-def parse(
-    content: str, units: list[str] | None = None
-) -> list[dict[str, Any]]:
+def parse(content: str, units: list[str]) -> list[dict[str, Any]]:
     """Validate the JSON response -> [{claim, quote, citations}].
 
     `units` is the numbered source the model cited: the quote is
@@ -176,13 +176,14 @@ def parse(
     for word in the source. A freeform 'quote' field is ignored — it
     can't be verified as verbatim. A claim whose citations are present
     but all out of range is dropped; one without citations keeps an
-    empty quote (JEV still judges the claim itself)."""
+    empty quote (JEV still judges the claim itself). units is
+    required — without it every citing claim would be dropped
+    silently."""
     data = _extract_json(content or "")
     if data is None:
         log.warning("LLM returned no parseable proposals object: %.200s", content)
         return []
     proposals = data["proposals"]
-    units = units or []
     out = []
     for p in proposals[:MAX_PROPOSALS]:
         if not (

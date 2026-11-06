@@ -2052,7 +2052,9 @@ class Resolver:
         def _verify(
             it: dict[str, Any], props: list[dict[str, Any]]
         ) -> dict[str, dict[str, Any]]:
-            text = it["text"][: proposals.PROMPT_TEXT_CHARS]
+            # it["text"] is already the numbered source the model
+            # cited — truncating again would hide units from the judge
+            text = it["text"]
             try:
                 return self.jev.ask(
                     proposals.build_state({it["node"]: text}, props),
@@ -2124,6 +2126,7 @@ class Resolver:
                         payload={
                             "claim": p["claim"],
                             "quote": p.get("quote"),
+                            "citations": p.get("citations"),
                             "answer": ans,
                             **(extra_payload or {}),
                         },
@@ -2267,11 +2270,15 @@ class Resolver:
         props = proposals.parse(content, units)
         if not props:
             return
-        answers = self.jev.ask(
-            proposals.build_summary_state(match, graph_text, props),
-            proposals.build_summary_questions(props),
-            stage="summary",
-        )
+        try:
+            answers = self.jev.ask(
+                proposals.build_summary_state(match, graph_text, props),
+                proposals.build_summary_questions(props),
+                stage="summary",
+            )
+        except JevError as e:  # unverified -> no summary, don't kill resolve
+            log.warning("summary verification failed: %s", e)
+            return
         graph.metadata["summary"] = [
             {
                 "claim": p["claim"],
