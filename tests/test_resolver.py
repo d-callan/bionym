@@ -966,3 +966,47 @@ def test_no_duplicate_edges():
     triples = [(e.subject, e.predicate, e.object) for e in g.edges]
     assert len(triples) == len(set(triples))
     assert triples.count(("ncbigene:672", "cited_in", "pubmed:26289816")) == 1
+
+
+def test_dataset_described_in_publication():
+    # VEuPathDB curates each dataset's primary publication — wire it as
+    # a described_in edge so datasets and publications meet off the
+    # gene node
+    r = _resolver()
+    r.veupathdb.dataset_records = lambda ids: {
+        dsid: {
+            "display_name": "Test dataset",
+            "type": "rna seq",
+            "summary": "test",
+            "pmid": "99999",
+            "citation": "Smith et al. 2020",
+        }
+        for dsid in ids
+    }
+    g = r.resolve("PF3D7_1477700", depth=5)
+    assert "pubmed:99999" in g.nodes
+    assert g.nodes["pubmed:99999"].label == "Smith et al. 2020"
+    assert any(
+        e.subject == "dataset:DS_TEST"
+        and e.predicate == "described_in"
+        and e.object == "pubmed:99999"
+        for e in g.edges
+    )
+
+
+def test_publication_condition_becomes_condition_node():
+    # output type, not source kind, decides the edge: a publication
+    # proposing a condition lands as condition: via has_condition —
+    # the shared label later merges it with dataset conditions
+    r = _resolver()
+    r.llm.complete = lambda system, user: (
+        '{"proposals": [{"claim": "heat shock", "type": "condition",'
+        ' "citations": [1]}]}'
+    )
+    g = r.resolve("672", depth=1)
+    cond_edges = [
+        e for e in g.edges
+        if e.predicate == "has_condition" and e.subject.startswith("pubmed:")
+    ]
+    assert cond_edges, "no publication-sourced condition edge"
+    assert g.nodes[cond_edges[0].object].type == NodeType.CONDITION

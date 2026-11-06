@@ -15,6 +15,7 @@ def test_parse_tolerates_misspelled_proposals_key():
     assert out == [
         {
             "claim": "BRCA1 is a tumor suppressor",
+            "type": "claim",
             "quote": "BRCA1 unit",
             "citations": [1],
         }
@@ -105,3 +106,47 @@ def test_parse_normalized_tolerates_misspelled_key():
     content = '{"normalised": ["time series post infection", "heat shock"]}'
     out = proposals.parse_normalized(content, 2)
     assert out == ["time series post infection", "heat shock"]
+
+
+def test_parse_type_field():
+    # 'type' survives when valid, falls back to the caller's default
+    # when missing or invalid — sources that only emit one kind don't
+    # send the field at all
+    units = ["u1", "u2", "u3"]
+    content = (
+        '{"proposals": ['
+        '{"claim": "heat shock", "type": "condition", "citations": [1]},'
+        ' {"claim": "essential", "citations": [2]},'
+        ' {"claim": "weird", "type": "bogus", "citations": [3]}]}'
+    )
+    out = proposals.parse(content, units)
+    assert [p["type"] for p in out] == ["condition", "claim", "claim"]
+    out = proposals.parse(content, units, default="condition")
+    assert [p["type"] for p in out] == ["condition"] * 3
+
+
+def test_build_questions_split_by_type():
+    # verify wording branches on the proposal's output type, not the
+    # source's kind — a publication condition is still a condition
+    props = [
+        {"node": "x", "type": "condition", "claim": "heat shock"},
+        {"node": "y", "type": "claim", "claim": "essential"},
+    ]
+    q = proposals.build_questions(props)
+    cond, claim = q["prop_0"]["instructions"], q["prop_1"]["instructions"]
+    assert "biologically informative" in cond
+    assert "falsifiable" not in cond
+    assert "falsifiable assertion" in claim
+    assert "source_gene" in cond and "source_gene" in claim
+
+
+def test_build_state_has_gene_and_type():
+    # JEV judges gene relevance — the state must carry the gene and
+    # each proposal's type
+    state = proposals.build_state(
+        {"n": "text"},
+        [{"node": "n", "type": "claim", "claim": "c", "quote": "q"}],
+        {"symbol": "BRCA1"},
+    )
+    assert state["source_gene"]["symbol"] == "BRCA1"
+    assert state["proposals"][0]["type"] == "claim"
