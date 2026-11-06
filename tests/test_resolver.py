@@ -530,6 +530,48 @@ def test_llm_proposals_add_gated_claims():
     assert reports[0].confidence == 0.5
     assert reports[0].jev_question_id.startswith("prop_")
     assert reports[0].evidence[0].source == "llm_proposal"
+    # the mock cites unit 1 — the quote is copied verbatim from the
+    # source text (title line), never reworded (issue #8)
+    assert reports[0].evidence[0].payload["quote"] == (
+        "BRCA1 loss alters the DNA damage response"
+    )
+
+
+def test_proposals_jev_failure_drops_claims():
+    # issue #8: a claim whose JEV verification raised is unverified —
+    # it must never reach the graph
+    from bionym.jev import JevError
+
+    r = _resolver()
+    orig = r.jev.ask
+
+    def fail_proposals(state, questions, stage=""):
+        if stage == "proposals":
+            raise JevError("boom")
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = fail_proposals
+    g = r.resolve("672", depth=1)
+    assert not [e for e in g.edges if e.predicate == "reports"]
+    assert not [n for n in g.nodes.values() if n.type == NodeType.CLAIM]
+
+
+def test_lone_candidate_low_noul_refused():
+    # issue #8: a single S1 candidate can still be rejected — below
+    # SINGLE_HIT_MIN_NOUL the match is refused outright
+    r = _resolver()
+    orig = r.jev.ask
+
+    def low_noul(state, questions, stage=""):
+        if stage == "s1_resolve":
+            return {"gene_match": {"type": "noul", "noul": 0.02,
+                                   "confidence": 0.02}}
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = low_noul
+    g = r.resolve("BRCA2", depth=1)
+    assert g.metadata["outcome"] == "refused"
+    assert "s1_resolve:no_match" in g.metadata["stages"]
 
 
 def test_parse_normalized():

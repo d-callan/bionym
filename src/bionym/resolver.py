@@ -50,6 +50,13 @@ def _score(ans: dict[str, Any]) -> float:
     return ans.get("noul", ans.get("confidence", 0.0))
 
 
+# A lone candidate still needs JEV's endorsement: its noul answer is
+# the probability the record IS the query's gene, so below this floor
+# the match is refused rather than silently taken. Without the check a
+# single wrong hit could never be rejected (issue #8).
+SINGLE_HIT_MIN_NOUL = 0.5
+
+
 # Identifier fields checked for exact query agreement across record
 # sources (NCBI eutils/Datasets, VEuPathDB, UniProt).
 _ID_FIELDS = (
@@ -344,8 +351,17 @@ class Resolver:
                 "gene_match"
             ]
             if len(pool) == 1:
+                score = _score(ans)
+                if score < SINGLE_HIT_MIN_NOUL:
+                    log.warning(
+                        "JEV rejected lone candidate for %r (noul %.2f)",
+                        identifier,
+                        score,
+                    )
+                    graph.mark_stage("s1_resolve:no_match")
+                    return None
                 match = pool[0]
-                confidence = _score(ans)
+                confidence = score
                 probabilities = {"yes": ans.get("noul", 0.0)}
             else:
                 pick = ans["choice"]
@@ -1299,8 +1315,11 @@ class Resolver:
                 "uniprot_match"
             ]
             if len(pool) == 1:
-                rec = pool[0]
                 confidence = _score(ans)
+                if confidence < SINGLE_HIT_MIN_NOUL:
+                    graph.mark_stage("s4_annotate:no_uniprot_match")
+                    return
+                rec = pool[0]
             else:
                 pick = ans.get("choice")
                 if pick == "none":
@@ -1978,10 +1997,18 @@ class Resolver:
         if not keep:
             return
 
-        def _propose(it: dict[str, Any]) -> list[dict[str, Any]]:
-            system, user = proposals.build_prompt(
-                it["kind"], it["text"][: proposals.PROMPT_TEXT_CHARS]
+        # Quotes are verbatim by construction: the model cites unit
+        # numbers and the quote is copied from the units it named
+        # (issue #8). Renumber once so prompt and JEV verify see the
+        # same numbered source.
+        for it in keep:
+            numbered, it["units"] = proposals.numbered_sentences(
+                it["text"][: proposals.PROMPT_TEXT_CHARS]
             )
+            it["text"] = numbered
+
+        def _propose(it: dict[str, Any]) -> list[dict[str, Any]]:
+            system, user = proposals.build_prompt(it["kind"], it["text"])
             try:
                 content = self.llm.complete(system, user)
             except Exception as e:  # proposals are best-effort
@@ -1989,7 +2016,7 @@ class Resolver:
                 return []
             return [
                 {"node": it["node"], "kind": it["kind"], **p}
-                for p in proposals.parse(content)
+                for p in proposals.parse(content, it["units"])
             ]
 
         with ThreadPoolExecutor(max_workers=self.proposal_concurrency) as ex:
@@ -2042,7 +2069,10 @@ class Resolver:
             verified = list(ex.map(lambda t: _verify(*t), pending))
         for (it, props), answers in zip(pending, verified):
             for i, p in enumerate(props):
-                ans = answers.get(f"prop_{i}", {})
+                ans = answers.get(f"prop_{i}") or {}
+                # no JEV answer -> unverified; never present the claim
+                if not ans:
+                    continue
                 if it["kind"] == "dataset":
                     ntype, predicate = NodeType.CONDITION, "has_condition"
                 else:
@@ -2137,7 +2167,11 @@ class Resolver:
                 "label": node.label if node else it["node"],
                 "summary": node.attrs.get("summary") if node else None,
             }
-            data_text = proposals.serialize_rows(rows)
+            # verbatim by construction: the model cites row numbers
+            # and the quote is copied from the rows it named (issue #8)
+            data_text, units = proposals.numbered_lines(
+                proposals.serialize_rows(rows)
+            )
             try:
                 content = self.llm.complete(
                     *proposals.build_data_prompt(meta, data_text)
@@ -2149,7 +2183,7 @@ class Resolver:
                 return [], {}, 0
             props = [
                 {"node": it["node"], "kind": "dataset", **p}
-                for p in proposals.parse(content)
+                for p in proposals.parse(content, units)
             ]
             if not props:
                 return [], {}, 0
@@ -2172,12 +2206,15 @@ class Resolver:
             results = list(ex.map(_work, datasets))
         for it, (props, answers, n_rows) in zip(datasets, results):
             for i, p in enumerate(props):
+                ans = answers.get(f"prop_{i}") or {}
+                if not ans:
+                    continue
                 self._add_proposal_edge(
                     graph,
                     it,
                     p,
                     i,
-                    answers.get(f"prop_{i}", {}),
+                    ans,
                     NodeType.CLAIM,
                     "reports",
                     summary=(
@@ -2217,6 +2254,9 @@ class Resolver:
         graph_text = proposals.serialize_graph(graph)
         if not graph_text.strip():
             return
+        # verbatim by construction: cite edge numbers, copy the
+        # lines (issue #8)
+        graph_text, units = proposals.numbered_lines(graph_text)
         try:
             content = self.llm.complete(
                 *proposals.build_summary_prompt(match, graph_text)
@@ -2224,7 +2264,7 @@ class Resolver:
         except Exception as e:  # summary is best-effort
             log.warning("LLM summary failed: %s", e)
             return
-        props = proposals.parse(content)
+        props = proposals.parse(content, units)
         if not props:
             return
         answers = self.jev.ask(
@@ -2242,6 +2282,8 @@ class Resolver:
                 ),
             }
             for i, p in enumerate(props)
+            # no JEV answer -> unverified; never present the claim
+            if answers.get(f"prop_{i}")
         ]
 
     def _fetch_dataset_values(

@@ -65,7 +65,7 @@ class LlmClient:
     def complete(self, system: str, user: str) -> str:
         """One chat completion -> raw content string (expected JSON)."""
         if self.mock:
-            return '{"proposals": [{"claim": "mock proposal", "quote": "mock"}], "answer": "mock answer", "cited_nodes": []}'
+            return '{"proposals": [{"claim": "mock proposal", "citations": [1]}], "answer": "mock answer", "cited_nodes": []}'
         body = {
             "model": self.model,
             "messages": [
