@@ -144,16 +144,30 @@ def chat_once(url: str, model: str, messages: list[dict]) -> dict:
         return json.loads(r.read())
 
 
+def _content_text(content) -> str:
+    """message.content may be str, None, or a list of parts."""
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "".join(p.get("text", "") for p in content
+                       if isinstance(p, dict))
+    return ""
+
+
 def llm_ask(url: str, model: str, ask: dict) -> dict:
     """One ask -> {"answers": {...}, "ms": int, "raw": str}
     or {"error": ..., "raw": str}."""
     t0 = time.time()
     msgs = build_messages(ask)
+    raw = ""
     try:
         for attempt in range(2):
             resp = chat_once(url, model, msgs)
-            raw = (resp.get("choices") or [{}])[0] \
-                .get("message", {}).get("content", "")
+            raw = _content_text(
+                (resp.get("choices") or [{}])[0]
+                .get("message", {}).get("content"))
+            if not raw:
+                raw = json.dumps(resp)[:4000]   # odd providers: keep for debug
             data = _extract_json(raw)
             if data is not None:
                 answers = _coerce_answers(data, ask["questions"])
@@ -174,6 +188,10 @@ def llm_ask(url: str, model: str, ask: dict) -> dict:
                 "detail": e.read()[:300].decode("utf-8", "replace")}
     except (urllib.error.URLError, TimeoutError, OSError) as e:
         return {"error": "timeout_or_conn", "detail": str(e)[:300]}
+    except Exception as e:                       # never lose the run to one ask
+        return {"error": "exception",
+                "detail": f"{type(e).__name__}: {e}"[:300],
+                "raw": raw[:4000]}
 
 
 def diff_one(jev_ans: dict, llm_ans: dict) -> dict:
