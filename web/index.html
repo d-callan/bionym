@@ -171,7 +171,7 @@
   </dialog>
 </main>
 <script type="module">
-import { BionymNetwork, BionymOverview, BionymDetail, filterByConfidence, resolveId, esc } from "./components/src/index.js";
+import { BionymNetwork, BionymOverview, BionymDetail, filterByConfidence, resolveId, esc, externalLink } from "./components/src/index.js";
 
 const $ = s => document.querySelector(s);
 let GRAPH = null;  // raw API response {nodes: {id: node}, edges, metadata}
@@ -226,7 +226,7 @@ $("#minconf").addEventListener("input", e => {
 window.__bionym = { net, ov, detail, setGraph(g) { GRAPH = g; renderFiltered(); } };
 
 function link(n) {
-  return n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener">${esc(n.label || n.id)}</a>` : esc(n.label || n.id);
+  return externalLink(n.url, n.label || n.id);
 }
 
 // Follow an ortholog/related gene into a new query.
