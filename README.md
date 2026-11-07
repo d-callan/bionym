@@ -5,18 +5,33 @@ Resolve bioinformatics identifiers into confidence-scored knowledge graphs.
 Given a gene identifier (any species — NCBI gene ID, symbol, VEuPathDB
 locus tag, UniProt accession, Ensembl ID, ...), BioNym gathers evidence
 from public APIs (NCBI, VEuPathDB, OMA, UniProt, GEO, Expression Atlas,
-...), asks [JEV](https://typesafe.ai) (TypeSafe `systemone`) an ordered
-workflow of typed questions, and emits a knowledge graph where every claim
-carries a confidence score and a list of supporting evidence.
+...), asks [JEV](https://typesafe.ai) (TypeSafe `systemone`) typed
+questions where the APIs can't decide for it, and emits a knowledge graph
+where every claim carries a confidence score and a list of supporting
+evidence.
+
+JEV policy: **no model calls for API-assertable facts.** If an external
+resource states it (orthogroup membership, taxon-group assemblies, exact
+identifier matches), the graph records it with provenance — JEV only
+arbitrates genuine ambiguity (multi-candidate picks, fuzzy hits, lineage
+rank) and verifies LLM-proposed claims against their sources. Negative
+claims are never model-guessed: an edge exists only when evidence
+supports it. Confidence is therefore two-band: **1.0 = asserted** (an
+API states the edge, or deterministic inference produced it — the edge's
+evidence states how, e.g. `matched_on`, GO evidence codes, OMA
+`rel_type`), **<1.0 = JEV judged it** (`jev_question_id` records which
+question). Sub-1.0 scores are comparable only to each other.
 
 ## Status
 
 All pipeline stages implemented: S0 (ID classification), S1 (entity
-resolution → organism + assembly), S2 (related & newer assemblies with
-species-rank lineage normalization), S3 (orthologs via OMA), S4 (UniProt
-annotation: GO evidence-code confidence, KEGG, InterPro/Pfam), S5
+resolution → organism + assembly), S2 (related assemblies from the taxon
+report; supersession = accession version bumps only), S3 (orthologs via
+OMA, asserted as-is), S4 (UniProt
+annotation: GO terms with evidence-code provenance, KEGG, InterPro/Pfam), S5
 (expression: GEO + Expression Atlas, JEV-scored), S6 (cross-assembly
-presence: `annotated_in` + JEV `likely_present`).
+presence: `annotated_in` + evidence-verified `ortholog_present`;
+unverified assemblies get no edge — no model-guessed presence).
 
 On top of the staged pipeline, two optional LLM passes propose claims that
 JEV then verifies: text claims over publication/dataset metadata, and data

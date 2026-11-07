@@ -14,26 +14,15 @@ from typing import Any
 import httpx
 
 from ..evidence import Evidence
+from ..species import same_species
 
 log = logging.getLogger(__name__)
 
 BASE = "https://rest.uniprot.org/uniprotkb/search"
 ENTRY = "https://rest.uniprot.org/uniprotkb"
 
-# GO evidence code -> confidence. Deterministic provenance scoring: these
-# annotations are already curated assertions, so confidence reflects the
-# strength of the underlying evidence type rather than a JEV judgment.
-GO_EVIDENCE_CONFIDENCE = {
-    "EXP": 0.95, "IDA": 0.95,
-    "IPI": 0.85, "IMP": 0.85, "IGI": 0.85, "IEP": 0.85,
-    "HTP": 0.85, "HDA": 0.85, "HMP": 0.85, "HGI": 0.85, "HEP": 0.85,
-    "TAS": 0.80,
-    "ISS": 0.70, "ISO": 0.70, "ISA": 0.70, "ISM": 0.70, "IGC": 0.70,
-    "IBA": 0.70, "IBD": 0.70, "IKR": 0.70, "IRD": 0.70, "RCA": 0.70,
-    "IC": 0.65, "NAS": 0.60,
-    "IEA": 0.50, "ND": 0.40,
-}
-DEFAULT_GO_CONFIDENCE = 0.60
+# GO evidence codes (IDA/TAS/IEA/...) are carried as per-assertion
+# provenance on has_go_term edges — a code tier, not a confidence tier.
 
 
 class UniProtClient:
@@ -49,16 +38,51 @@ class UniProtClient:
             self._cache = diskcache.Cache(os.path.join(cache_dir, "uniprot"))
 
     def search_gene(
-        self, symbol: str, tax_id: int | str | None = None, size: int = 3
+        self,
+        symbol: str,
+        tax_id: int | str | None = None,
+        size: int = 3,
+        organism: str | None = None,
     ) -> tuple[list[dict[str, Any]], list[Evidence]]:
         """Best UniProtKB entries for a gene symbol (+ organism if known)."""
         query = f"(gene:{symbol})"
+        results = []
         if tax_id:
-            query += f" AND (organism_id:{tax_id})"
-        params = {"query": query, "format": "json", "size": str(size)}
-        data = self._get(BASE, params)
-        results = data.get("results", [])
+            data = self._get(
+                BASE,
+                {
+                    "query": f"{query} AND (organism_id:{tax_id})",
+                    "format": "json",
+                    "size": str(size),
+                },
+            )
+            results = data.get("results", [])
+        if not results:
+            # organism_id misses species-indexed entries whenever tax_id
+            # is strain-level (36329 vs 5833). Retry unfiltered — but
+            # over-fetch, since bare gene-name hits span all species
+            # (AMA1 -> yeast, Toxo, mushrooms) and size=3 would drop the
+            # right entry before the organism filter below can keep it.
+            data = self._get(
+                BASE,
+                {"query": query, "format": "json", "size": str(max(size, 20))},
+            )
+            results = data.get("results", [])
         records = [self._normalize_entry(e) for e in results]
+        if organism:
+            records = [
+                r
+                for r in records
+                if same_species(organism, r.get("organism"))
+            ]
+        # Prefer the reviewed (Swiss-Prot) entry when several records in
+        # this organism share the gene name — curated canonicals carry
+        # the annotation S4 emits. Stable sort keeps API relevance order
+        # within each group.
+        records.sort(
+            key=lambda r: "unreviewed" in str(r.get("entry_type") or "").lower()
+        )
+        records = records[:size]
         ev = Evidence(
             source="uniprot",
             endpoint=BASE,
@@ -66,6 +90,26 @@ class UniProtClient:
             payload={"query": query, "n": len(records)},
         )
         return records, [ev]
+
+    def corroborating_evidence(self, record: dict[str, Any]) -> Evidence:
+        """Evidence for a same-gene entry that shares an accession's
+        same_as edge — the picked record stays the edge object, this
+        stays as provenance."""
+        return Evidence(
+            source="uniprot",
+            endpoint=f"{ENTRY}/{record.get('accession')}",
+            summary=(
+                f"corroborating UniProt entry {record.get('accession')} "
+                f"({record.get('entry_type') or 'unknown'})"
+            ),
+            payload={
+                "accession": record.get("accession"),
+                "entry_type": record.get("entry_type"),
+                "gene_name": record.get("gene_name"),
+                "organism": record.get("organism"),
+                "role": "corroborating",
+            },
+        )
 
     def entry_by_accession(
         self, accession: str
@@ -118,6 +162,16 @@ class UniProtClient:
 
         genes = e.get("genes") or []
         gene_name = (genes[0].get("geneName") or {}).get("value") if genes else None
+        aliases = (
+            [
+                v.get("value")
+                for key in ("synonyms", "orderedLocusNames", "orfNames")
+                for v in genes[0].get(key, [])
+                if v.get("value")
+            ]
+            if genes
+            else []
+        )
         protein_name = (
             (e.get("proteinDescription") or {})
             .get("recommendedName", {})
@@ -129,7 +183,9 @@ class UniProtClient:
             "source": "uniprot",
             "accession": e.get("primaryAccession"),
             "uniprot_id": e.get("uniProtkbId"),
+            "entry_type": e.get("entryType"),
             "gene_name": gene_name,
+            "aliases": aliases,
             "protein_name": protein_name,
             "organism": organism.get("scientificName"),
             "tax_id": organism.get("taxonId"),

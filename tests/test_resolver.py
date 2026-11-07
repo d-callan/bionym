@@ -63,7 +63,18 @@ class FakeNcbi:
                 "refseq": True,
                 "submission_date": "2025-01-01",
                 "raw": {},
-            }
+            },
+            {
+                # version bump of the source accession (GCF_000001405.40)
+                "accession": "GCF_000001405.41",
+                "name": "ASM1405v41",
+                "organism": "Homo sapiens",
+                "tax_id": tax_id,
+                "level": "Complete Genome",
+                "refseq": True,
+                "submission_date": "2025-06-01",
+                "raw": {},
+            },
         ], []
 
     def gene_products(self, gene_id):
@@ -73,7 +84,12 @@ class FakeNcbi:
         }, _EV
 
     def gene_pubmed(self, gene_id):
-        return [{"pubmed_id": "26289816", "kind": "gene_pubmed"}], _EV
+        # real NCBI overlap: the same PMID under both link kinds —
+        # exercises edge dedup on cited_in
+        return [
+            {"pubmed_id": "26289816", "kind": "gene_pubmed"},
+            {"pubmed_id": "26289816", "kind": "gene_pubmed_rif"},
+        ], _EV
 
     def pubmed_details(self, pmids):
         return {
@@ -217,7 +233,7 @@ class FakeUniProt:
     def entry_by_accession(self, accession):
         return None, _EV
 
-    def search_gene(self, symbol, tax_id=None):
+    def search_gene(self, symbol, tax_id=None, organism=None):
         return [
             {
                 "source": "uniprot",
@@ -230,6 +246,8 @@ class FakeUniProt:
                 "go_terms": [
                     {"id": "GO:0003677", "term": "DNA binding", "aspect": "F", "evidence": "IDA"},
                     {"id": "GO:0006281", "term": "DNA repair", "aspect": "P", "evidence": "IEA"},
+                    # real UniProt responses carry the assignment source
+                    {"id": "GO:0005737", "term": "cytoplasm", "aspect": "C", "evidence": "IEA:UniProtKB-SubCell"},
                 ],
                 "kegg": ["hsa:672"],
                 "interpro": [{"id": "IPR001357", "name": "BRCT"}],
@@ -300,8 +318,9 @@ def test_resolve_numeric_id_mock_jev():
         for e in g.edges
     )
     assert all(e.evidence or e.jev_question_id for e in g.edges)
-    # s0 + s1 + proposals_triage + proposals (pubmed node exists at depth 1)
-    assert g.metadata["jev_usage"]["total"]["calls"] == 4
+    # s0/s1 resolve deterministically (single regex hint, exact gene-id
+    # match) — only proposals_triage + proposals hit JEV at depth 1
+    assert g.metadata["jev_usage"]["total"]["calls"] == 2
 
 
 def test_resolve_veupathdb_id_falls_back_to_ncbi():
@@ -384,6 +403,23 @@ def test_summarize_on_existing_graph():
     assert g.metadata["summary"][0]["claim"] == "mock proposal"
 
 
+def test_no_dangling_edges_at_any_depth():
+    # issue #6: every edge endpoint must exist as a node, at every
+    # depth, for both ID sources (bridged VEuPathDB and NCBI)
+    for ident in ("672", "PF3D7_1477700"):
+        for depth in range(1, 7):
+            g = _resolver().resolve(ident, depth=depth)
+            for e in g.edges:
+                assert e.subject in g.nodes and e.object in g.nodes, (
+                    f"{ident} depth {depth}: dangling edge "
+                    f"{e.subject} --{e.predicate}--> {e.object}"
+                )
+    # the reported case: the source assembly learned during the NCBI
+    # bridge must be a real node before S2 hangs edges off it
+    g = _resolver().resolve("PF3D7_1477700", depth=2)
+    assert g.nodes["assembly:GCF_000001405.40"].type == NodeType.ASSEMBLY
+
+
 def test_serialize_rows_sorts_caps_tolerates():
     from bionym import proposals
 
@@ -415,7 +451,10 @@ def test_depth_two_adds_related_assembly():
     assert "assembly:GCF_999999999.1" in g.nodes
     predicates = {e.predicate for e in g.edges}
     assert "related_assembly" in predicates
-    assert "superseded_by" in predicates
+    # superseded_by only for accession version bumps: .41 supersedes
+    # source .40; the unrelated GCF_999999999.1 does not
+    sup = [e.object for e in g.edges if e.predicate == "superseded_by"]
+    assert sup == ["assembly:GCF_000001405.41"]
 
 
 def test_depth_three_adds_ortholog():
@@ -437,9 +476,21 @@ def test_depth_four_adds_annotation():
     assert "domain:IPR001357" in g.nodes
     predicates = {e.predicate for e in g.edges}
     assert {"same_as", "has_go_term", "in_pathway", "has_domain"} <= predicates
-    # IDA evidence should outscore IEA
-    conf = {e.object: e.confidence for e in g.edges if e.predicate == "has_go_term"}
-    assert conf["go:GO:0003677"] > conf["go:GO:0006281"]
+    # GO assertions are all 1.0 — the evidence code rides in edge
+    # evidence as provenance, not a confidence tier.
+    go_edges = {e.object: e for e in g.edges if e.predicate == "has_go_term"}
+    assert all(e.confidence == 1.0 for e in go_edges.values())
+    codes = {
+        go: [
+            (ev.payload.get("evidence_code"), ev.payload.get("evidence_source"))
+            for ev in e.evidence
+            if ev.payload.get("go_id") == go.split(":", 1)[1]
+        ]
+        for go, e in go_edges.items()
+    }
+    assert codes["go:GO:0003677"] == [("IDA", None)]
+    assert codes["go:GO:0006281"] == [("IEA", None)]
+    assert codes["go:GO:0005737"] == [("IEA", "UniProtKB-SubCell")]
 
 
 def test_depth_five_adds_expression():
@@ -458,10 +509,14 @@ def test_depth_six_adds_remap():
     predicates = {e.predicate for e in g.edges}
     # GCF_000001405.40 + GCF_009914755.1 are in the record's annotations
     assert "annotated_in" in predicates
-    # GCF_999999999.1 (S2 fake) is not annotated -> likely_present
-    assert "likely_present" in predicates
-    lp = [e for e in g.edges if e.predicate == "likely_present"]
-    assert lp[0].object == "assembly:GCF_999999999.1"
+    # GCF_999999999.1 (S2 fake) is not annotated and no resolved ortholog
+    # verifies presence -> no edge at all (JEV likely_present guesses removed)
+    assert "likely_present" not in predicates
+    assert not [
+        e for e in g.edges
+        if e.object == "assembly:GCF_999999999.1"
+        and e.predicate in ("likely_present", "ortholog_present")
+    ]
 
 
 def test_llm_proposals_add_gated_claims():
@@ -656,3 +711,21 @@ def test_resolve_records_refused_outcome():
     r.veupathdb.lookup_gene = lambda gid: ([], [])
     g = r.resolve("672", depth=1)
     assert g.metadata["outcome"] == "refused"
+
+
+def test_nuccore_typed_by_kind():
+    # genomic accessions are sequences (NC_*), transcript accessions
+    # stay transcripts (XM_*) — issue #6
+    g = _resolver().resolve("672", depth=1)
+    assert g.nodes["nuccore:NC_000013.11"].type == NodeType.SEQUENCE
+    assert g.nodes["nuccore:XM_001348563.4"].type == NodeType.TRANSCRIPT
+
+
+def test_no_duplicate_edges():
+    # issue #6: (subject, predicate, object) names one claim — NCBI
+    # returning a PMID under both link kinds must not produce a
+    # second cited_in edge; both link kinds stay on the node
+    g = _resolver().resolve("672", depth=1)
+    triples = [(e.subject, e.predicate, e.object) for e in g.edges]
+    assert len(triples) == len(set(triples))
+    assert triples.count(("ncbigene:672", "cited_in", "pubmed:26289816")) == 1

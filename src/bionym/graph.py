@@ -35,6 +35,7 @@ class NodeType(str, Enum):
     CLAIM = "Claim"
     ID_TYPE = "IdType"
     TRANSCRIPT = "Transcript"
+    SEQUENCE = "Sequence"
     PROTEIN = "Protein"
     PUBLICATION = "Publication"
 
@@ -117,12 +118,17 @@ class Node(BaseModel):
 
 
 class Edge(BaseModel):
-    """A claim: subject --predicate--> object, with JEV confidence + evidence."""
+    """A claim: subject --predicate--> object, with confidence + evidence.
+
+    Confidence is two-band: 1.0 means asserted — an API states the edge
+    or deterministic inference produced it (the how lives in evidence);
+    sub-1.0 means JEV judged it (jev_question_id records the question).
+    """
 
     subject: str
     predicate: str  # e.g. "is_a", "resolved_to", "in_organism", "in_assembly"
     object: str
-    confidence: float = 0.0
+    confidence: float = Field(default=0.0, ge=0.0, le=1.0)
     probabilities: dict[str, float] = Field(default_factory=dict)
     jev_question_id: str = ""
     evidence: list[Evidence] = Field(default_factory=list)
@@ -148,6 +154,38 @@ class KnowledgeGraph(BaseModel):
         return existing
 
     def add_edge(self, edge: Edge) -> Edge:
+        """Insert an edge, or merge into one making the same claim.
+
+        A (subject, predicate, object) triple names a single claim —
+        repeats from different sources strengthen rather than restate
+        it. Evidence entries union (each source link stays recorded),
+        confidence keeps the max, and provenance fields come from the
+        higher-confidence claim.
+        """
+        for existing in self.edges:
+            if (
+                existing.subject == edge.subject
+                and existing.predicate == edge.predicate
+                and existing.object == edge.object
+            ):
+                if edge.confidence > existing.confidence:
+                    existing.confidence = edge.confidence
+                    existing.probabilities = dict(edge.probabilities)
+                    existing.jev_question_id = edge.jev_question_id
+                elif not existing.jev_question_id:
+                    existing.jev_question_id = edge.jev_question_id
+                for ev in edge.evidence:
+                    # Evidence equality includes retrieved_at, which
+                    # always differs — compare the claim fields instead
+                    if not any(
+                        ev.source == e.source
+                        and ev.endpoint == e.endpoint
+                        and ev.summary == e.summary
+                        and ev.payload == e.payload
+                        for e in existing.evidence
+                    ):
+                        existing.evidence.append(ev)
+                return existing
         self.edges.append(edge)
         return edge
 
