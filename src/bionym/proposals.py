@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from typing import Any
 
 log = logging.getLogger(__name__)
@@ -46,18 +47,94 @@ _INSTRUCTIONS = {
 
 _SCHEMA = (
     'Return JSON: {"proposals": [{"claim": "<short noun phrase>", '
-    '"quote": "<verbatim span from the text supporting it>"}]}. '
+    '"citations": [<numbers of the units above that support it>]}]}. '
     f"At most {MAX_PROPOSALS} proposals. Rules: every proposal must be "
     "checkable against the text alone — no outside knowledge, no "
-    "speculation, no duplicates."
+    "speculation, no duplicates. Cite unit numbers only, never rewrite "
+    "or splice the source's words."
 )
+
+
+# Sentences (prose sources) or lines (rows, serialized edges) are the
+# citable units: the model names unit numbers and the quote is copied
+# verbatim from those units, so a quote can never drift from its
+# source (issue #8). The split skips boundaries before a lowercase
+# token so initials, 'e.g.'/'i.e.', and binomials ('P. falciparum')
+# stay one unit — verbatim correctness doesn't need perfect
+# boundaries, but fragment units make useless quotes. Residual: an
+# abbreviation followed by a capitalized word ('et al. Johnson')
+# still splits.
+_SENT_SPLIT = re.compile(r"(?<=[.!?])\s+(?=[^\sa-z])|\n+")
+
+
+def _numbered(units: list[str]) -> tuple[str, list[str]]:
+    display = "\n".join(f"[{i}] {u}" for i, u in enumerate(units, 1))
+    return display, units
+
+
+def numbered_sentences(text: str) -> tuple[str, list[str]]:
+    """Prose -> ('[1] s1\\n[2] s2', [s1, s2]). Source for text claims."""
+    return _numbered([s.strip() for s in _SENT_SPLIT.split(text) if s.strip()])
+
+
+def numbered_lines(text: str) -> tuple[str, list[str]]:
+    """Line-structured source (data rows, serialized graph) -> same."""
+    return _numbered([ln for ln in text.splitlines() if ln.strip()])
+
+
+def _valid_citations(raw: Any, n_units: int) -> list[int] | None:
+    """Citation field -> 0-based unit indices that exist.
+
+    None = no citation field at all; [] = the list was empty or every
+    index missed the unit range. parse() drops the claim either way —
+    citations are required (PR #10). Nested groups like [[1,2],5] are
+    flattened — they carry no information the indices don't (adjacency
+    is derivable), and small models may improvise them."""
+    if raw is None:
+        return None
+    if not isinstance(raw, list):
+        return []
+    out = []
+    for n in raw:
+        if isinstance(n, list):  # flatten improvised grouping
+            for m in n:
+                try:
+                    i = int(m) - 1
+                except (TypeError, ValueError):
+                    continue
+                if 0 <= i < n_units:
+                    out.append(i)
+            continue
+        try:
+            i = int(n) - 1  # the display numbers are 1-based
+        except (TypeError, ValueError):
+            continue
+        if 0 <= i < n_units:
+            out.append(i)
+    return out
+
+
+def _verbatim_quote(units: list[str], citations: list[int]) -> str:
+    """Assemble the quote from cited units in SOURCE order: sorted and
+    deduplicated, so '[3, 2]' or '[1, 2, 1]' can't read as reordered or
+    repeated source text (PR #10). Adjacent units join as one span; a
+    gap inserts ' … ' so disjoint sentences never read as contiguous
+    source text."""
+    quote = ""
+    prev = None
+    for i in sorted(set(citations)):
+        if prev is not None:
+            quote += " " if i == prev + 1 else " … "
+        quote += units[i]
+        prev = i
+    return quote
 
 
 def build_prompt(kind: str, text: str) -> tuple[str, str]:
     """(system, user) messages for one enumeration call."""
     user = (
         f"{_INSTRUCTIONS[kind]}\n\n{_SCHEMA}\n\n"
-        f"Text:\n---\n{text}\n---"
+        f"Text (numbered units):\n---\n{text}\n---"
     )
     return SYSTEM, user
 
@@ -91,9 +168,17 @@ def _extract_json(content: str, key: str = "proposals") -> dict | None:
     return None
 
 
-def parse(content: str) -> list[dict[str, str]]:
-    """Validate the JSON response -> [{claim, quote}]. Drops anything
-    malformed rather than failing the whole batch."""
+def parse(content: str, units: list[str]) -> list[dict[str, Any]]:
+    """Validate the JSON response -> [{claim, quote, citations}].
+
+    `units` is the numbered source the model cited: the quote is
+    assembled verbatim from the cited units, so it always appears word
+    for word in the source. A freeform 'quote' field is ignored — it
+    can't be verified as verbatim. Citations are required: a missing
+    field, an empty list, or indices all out of range all drop the
+    claim — an unquoted claim can't be shown as verbatim-verified
+    (PR #10). units is required — without it every claim would be
+    dropped silently."""
     data = _extract_json(content or "")
     if data is None:
         log.warning("LLM returned no parseable proposals object: %.200s", content)
@@ -101,13 +186,22 @@ def parse(content: str) -> list[dict[str, str]]:
     proposals = data["proposals"]
     out = []
     for p in proposals[:MAX_PROPOSALS]:
-        if isinstance(p, dict) and isinstance(p.get("claim"), str) and p["claim"].strip():
-            out.append(
-                {
-                    "claim": " ".join(p["claim"].split()),
-                    "quote": str(p.get("quote") or ""),
-                }
-            )
+        if not (
+            isinstance(p, dict)
+            and isinstance(p.get("claim"), str)
+            and p["claim"].strip()
+        ):
+            continue
+        citations = _valid_citations(p.get("citations"), len(units))
+        if not citations:
+            continue
+        out.append(
+            {
+                "claim": " ".join(p["claim"].split()),
+                "quote": _verbatim_quote(units, citations),
+                "citations": citations,
+            }
+        )
     return out
 
 
@@ -306,10 +400,11 @@ def build_data_prompt(
     """
     user = (
         "Below is a dataset's metadata and this gene's per-sample "
-        "measurements in it. Propose concise biological claims about THIS "
-        "gene that the data supports — e.g. conditions or stages where it "
-        "is highly or lowly expressed, or notable contrasts. Each claim "
-        "must cite the supporting sample(s)/value(s) in 'quote'.\n\n"
+        "measurements in it, one numbered row per sample. Propose "
+        "concise biological claims about THIS gene that the data "
+        "supports — e.g. conditions or stages where it is highly or "
+        "lowly expressed, or notable contrasts. Each claim must cite "
+        "the numbers of the supporting row(s) in 'citations'.\n\n"
         f"{_SCHEMA}\n\n"
         f"Dataset: {meta.get('label')}\n"
         f"Summary: {meta.get('summary') or 'n/a'}\n\n"
@@ -401,8 +496,8 @@ def build_summary_prompt(
         "unknown. Each claim must be directly supported by the edges "
         "above. Gaps are valid claims ('no known function', 'no orthologs "
         "found').\n"
-        'Return JSON: {"proposals": [{"claim": "...", "quote": "the '
-        'edges supporting it"}]}'
+        'Return JSON: {"proposals": [{"claim": "...", "citations": '
+        '[<numbers of the edges above that support it>]}]}'
     )
     return _SUMMARY_SYSTEM, user
 

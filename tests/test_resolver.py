@@ -1,3 +1,5 @@
+import pytest
+
 from bionym.evidence import Evidence
 from bionym.graph import NodeType
 from bionym.jev import JevClient
@@ -530,6 +532,241 @@ def test_llm_proposals_add_gated_claims():
     assert reports[0].confidence == 0.5
     assert reports[0].jev_question_id.startswith("prop_")
     assert reports[0].evidence[0].source == "llm_proposal"
+    # the mock cites unit 1 — the quote is copied verbatim from the
+    # source text (title line), never reworded (issue #8)
+    assert reports[0].evidence[0].payload["quote"] == (
+        "BRCA1 loss alters the DNA damage response"
+    )
+
+
+def test_proposals_jev_failure_drops_claims():
+    # issue #8: a claim whose JEV verification raised is unverified —
+    # it must never reach the graph
+    from bionym.jev import JevError
+
+    r = _resolver()
+    orig = r.jev.ask
+
+    def fail_proposals(state, questions, stage=""):
+        if stage == "proposals":
+            raise JevError("boom")
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = fail_proposals
+    g = r.resolve("672", depth=1)
+    assert not [e for e in g.edges if e.predicate == "reports"]
+    assert not [n for n in g.nodes.values() if n.type == NodeType.CLAIM]
+
+
+def test_lone_candidate_low_noul_refused():
+    # issue #8: a single S1 candidate can still be rejected — below
+    # SINGLE_HIT_MIN_NOUL the match is refused outright
+    r = _resolver()
+    orig = r.jev.ask
+
+    def low_noul(state, questions, stage=""):
+        if stage == "s1_resolve":
+            return {"gene_match": {"type": "noul", "noul": 0.02,
+                                   "confidence": 0.02}}
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = low_noul
+    g = r.resolve("BRCA2", depth=1)
+    assert g.metadata["outcome"] == "refused"
+    assert "s1_resolve:no_match" in g.metadata["stages"]
+
+
+def test_ncbi_link_lone_hit_low_noul_refused():
+    # issue #8: a lone find_gene hit is still a JEV judgment — below
+    # SINGLE_HIT_MIN_NOUL it must not set match["ncbi_gene_id"], which
+    # _enrich_ncbi_gene, OMA links and S6 all build on
+    r = _resolver()
+    r.jev.ask = lambda state, questions, stage="": {
+        "gene_match": {"type": "noul", "noul": 0.02, "confidence": 0.02}
+    }
+    records = [
+        {"gene_id": "1", "symbol": "ZZZ", "locus_tag": "ZZZ1",
+         "tax_id": 5833}
+    ]
+    hit, _, _ = r._pick_ncbi_hit("no_exact_match", records, 9999)
+    assert hit is None
+
+
+def test_s4_lone_uniprot_low_noul_refused():
+    # lone UniProt hit without a noul >= SINGLE_HIT_MIN_NOUL is not
+    # attached
+    r = _resolver()
+    orig = r.jev.ask
+
+    def low(state, questions, stage=""):
+        if stage == "s4_pick":
+            return {"uniprot_match": {"type": "noul", "noul": 0.02,
+                                      "confidence": 0.02}}
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = low
+    g = r.resolve("672", depth=4)
+    assert "s4_annotate:no_uniprot_match" in g.metadata["stages"]
+    assert not [n for n in g.nodes if n.startswith("uniprot:")]
+
+
+def test_data_claims_missing_answer_dropped():
+    # a data claim JEV never answered is unverified — same rule as the
+    # proposals stage, it must not reach the graph
+    r = _resolver()
+    orig = r.jev.ask
+    asked = []
+
+    def silent(state, questions, stage=""):
+        asked.append(stage)
+        if stage == "data_proposals":
+            return {}
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = silent
+    g = r.resolve("672", depth=5)  # s5 attaches the GEO/GXA datasets
+    assert "data_proposals" in asked  # the stage actually ran
+    assert not [
+        e for e in g.edges
+        if any("n_rows" in ev.payload for ev in e.evidence)
+    ]
+
+
+def test_summary_jev_failure_drops_summary():
+    # a JEV error at summary verification is best-effort — the resolve
+    # completes but no summary is recorded
+    from bionym.jev import JevError
+
+    r = _resolver()
+    orig = r.jev.ask
+
+    def fail(state, questions, stage=""):
+        if stage == "summary":
+            raise JevError("boom")
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = fail
+    g = r.resolve("672", depth=1, summarize=True)
+    assert "summary" not in g.metadata
+
+
+def test_summary_missing_answer_filtered():
+    # claims JEV never answered are filtered out of the summary — an
+    # unverified claim must never be presented
+    r = _resolver()
+    orig = r.jev.ask
+
+    def silent(state, questions, stage=""):
+        if stage == "summary":
+            return {}
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = silent
+    g = r.resolve("672", depth=1, summarize=True)
+    assert g.metadata["summary"] == []
+
+
+def test_verify_sees_full_numbered_source():
+    # issue #8: the verify ask must see the whole numbered source —
+    # truncating the numbered text a second time could hide the unit a
+    # model cited. Raw text is capped at PROMPT_TEXT_CHARS before
+    # numbering, so the numbered text runs past the cap; a sentinel
+    # near the end proves nothing was clipped
+    from bionym import proposals
+
+    r = _resolver()
+    # fill to just under the raw cap, then the sentinel: inside the raw
+    # slice but past PROMPT_TEXT_CHARS once numbering overhead is added
+    sents = []
+    while len(" ".join(sents)) < proposals.PROMPT_TEXT_CHARS - 200:
+        sents.append(f"Filler sentence {len(sents):04d} keeps going.")
+    sents.append("End sentinel SENTINEL.")
+    raw = " ".join(sents)
+    numbered, _ = proposals.numbered_sentences(
+        raw[: proposals.PROMPT_TEXT_CHARS]
+    )
+    # fixture premises: the sentinel survives the raw cap, but sits past
+    # it in the numbered text — where a second [: cap] would clip it
+    assert "SENTINEL" in numbered
+    assert numbered.index("SENTINEL") > proposals.PROMPT_TEXT_CHARS
+
+    details, _ = FakeNcbi().pubmed_details(["26289816"])
+    details["26289816"]["abstract"] = raw
+    r.ncbi.pubmed_details = lambda pmids: (details, _EV)
+
+    orig = r.jev.ask
+    seen = []
+
+    def watch(state, questions, stage=""):
+        if stage == "proposals":
+            seen.append(state)
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = watch
+    r.resolve("672", depth=1)
+    assert seen, "verify ask never ran"
+    # state is a dict: {"source_texts": {node: text}, "proposals": [...]}
+    assert any("SENTINEL" in str(s) for s in seen)
+
+
+def test_summarize_standalone_raises_jev_error():
+    # the /api/summarize path: a failed verification must surface — a
+    # silent [] or a stale summary on a reposted graph is wrong (PR #10)
+    from bionym.jev import JevError
+
+    r = _resolver()
+    g = r.resolve("672", depth=1)
+    orig = r.jev.ask
+
+    def fail(state, questions, stage=""):
+        if stage == "summary":
+            raise JevError("boom")
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = fail
+    with pytest.raises(JevError):
+        r.summarize(g, {"symbol": "BRCA2", "organism": "Homo sapiens"})
+
+
+def test_truncated_source_drops_dangling_last_unit():
+    # a source cut at PROMPT_TEXT_CHARS can end mid-sentence — the
+    # dangling fragment is dropped so a quote is always a complete
+    # span of source text (PR #10)
+    from bionym import proposals
+
+    r = _resolver()
+    sents = []
+    while len(" ".join(sents)) < proposals.PROMPT_TEXT_CHARS - 200:
+        sents.append(f"Filler sentence {len(sents):04d} keeps going.")
+    # long trailing sentence with no terminator yet — the cap cuts it
+    # mid-way, leaving a fragment (with the marker inside it) as the
+    # last unit
+    sents.append("Trailing FRAGMENT sentence " + "word " * 300)
+    raw = " ".join(sents)
+    _, units = proposals.numbered_sentences(
+        raw[: proposals.PROMPT_TEXT_CHARS]
+    )
+    # premise: the marker survives the cap inside an incomplete unit
+    assert "FRAGMENT" in units[-1]
+    assert not units[-1].endswith(".")
+
+    details, _ = FakeNcbi().pubmed_details(["26289816"])
+    details["26289816"]["abstract"] = raw
+    r.ncbi.pubmed_details = lambda pmids: (details, _EV)
+
+    orig = r.jev.ask
+    seen = []
+
+    def watch(state, questions, stage=""):
+        if stage == "proposals":
+            seen.append(state)
+        return orig(state, questions, stage=stage)
+
+    r.jev.ask = watch
+    r.resolve("672", depth=1)
+    assert seen, "verify ask never ran"
+    # the fragment was dropped — the marker can never be cited/quoted
+    assert not any("FRAGMENT" in str(s) for s in seen)
 
 
 def test_parse_normalized():
