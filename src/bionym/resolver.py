@@ -1666,6 +1666,29 @@ class Resolver:
                     evidence=evidence,
                 )
             )
+            # VEuPathDB curates the dataset's primary publication —
+            # link it: datasets and publications otherwise only meet at
+            # the gene node.
+            if m.get("pmid"):
+                pm_node = f"pubmed:{m['pmid']}"
+                graph.add_node(
+                    Node(
+                        id=pm_node,
+                        type=NodeType.PUBLICATION,
+                        label=m.get("citation") or f"PMID {m['pmid']}",
+                        id_namespace="pubmed",
+                        attrs={"citation": m.get("citation")},
+                    )
+                )
+                graph.add_edge(
+                    Edge(
+                        subject=node_id,
+                        predicate="described_in",
+                        object=pm_node,
+                        confidence=1.0,
+                        evidence=evidence,
+                    )
+                )
         return len(datasets)
 
     # -- S6 ----------------------------------------------------------------
@@ -1905,6 +1928,10 @@ class Resolver:
         """
         if not self.llm.enabled:
             return
+        # Gene context flows into the propose prompt and the JEV verify
+        # state — claims must be falsifiable assertions relevant to the
+        # gene, not verbatim-but-trivial fragments (eval finding).
+        symbol = match.get("symbol") or match.get("locus_tag")
         self._enrich_publications(graph)
         # Datasets carry title/summary/sample names; publications carry
         # title + abstract (enriched above — bare PMIDs have no text to
@@ -2026,7 +2053,9 @@ class Resolver:
             it["text"] = numbered
 
         def _propose(it: dict[str, Any]) -> list[dict[str, Any]]:
-            system, user = proposals.build_prompt(it["kind"], it["text"])
+            system, user = proposals.build_prompt(
+                it["kind"], it["text"], symbol or ""
+            )
             try:
                 content = self.llm.complete(system, user)
             except Exception as e:  # proposals are best-effort
@@ -2034,19 +2063,30 @@ class Resolver:
                 return []
             return [
                 {"node": it["node"], "kind": it["kind"], **p}
-                for p in proposals.parse(content, it["units"])
+                for p in proposals.parse(
+                    content,
+                    it["units"],
+                    default=(
+                        "condition"
+                        if it["kind"] == "dataset"
+                        else "claim"
+                    ),
+                )
             ]
 
         with ThreadPoolExecutor(max_workers=self.proposal_concurrency) as ex:
             per_node = list(ex.map(_propose, keep))
 
-        # One normalization pass over all dataset claims: equivalent
-        # conditions get identical labels, so they collapse to a single
-        # condition: node instead of 'timeseries post infection' vs
-        # 'post infection timeseries' duplicates. Best-effort — on failure
-        # the raw claims stand.
+        # One normalization pass over all condition proposals
+        # (any source): equivalent conditions get identical labels, so
+        # they collapse to a single condition: node instead of
+        # 'timeseries post infection' vs 'post infection timeseries'
+        # duplicates. Best-effort — on failure the raw labels stand.
         flat = [
-            p for props in per_node for p in props if p["kind"] == "dataset"
+            p
+            for props in per_node
+            for p in props
+            if p.get("type") == "condition"
         ]
         if flat:
             try:
@@ -2075,7 +2115,9 @@ class Resolver:
             text = it["text"]
             try:
                 return self.jev.ask(
-                    proposals.build_state({it["node"]: text}, props),
+                    proposals.build_state(
+                        {it["node"]: text}, props, match
+                    ),
                     proposals.build_questions(props),
                     stage="proposals",
                 )
@@ -2093,7 +2135,7 @@ class Resolver:
                 # no JEV answer -> unverified; never present the claim
                 if not ans:
                     continue
-                if it["kind"] == "dataset":
+                if p["type"] == "condition":
                     ntype, predicate = NodeType.CONDITION, "has_condition"
                 else:
                     ntype, predicate = NodeType.CLAIM, "reports"
@@ -2187,6 +2229,7 @@ class Resolver:
             meta = {
                 "label": node.label if node else it["node"],
                 "summary": node.attrs.get("summary") if node else None,
+                "gene": symbol,
             }
             # verbatim by construction: the model cites row numbers
             # and the quote is copied from the rows it named (issue #8)

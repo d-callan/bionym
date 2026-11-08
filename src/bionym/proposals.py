@@ -25,28 +25,45 @@ SYSTEM = (
     "verification. Output JSON only, no commentary."
 )
 
+# A source can yield two output types in one ask: conditions are
+# noun-phrase labels for what the gene was measured under (they
+# normalize into shared condition: nodes), claims are falsifiable
+# assertions about the gene. The verify wording branches on this.
+_TYPE_RULES = (
+    "Two proposal types: 'condition' — a short noun phrase naming an "
+    "experimental condition the gene was measured under, a label not "
+    "a sentence ('intraerythrocytic time course'); and 'claim' — a "
+    "falsifiable assertion about the gene that could be true or "
+    "false ('essential for erythrocyte invasion')."
+)
+
 _INSTRUCTIONS = {
     "dataset": (
-        "List every distinct experimental condition, contrast, or sample "
-        "group this dataset description explicitly states or clearly "
-        "implies (e.g. a compound treatment, dose, tissue, strain "
-        "comparison). Rules: only biologically informative conditions — "
-        "never the organism itself (already implied by context), never "
-        "technical artifacts (read orientation, unique reads, sequencing "
-        "metrics). Aggregate series into one condition: 'time series "
-        "post infection' not '7 hpi' and '16 hpi' separately; 'life "
-        "cycle stages' not individual stages. Strain/sample counts are "
-        "fine ('5 strains investigated')."
+        "This text describes a dataset the gene was measured in. List "
+        "every distinct experimental condition, contrast, or sample "
+        "group it explicitly states or clearly implies (type "
+        "'condition'), plus any distinct assertion about the gene it "
+        "makes (type 'claim'). Rules: only conditions relevant to the "
+        "gene measured and biologically informative — never the "
+        "organism itself (already implied by context), never technical "
+        "artifacts (read orientation, unique reads, sequencing metrics, "
+        "replicate counts). Aggregate series into one condition: 'time "
+        "series post infection' not '7 hpi' and '16 hpi' separately; "
+        "'life cycle stages' not individual stages. Strain/sample "
+        "counts are fine ('5 strains investigated')."
     ),
     "publication": (
-        "List every distinct claim or finding this publication's title "
-        "and abstract explicitly state or clearly imply about the gene, "
-        "its function, or its organism."
+        "This text is a publication's title and abstract. List every "
+        "distinct falsifiable assertion it explicitly states or clearly "
+        "implies about the gene, its function, or its organism (type "
+        "'claim'), plus any experimental condition the gene was "
+        "measured under (type 'condition')."
     ),
 }
 
 _SCHEMA = (
-    'Return JSON: {"proposals": [{"claim": "<short noun phrase>", '
+    'Return JSON: {"proposals": [{"claim": "<condition label or '
+    'assertion text>", "type": "condition|claim", '
     '"citations": [<numbers of the units above that support it>]}]}. '
     f"At most {MAX_PROPOSALS} proposals. Rules: every proposal must be "
     "checkable against the text alone — no outside knowledge, no "
@@ -130,10 +147,13 @@ def _verbatim_quote(units: list[str], citations: list[int]) -> str:
     return quote
 
 
-def build_prompt(kind: str, text: str) -> tuple[str, str]:
+def build_prompt(
+    kind: str, text: str, gene: str = ""
+) -> tuple[str, str]:
     """(system, user) messages for one enumeration call."""
     user = (
-        f"{_INSTRUCTIONS[kind]}\n\n{_SCHEMA}\n\n"
+        f"Gene: {gene or 'the source gene'}\n\n"
+        f"{_TYPE_RULES}\n\n{_INSTRUCTIONS[kind]}\n\n{_SCHEMA}\n\n"
         f"Text (numbered units):\n---\n{text}\n---"
     )
     return SYSTEM, user
@@ -168,8 +188,10 @@ def _extract_json(content: str, key: str = "proposals") -> dict | None:
     return None
 
 
-def parse(content: str, units: list[str]) -> list[dict[str, Any]]:
-    """Validate the JSON response -> [{claim, quote, citations}].
+def parse(
+    content: str, units: list[str], default: str = "claim"
+) -> list[dict[str, Any]]:
+    """Validate the JSON response -> [{claim, type, quote, citations}].
 
     `units` is the numbered source the model cited: the quote is
     assembled verbatim from the cited units, so it always appears word
@@ -178,7 +200,9 @@ def parse(content: str, units: list[str]) -> list[dict[str, Any]]:
     field, an empty list, or indices all out of range all drop the
     claim — an unquoted claim can't be shown as verbatim-verified
     (PR #10). units is required — without it every claim would be
-    dropped silently."""
+    dropped silently. `type` is 'condition'|'claim'; a missing or
+    invalid value falls back to `default` — sources that only ever
+    produce one type (data rows, summaries) don't emit the field."""
     data = _extract_json(content or "")
     if data is None:
         log.warning("LLM returned no parseable proposals object: %.200s", content)
@@ -198,6 +222,9 @@ def parse(content: str, units: list[str]) -> list[dict[str, Any]]:
         out.append(
             {
                 "claim": " ".join(p["claim"].split()),
+                "type": p.get("type")
+                if p.get("type") in ("condition", "claim")
+                else default,
                 "quote": _verbatim_quote(units, citations),
                 "citations": citations,
             }
@@ -225,15 +252,20 @@ TRIAGE_CHUNK = 50
 TRIAGE_PER_KIND = MAX_ITEMS_PER_KIND * 4
 
 
+def _gene_ctx(match: dict[str, Any]) -> dict[str, Any]:
+    """The gene fields a verifier needs to judge claim relevance."""
+    return {
+        "symbol": match.get("symbol"),
+        "description": match.get("description"),
+        "organism": match.get("organism"),
+    }
+
+
 def build_triage_state(
     source_gene: dict[str, Any], items: list[dict[str, Any]]
 ) -> dict:
     return {
-        "source_gene": {
-            "symbol": source_gene.get("symbol"),
-            "description": source_gene.get("description"),
-            "organism": source_gene.get("organism"),
-        },
+        "source_gene": _gene_ctx(source_gene),
         "items": [
             {"node": it["node"], "kind": it["kind"], "text": it["text"]}
             for it in items
@@ -272,28 +304,58 @@ def build_triage_questions(items: list[dict[str, Any]]) -> dict:
     }
 
 
-def build_state(texts: dict[str, str], proposals: list[dict[str, Any]]) -> dict:
-    """JEV state: source texts + the proposals to verify against them."""
+def build_state(
+    texts: dict[str, str],
+    proposals: list[dict[str, Any]],
+    match: dict[str, Any] | None = None,
+) -> dict:
+    """JEV state: gene context + source texts + proposals to verify."""
     return {
+        "source_gene": _gene_ctx(match or {}),
         "source_texts": texts,
         "proposals": [
-            {"node": p["node"], "claim": p["claim"], "quote": p.get("quote")}
+            {
+                "node": p["node"],
+                "type": p.get("type"),
+                "claim": p["claim"],
+                "quote": p.get("quote"),
+            }
             for p in proposals
         ],
     }
+
+
+# Verify wording differs by output type: conditions are labels judged on
+# biological informativeness; claims stay assertions, so the bar adds
+# falsifiability. Both must be relevant to `source_gene` — textual
+# support alone let trivia like 'duplicate samples' through (verbatim
+# support doesn't imply a claim worth graphing).
+_VERIFY_INSTRUCTIONS = {
+    "condition": (
+        "`proposals[{i}]` is a condition machine-extracted from "
+        "`source_texts` for node '{node}'. Accept it only if the source "
+        "text states or clearly implies it, it is biologically "
+        "informative about how `source_gene` was measured — not a "
+        "technical artifact, metadata, or the organism itself — and "
+        "it is relevant to `source_gene`."
+    ),
+    "claim": (
+        "`proposals[{i}]` was machine-extracted from `source_texts` for "
+        "node '{node}'. Accept it only if the source text supports it "
+        "— judge textual support, not plausibility — and it is a "
+        "falsifiable assertion relevant to `source_gene`, not a bare "
+        "label or fragment."
+    ),
+}
 
 
 def build_questions(proposals: list[dict[str, Any]]) -> dict:
     return {
         f"prop_{i}": {
             "type": "noul",
-            "instructions": (
-                f"`proposals[{i}]` was machine-extracted from "
-                f"`source_texts` for node '{p['node']}'. Does the source "
-                "text support this claim? Judge textual support, not "
-                "plausibility — reject claims the text doesn't state or "
-                "clearly imply, even if they sound reasonable."
-            ),
+            "instructions": _VERIFY_INSTRUCTIONS.get(
+                p.get("type"), _VERIFY_INSTRUCTIONS["claim"]
+            ).format(i=i, node=p["node"]),
         }
         for i, p in enumerate(proposals)
     }
@@ -398,10 +460,12 @@ def build_data_prompt(
     The dataset's own metadata is included — raw values are
     uninterpretable without knowing what the contrast is.
     """
+    gene = meta.get("gene") or "the gene"
     user = (
-        "Below is a dataset's metadata and this gene's per-sample "
+        f"Below is a dataset's metadata and {gene}'s per-sample "
         "measurements in it, one numbered row per sample. Propose "
-        "concise biological claims about THIS gene that the data "
+        "concise falsifiable biological claims about "
+        f"{gene} that the data "
         "supports — e.g. conditions or stages where it is highly or "
         "lowly expressed, or notable contrasts. Each claim must cite "
         "the numbers of the supporting row(s) in 'citations'.\n\n"
@@ -416,8 +480,9 @@ def build_data_prompt(
 def build_data_state(
     meta: dict[str, Any], data_text: str, proposals: list[dict[str, Any]]
 ) -> dict:
-    """JEV state: dataset context + serialized data + proposals."""
+    """JEV state: gene + dataset context + serialized data + proposals."""
     return {
+        "gene": meta.get("gene"),
         "dataset": {
             "name": meta.get("label"),
             "summary": meta.get("summary"),
@@ -436,10 +501,10 @@ def build_data_questions(proposals: list[dict[str, Any]]) -> dict:
             "type": "noul",
             "instructions": (
                 f"`proposals[{i}]` was machine-extracted from the "
-                "per-sample measurements in `data` for this gene. Does "
-                "the data support this claim? Judge the numbers, not "
-                "plausibility — reject claims whose stated direction or "
-                "magnitude the values don't support."
+                "per-sample measurements in `data`. Accept it only if "
+                "the numbers support it — judge the values, not "
+                "plausibility — and it is a falsifiable assertion "
+                "about `gene`, not a bare label."
             ),
         }
         for i, p in enumerate(proposals)
@@ -493,9 +558,9 @@ def build_summary_prompt(
         f"{graph_text}\n\n"
         "Propose a concise summary of this gene as typed claims: what it "
         "is, what it does, where/when it's expressed, what's known vs "
-        "unknown. Each claim must be directly supported by the edges "
-        "above. Gaps are valid claims ('no known function', 'no orthologs "
-        "found').\n"
+        "unknown. Each claim must be a falsifiable assertion about the "
+        "gene, directly supported by the edges above. Gaps are valid "
+        "claims ('no known function', 'no orthologs found').\n"
         'Return JSON: {"proposals": [{"claim": "...", "citations": '
         '[<numbers of the edges above that support it>]}]}'
     )
@@ -521,10 +586,10 @@ def build_summary_questions(props: list[dict[str, Any]]) -> dict:
             "type": "noul",
             "instructions": (
                 f"`proposals[{i}]` is a candidate summary claim about "
-                "this gene. Is it supported by the edges in `graph`, and "
-                "is it important enough for a concise summary? Reject "
-                "claims the edges don't support and trivia not worth "
-                "surfacing."
+                "`gene`. Accept it only if it is supported by the edges "
+                "in `graph`, is a falsifiable assertion about `gene` — "
+                "not a bare label — and is important enough for a "
+                "concise summary. Reject trivia."
             ),
         }
         for i, p in enumerate(props)
