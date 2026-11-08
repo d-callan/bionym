@@ -1,0 +1,871 @@
+[{"stream_name":"stdout","time":1.940962868,"data":"[asks] 469 from /kaggle/input/datasets/daniellecallan/bionym-jev-asks/asks.jsonl\n"}
+,{"stream_name":"stdout","time":7.348702993,"data":"[laya-serve] booting (weight download on first run)…\n"}
+,{"stream_name":"stderr","time":13.510531798,"data":"\rFetching 5 files:   0%|          | 0/5 [00:00\u003c?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":19.881825946,"data":"\rFetching 5 files:  20%|██        | 1/5 [00:00\u003c00:00,  5.60it/s]\rFetching 5 files: 100%|██████████| 5/5 [00:06\u003c00:00,  1.36s/it]\rFetching 5 files: 100%|██████████| 5/5 [00:06\u003c00:00,  1.29s/it]\n"}
+,{"stream_name":"stderr","time":44.626683015,"data":"/usr/local/lib/python3.13/dist-packages/laya/router.py:1109: RuntimeWarning: laya: this checkpoint ships invalid temperatures or values outside [0.5, 5]; using choice:11+=0.10058280825614929 -\u003e 0.5. Treat confidence from the affected entries as uncalibrated.\n"}
+,{"stream_name":"stderr","time":44.626729591,"data":"  return Agent(repo, **kwargs)\n"}
+,{"stream_name":"stderr","time":49.192368992,"data":"\rFetching 5 files:   0%|          | 0/5 [00:00\u003c?, ?it/s]\rFetching 5 files:  20%|██        | 1/5 [00:00\u003c00:00,  8.79it/s]\rFetching 5 files:  80%|████████  | 4/5 [00:00\u003c00:00,  6.27it/s]\rFetching 5 files: 100%|██████████| 5/5 [00:04\u003c00:00,  1.18s/it]\rFetching 5 files: 100%|██████████| 5/5 [00:04\u003c00:00,  1.13it/s]\n"}
+,{"stream_name":"stderr","time":60.828006693,"data":"\rFetching 5 files:   0%|          | 0/5 [00:00\u003c?, ?it/s]\rFetching 5 files:  40%|████      | 2/5 [00:00\u003c00:00, 15.85it/s]\rFetching 5 files: 100%|██████████| 5/5 [00:05\u003c00:00,  1.33s/it]\rFetching 5 files: 100%|██████████| 5/5 [00:05\u003c00:00,  1.18s/it]\n"}
+,{"stream_name":"stderr","time":62.491753524,"data":"INFO:     Started server process [26]\n"}
+,{"stream_name":"stderr","time":62.491788498,"data":"INFO:     Waiting for application startup.\n"}
+,{"stream_name":"stderr","time":62.493205461,"data":"INFO:     Application startup complete.\n"}
+,{"stream_name":"stderr","time":62.497325318,"data":"INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)\n"}
+,{"stream_name":"stdout","time":67.549385477,"data":"INFO:     127.0.0.1:43268 - \"GET /health HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":67.550071685,"data":"[laya-serve] health: {'status': 'ok', 'loaded': ['english', 'multilingual', 'typed-decisions'], 'revisions': {'english': '7b928d828b7b0e022f929d9bd2e44165aa270148', 'multilingual': '7b928d828b7b0e022f929d9bd2e44165aa270148', 'typed-decisions': '7b928d828b7b0e022f929d9bd2e44165aa270148'}, 'device': 'cpu', 'device_is_preference': False, 'checkpoint_devices': {'english': 'cpu', 'multilingual': 'cpu', 'typed-decisions': 'cpu'}, 'cpu_fallbacks': {'english': {'count': 0, 'last_reason': None}, 'multilingual': {'count': 0, 'last_reason': None}, 'typed-decisions': {'count': 0, 'last_reason': None}}}\n"}
+,{"stream_name":"stdout","time":67.550101878,"data":"[0/469]\n"}
+,{"stream_name":"stdout","time":70.015228734,"data":"INFO:     127.0.0.1:43278 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":71.306056543,"data":"INFO:     127.0.0.1:43282 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":72.574004796,"data":"INFO:     127.0.0.1:43296 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":73.826435,"data":"INFO:     127.0.0.1:43304 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":75.071210334,"data":"INFO:     127.0.0.1:43310 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":78.675614581,"data":"state truncated on /v1/systemone model=english questions=1 state_tokens_dropped=1028 truncated_questions=['gene_match']\n"}
+,{"stream_name":"stdout","time":78.676199797,"data":"INFO:     127.0.0.1:59610 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":81.810025819,"data":"INFO:     127.0.0.1:59620 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":83.36354481,"data":"INFO:     127.0.0.1:59630 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":273.850156878,"data":"state truncated on /v1/systemone model=english questions=50 state_tokens_dropped=6944 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26', 'triage_27', 'triage_28', 'triage_29', 'triage_30', 'triage_31', 'triage_32', 'triage_33', 'triage_34', 'triage_35', 'triage_36', 'triage_37', 'triage_38', 'triage_39', 'triage_40', 'triage_41', 'triage_42', 'triage_43', 'triage_44', 'triage_45', 'triage_46', 'triage_47', 'triage_48', 'triage_49']\n"}
+,{"stream_name":"stderr","time":273.877523224,"data":"[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (8317 \u003e 8192). Running this sequence through the model will result in indexing errors\n"}
+,{"stream_name":"stderr","time":480.099067298,"data":"state truncated on /v1/systemone model=english questions=50 state_tokens_dropped=7882 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26', 'triage_27', 'triage_28', 'triage_29', 'triage_30', 'triage_31', 'triage_32', 'triage_33', 'triage_34', 'triage_35', 'triage_36', 'triage_37', 'triage_38', 'triage_39', 'triage_40', 'triage_41', 'triage_42', 'triage_43', 'triage_44', 'triage_45', 'triage_46', 'triage_47', 'triage_48', 'triage_49']\n"}
+,{"stream_name":"stderr","time":593.815085865,"data":"state truncated on /v1/systemone model=english questions=29 state_tokens_dropped=4431 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26', 'triage_27', 'triage_28']\n"}
+,{"stream_name":"stdout","time":593.81692991,"data":"INFO:     127.0.0.1:36968 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":604.267882363,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=1353 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":604.26836795,"data":"INFO:     127.0.0.1:43028 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":611.206153792,"data":"INFO:     127.0.0.1:58738 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":611.206201367,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=64 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":617.132648774,"data":"INFO:     127.0.0.1:58748 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":619.798690623,"data":"INFO:     127.0.0.1:39338 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":630.261355812,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=216 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":630.261815861,"data":"INFO:     127.0.0.1:39350 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":637.157121094,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=1112 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":637.157711744,"data":"INFO:     127.0.0.1:44796 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":680.33788944,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1124 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":680.338478492,"data":"INFO:     127.0.0.1:50710 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":690.62197771,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=501 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":690.622585748,"data":"INFO:     127.0.0.1:45424 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":697.532175365,"data":"INFO:     127.0.0.1:46160 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":740.396230762,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1195 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":740.396763613,"data":"INFO:     127.0.0.1:52658 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":762.073166295,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=3253 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":762.073607607,"data":"INFO:     127.0.0.1:42284 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":768.557346961,"data":"INFO:     127.0.0.1:59290 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":771.500171632,"data":"INFO:     127.0.0.1:56362 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":773.676446958,"data":"INFO:     127.0.0.1:56364 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":773.677030261,"data":"[25/469]\n"}
+,{"stream_name":"stdout","time":779.803706286,"data":"INFO:     127.0.0.1:56374 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":822.361074883,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1038 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":822.361439464,"data":"INFO:     127.0.0.1:36230 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":828.566031261,"data":"INFO:     127.0.0.1:34994 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":835.269806431,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=55 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":835.270160405,"data":"INFO:     127.0.0.1:59836 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":848.979730109,"data":"INFO:     127.0.0.1:42704 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":848.979729286,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=206 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stderr","time":855.719689073,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=19 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":855.720153436,"data":"INFO:     127.0.0.1:39294 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":869.401911777,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=112 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":869.402310512,"data":"INFO:     127.0.0.1:40098 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":879.541374168,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=425 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":879.541589023,"data":"INFO:     127.0.0.1:60750 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":922.132636489,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1016 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":922.133165525,"data":"INFO:     127.0.0.1:55814 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":935.782040414,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=208 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":935.782439983,"data":"INFO:     127.0.0.1:35076 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":942.493673221,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=9 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":942.494129706,"data":"INFO:     127.0.0.1:44664 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":952.662928971,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=134 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":952.66336929,"data":"INFO:     127.0.0.1:44674 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":966.306279884,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=279 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":966.306689551,"data":"INFO:     127.0.0.1:47040 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":973.008498256,"data":"INFO:     127.0.0.1:41650 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":986.65723648,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=461 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":986.657788973,"data":"INFO:     127.0.0.1:41664 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":993.336257798,"data":"INFO:     127.0.0.1:43092 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":995.748954392,"data":"INFO:     127.0.0.1:43106 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1005.902291564,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=68 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":1005.902759126,"data":"INFO:     127.0.0.1:51648 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1022.894929167,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=5805 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":1022.895334807,"data":"INFO:     127.0.0.1:59530 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1039.787364438,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=405 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":1039.787944558,"data":"INFO:     127.0.0.1:36828 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1046.452739971,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=2788 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":1046.4530544,"data":"INFO:     127.0.0.1:56810 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1053.125801693,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=395 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":1053.126014953,"data":"INFO:     127.0.0.1:53110 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1063.224413635,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=263 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":1063.224812298,"data":"INFO:     127.0.0.1:53120 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1066.24207235,"data":"INFO:     127.0.0.1:43326 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1076.361648655,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=3016 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":1076.362065645,"data":"INFO:     127.0.0.1:52074 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1076.3627848,"data":"[50/469]\n"}
+,{"stream_name":"stdout","time":1081.311633881,"data":"INFO:     127.0.0.1:53130 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1091.47896354,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=15 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":1091.479294199,"data":"INFO:     127.0.0.1:53132 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1099.612705834,"data":"INFO:     127.0.0.1:57880 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1134.754920715,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=960 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":1134.75534264,"data":"INFO:     127.0.0.1:55702 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1163.11527844,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=845 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":1163.115835262,"data":"INFO:     127.0.0.1:44176 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1176.688690643,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=425 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":1176.688978357,"data":"INFO:     127.0.0.1:35088 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1183.383187066,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=117 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":1183.383599045,"data":"INFO:     127.0.0.1:36102 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1197.110531291,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=76 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":1197.110859174,"data":"INFO:     127.0.0.1:36112 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1210.928224401,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=1833 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":1210.928501271,"data":"INFO:     127.0.0.1:39578 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1213.714239204,"data":"INFO:     127.0.0.1:37566 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1217.206178333,"data":"state truncated on /v1/systemone model=english questions=1 state_tokens_dropped=39 truncated_questions=['prop_0']\n"}
+,{"stream_name":"stdout","time":1217.206647107,"data":"INFO:     127.0.0.1:37578 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1227.403304623,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=225 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":1227.40360937,"data":"INFO:     127.0.0.1:49250 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1244.484033659,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=246 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":1244.484346105,"data":"INFO:     127.0.0.1:50044 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1252.991625205,"data":"INFO:     127.0.0.1:51178 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1292.003583727,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=697 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":1292.004098825,"data":"INFO:     127.0.0.1:51182 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1313.508661095,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=146 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":1313.50908321,"data":"INFO:     127.0.0.1:37224 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1339.145044999,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=647 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":1339.145857362,"data":"INFO:     127.0.0.1:59998 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1371.408370494,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=1119 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":1371.409005525,"data":"INFO:     127.0.0.1:41804 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1410.555951431,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=860 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":1410.556447288,"data":"INFO:     127.0.0.1:48018 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1453.412605139,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=952 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1453.413059854,"data":"INFO:     127.0.0.1:38884 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1496.19351285,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1058 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1496.194128108,"data":"INFO:     127.0.0.1:38520 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1539.114499925,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1057 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1539.114990196,"data":"INFO:     127.0.0.1:60864 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1560.580975285,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=586 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":1560.581419421,"data":"INFO:     127.0.0.1:40926 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1603.259858049,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1074 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1603.260357011,"data":"INFO:     127.0.0.1:34444 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1645.825770008,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=992 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1645.826230734,"data":"INFO:     127.0.0.1:60842 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1645.826981814,"data":"[75/469]\n"}
+,{"stream_name":"stderr","time":1677.827636152,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=776 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":1677.828116157,"data":"INFO:     127.0.0.1:38612 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1713.416226446,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=800 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":1713.416873116,"data":"INFO:     127.0.0.1:56658 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1755.929243688,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=948 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1755.929814272,"data":"INFO:     127.0.0.1:47830 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1784.30210039,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=631 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":1784.302550851,"data":"INFO:     127.0.0.1:53472 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1826.757895386,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=848 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1826.758256983,"data":"INFO:     127.0.0.1:32982 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1868.976105896,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=895 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1868.976766478,"data":"INFO:     127.0.0.1:35942 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1911.454163924,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1039 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1911.454701913,"data":"INFO:     127.0.0.1:40804 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1946.632941307,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=637 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":1946.633521128,"data":"INFO:     127.0.0.1:48524 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":1988.551933225,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1072 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":1988.552463114,"data":"INFO:     127.0.0.1:45356 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2009.6603749,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=215 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":2009.660886623,"data":"INFO:     127.0.0.1:51500 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2052.141597471,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1154 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2052.142114933,"data":"INFO:     127.0.0.1:43512 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2094.239461618,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2345 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2094.239945162,"data":"INFO:     127.0.0.1:33516 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2136.165842429,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=622 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2136.166454419,"data":"INFO:     127.0.0.1:51238 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2178.138463065,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=677 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2178.13886975,"data":"INFO:     127.0.0.1:55628 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2220.114202675,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=977 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2220.114734874,"data":"INFO:     127.0.0.1:54598 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2262.217220505,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=3047 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2262.218049557,"data":"INFO:     127.0.0.1:44640 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2304.317007938,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=563 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2304.317524665,"data":"INFO:     127.0.0.1:51338 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2346.305833754,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2613 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2346.306334322,"data":"INFO:     127.0.0.1:51944 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2387.886370498,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=3302 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2387.886919256,"data":"INFO:     127.0.0.1:50724 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2429.781162337,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=554 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2429.781716451,"data":"INFO:     127.0.0.1:41900 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2450.727874957,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=63 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":2450.728356545,"data":"INFO:     127.0.0.1:54414 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2492.403504089,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1168 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2492.404002629,"data":"INFO:     127.0.0.1:56452 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2523.622439146,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=375 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":2523.622914536,"data":"INFO:     127.0.0.1:44488 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2565.288592354,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=851 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2565.289271356,"data":"INFO:     127.0.0.1:60162 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2607.011990881,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1104 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2607.012263122,"data":"INFO:     127.0.0.1:47772 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":2607.013105247,"data":"[100/469]\n"}
+,{"stream_name":"stderr","time":2648.685913124,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=930 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2648.686320301,"data":"INFO:     127.0.0.1:46482 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2690.195245638,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=757 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2690.195835091,"data":"INFO:     127.0.0.1:45656 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2721.436981324,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=729 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":2721.437339838,"data":"INFO:     127.0.0.1:60066 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2762.997433836,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=825 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2762.997854815,"data":"INFO:     127.0.0.1:55496 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2804.893093967,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=676 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2804.894426179,"data":"INFO:     127.0.0.1:36644 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2846.222947561,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=770 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2846.223635906,"data":"INFO:     127.0.0.1:39656 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2887.575962433,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=831 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2887.576971405,"data":"INFO:     127.0.0.1:45626 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2929.274973607,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=997 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2929.275448861,"data":"INFO:     127.0.0.1:44942 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":2970.847297973,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=728 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":2970.848028086,"data":"INFO:     127.0.0.1:39602 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3013.040272504,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1641 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3013.040780542,"data":"INFO:     127.0.0.1:51706 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3047.985745205,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=349 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":3047.986527658,"data":"INFO:     127.0.0.1:40320 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3090.654710288,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2127 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3090.655424553,"data":"INFO:     127.0.0.1:44668 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3126.24881904,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=349 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":3126.249268038,"data":"INFO:     127.0.0.1:33088 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3134.196279802,"data":"INFO:     127.0.0.1:37452 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3177.000786503,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=805 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3177.001437851,"data":"INFO:     127.0.0.1:37456 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3219.551474168,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2437 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3219.55215313,"data":"INFO:     127.0.0.1:52060 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3262.08882793,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=803 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3262.089410959,"data":"INFO:     127.0.0.1:36072 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3304.779237938,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2376 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3304.779872117,"data":"INFO:     127.0.0.1:46784 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3347.635502678,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=847 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3347.636312686,"data":"INFO:     127.0.0.1:57646 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3379.748009708,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=107 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":3379.74850758,"data":"INFO:     127.0.0.1:60692 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3422.704740263,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2083 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3422.705353862,"data":"INFO:     127.0.0.1:43308 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3458.571660168,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=627 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":3458.572477368,"data":"INFO:     127.0.0.1:42704 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3497.990518602,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1801 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":3497.991082621,"data":"INFO:     127.0.0.1:51656 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3519.830260115,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=279 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":3519.831012512,"data":"INFO:     127.0.0.1:46962 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3556.359741675,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=512 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":3556.360343297,"data":"INFO:     127.0.0.1:49790 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3556.361175536,"data":"[125/469]\n"}
+,{"stream_name":"stderr","time":3599.638019447,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=823 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3599.638735341,"data":"INFO:     127.0.0.1:53816 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3643.828662273,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2811 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3643.82965939,"data":"INFO:     127.0.0.1:45390 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3687.184901552,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=829 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":3687.185454757,"data":"INFO:     127.0.0.1:59682 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3726.541511783,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=557 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":3726.542196331,"data":"INFO:     127.0.0.1:36416 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3755.389817037,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=4007 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":3755.390353709,"data":"INFO:     127.0.0.1:39000 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3757.663207102,"data":"INFO:     127.0.0.1:55946 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3758.903870081,"data":"INFO:     127.0.0.1:55958 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3760.149033026,"data":"INFO:     127.0.0.1:55960 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3761.48395238,"data":"INFO:     127.0.0.1:55970 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3762.776514957,"data":"INFO:     127.0.0.1:55978 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3764.031131389,"data":"INFO:     127.0.0.1:55992 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3765.339932507,"data":"INFO:     127.0.0.1:56006 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3766.601173109,"data":"INFO:     127.0.0.1:55858 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3770.181545573,"data":"state truncated on /v1/systemone model=english questions=1 state_tokens_dropped=91 truncated_questions=['gene_match']\n"}
+,{"stream_name":"stdout","time":3770.181545958,"data":"INFO:     127.0.0.1:55864 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3773.779107927,"data":"state truncated on /v1/systemone model=english questions=1 state_tokens_dropped=91 truncated_questions=['gene_match']\n"}
+,{"stream_name":"stdout","time":3773.779444194,"data":"INFO:     127.0.0.1:55878 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3775.036470745,"data":"INFO:     127.0.0.1:55892 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3776.279908234,"data":"INFO:     127.0.0.1:60212 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3777.561911641,"data":"INFO:     127.0.0.1:60224 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3778.833956216,"data":"INFO:     127.0.0.1:60236 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3780.126798818,"data":"INFO:     127.0.0.1:60246 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3781.4859254,"data":"INFO:     127.0.0.1:60248 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3784.012494271,"data":"INFO:     127.0.0.1:60252 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3785.765382507,"data":"INFO:     127.0.0.1:60264 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":3835.851229681,"data":"state truncated on /v1/systemone model=english questions=14 state_tokens_dropped=2074 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13']\n"}
+,{"stream_name":"stdout","time":3835.852370877,"data":"INFO:     127.0.0.1:47034 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4015.955564402,"data":"[150/469]\n"}
+,{"stream_name":"stderr","time":4026.918851152,"data":"state truncated on /v1/systemone model=english questions=50 state_tokens_dropped=7096 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26', 'triage_27', 'triage_28', 'triage_29', 'triage_30', 'triage_31', 'triage_32', 'triage_33', 'triage_34', 'triage_35', 'triage_36', 'triage_37', 'triage_38', 'triage_39', 'triage_40', 'triage_41', 'triage_42', 'triage_43', 'triage_44', 'triage_45', 'triage_46', 'triage_47', 'triage_48', 'triage_49']\n"}
+,{"stream_name":"stderr","time":4219.574502549,"data":"state truncated on /v1/systemone model=english questions=50 state_tokens_dropped=7833 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26', 'triage_27', 'triage_28', 'triage_29', 'triage_30', 'triage_31', 'triage_32', 'triage_33', 'triage_34', 'triage_35', 'triage_36', 'triage_37', 'triage_38', 'triage_39', 'triage_40', 'triage_41', 'triage_42', 'triage_43', 'triage_44', 'triage_45', 'triage_46', 'triage_47', 'triage_48', 'triage_49']\n"}
+,{"stream_name":"stderr","time":4413.029426154,"data":"state truncated on /v1/systemone model=english questions=50 state_tokens_dropped=7238 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26', 'triage_27', 'triage_28', 'triage_29', 'triage_30', 'triage_31', 'triage_32', 'triage_33', 'triage_34', 'triage_35', 'triage_36', 'triage_37', 'triage_38', 'triage_39', 'triage_40', 'triage_41', 'triage_42', 'triage_43', 'triage_44', 'triage_45', 'triage_46', 'triage_47', 'triage_48', 'triage_49']\n"}
+,{"stream_name":"stdout","time":4416.309438701,"data":"INFO:     127.0.0.1:47332 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4419.413080134,"data":"INFO:     127.0.0.1:38422 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4433.192782583,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=508 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":4433.193170526,"data":"INFO:     127.0.0.1:38438 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4446.973066921,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=262 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":4446.973725458,"data":"INFO:     127.0.0.1:35876 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4450.458598831,"data":"state truncated on /v1/systemone model=english questions=1 state_tokens_dropped=178 truncated_questions=['prop_0']\n"}
+,{"stream_name":"stdout","time":4450.458956728,"data":"INFO:     127.0.0.1:59158 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4464.312454326,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=229 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":4464.312997923,"data":"INFO:     127.0.0.1:59174 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4466.762167569,"data":"INFO:     127.0.0.1:49132 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4477.057825692,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=529 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":4477.058221245,"data":"INFO:     127.0.0.1:49142 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4520.040415039,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=793 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":4520.041064206,"data":"INFO:     127.0.0.1:36340 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4522.922761217,"data":"INFO:     127.0.0.1:42188 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4536.848119545,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=1830 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":4536.84854325,"data":"INFO:     127.0.0.1:42196 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4542.962837467,"data":"INFO:     127.0.0.1:39892 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4584.317226459,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1252 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":4584.318108434,"data":"INFO:     127.0.0.1:39908 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4595.383378916,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=16 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":4595.385150171,"data":"INFO:     127.0.0.1:60872 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4628.680650658,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=733 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":4628.681412324,"data":"INFO:     127.0.0.1:52192 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4669.396376688,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=952 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":4669.39692531,"data":"INFO:     127.0.0.1:42514 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4713.326004151,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=839 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":4713.326516332,"data":"INFO:     127.0.0.1:59636 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4749.931677609,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=730 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":4749.932462241,"data":"INFO:     127.0.0.1:51786 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4793.29054126,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1060 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":4793.291192389,"data":"INFO:     127.0.0.1:54784 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4822.418052178,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=559 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":4822.418677972,"data":"INFO:     127.0.0.1:55100 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4835.740365578,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=2771 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":4835.740978714,"data":"INFO:     127.0.0.1:43680 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4842.598646533,"data":"INFO:     127.0.0.1:57798 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4856.782994822,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=213 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":4856.783458989,"data":"INFO:     127.0.0.1:57804 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4856.784638481,"data":"[175/469]\n"}
+,{"stream_name":"stderr","time":4867.265265172,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=231 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":4867.265815434,"data":"INFO:     127.0.0.1:59010 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4874.27061914,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=2799 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":4874.270979878,"data":"INFO:     127.0.0.1:35348 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4877.056444223,"data":"INFO:     127.0.0.1:60656 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4883.955638952,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=394 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":4883.956134807,"data":"INFO:     127.0.0.1:60672 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4905.688362118,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=942 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":4905.688827653,"data":"INFO:     127.0.0.1:60678 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4919.511913466,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=456 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":4919.512512292,"data":"INFO:     127.0.0.1:57014 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4922.604165051,"data":"INFO:     127.0.0.1:54432 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4936.42429135,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=28 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":4936.424706642,"data":"INFO:     127.0.0.1:54448 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":4975.928222133,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=768 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":4975.928709291,"data":"INFO:     127.0.0.1:38196 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4986.905571921,"data":"INFO:     127.0.0.1:58622 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5015.773930486,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=745 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":5015.774529672,"data":"INFO:     127.0.0.1:53956 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5026.027937067,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=1076 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":5026.028599587,"data":"INFO:     127.0.0.1:45108 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5047.618294755,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=368 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":5047.618914169,"data":"INFO:     127.0.0.1:47642 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5057.700851843,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=14 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":5057.701374692,"data":"INFO:     127.0.0.1:33810 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5074.725541101,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=503 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":5074.72611931,"data":"INFO:     127.0.0.1:55360 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5077.864162435,"data":"INFO:     127.0.0.1:57552 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5095.008591511,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=537 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":5095.008916633,"data":"INFO:     127.0.0.1:57562 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5101.823130389,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=438 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":5101.823442328,"data":"INFO:     127.0.0.1:37810 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5107.245605648,"data":"INFO:     127.0.0.1:37816 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5110.716333709,"data":"INFO:     127.0.0.1:58866 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5117.492241259,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=8 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":5117.492574267,"data":"INFO:     127.0.0.1:58878 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5134.62467987,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=2607 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":5134.625058256,"data":"INFO:     127.0.0.1:59800 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5144.917532267,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=215 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":5144.918073476,"data":"INFO:     127.0.0.1:48858 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5158.797012043,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=1425 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":5158.797685975,"data":"INFO:     127.0.0.1:54782 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5168.108339451,"data":"INFO:     127.0.0.1:35402 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5168.109260064,"data":"[200/469]\n"}
+,{"stream_name":"stderr","time":5210.611703854,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=880 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":5210.612182468,"data":"INFO:     127.0.0.1:45162 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5242.574459785,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=732 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":5242.574977323,"data":"INFO:     127.0.0.1:60986 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5285.070270645,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=937 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":5285.070897838,"data":"INFO:     127.0.0.1:54740 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5290.891485342,"data":"INFO:     127.0.0.1:49824 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5301.072813497,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=1730 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":5301.073601195,"data":"INFO:     127.0.0.1:49828 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5311.238148076,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=135 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":5311.238576047,"data":"INFO:     127.0.0.1:43836 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5316.289327792,"data":"INFO:     127.0.0.1:44366 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5322.553360898,"data":"INFO:     127.0.0.1:45908 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5351.075458958,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=809 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":5351.07607001,"data":"INFO:     127.0.0.1:45922 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5393.394018626,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1305 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":5393.39463611,"data":"INFO:     127.0.0.1:43330 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5425.406616465,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=712 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":5425.407441416,"data":"INFO:     127.0.0.1:60736 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5432.197480897,"data":"INFO:     127.0.0.1:43324 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5476.066600658,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=759 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":5476.067437801,"data":"INFO:     127.0.0.1:43340 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5519.383674659,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=866 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":5519.3844372,"data":"INFO:     127.0.0.1:52166 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5562.654904947,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1006 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":5562.655532873,"data":"INFO:     127.0.0.1:52524 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5605.516723446,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1231 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":5605.517236363,"data":"INFO:     127.0.0.1:60450 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5622.72123908,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=220 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":5622.721816001,"data":"INFO:     127.0.0.1:60750 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5662.113135121,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1007 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":5662.113949844,"data":"INFO:     127.0.0.1:38180 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5694.230683855,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=912 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":5694.231347337,"data":"INFO:     127.0.0.1:49662 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5726.233427376,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=1072 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":5726.234012031,"data":"INFO:     127.0.0.1:58636 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5758.282091973,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=844 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":5758.28278953,"data":"INFO:     127.0.0.1:55206 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5797.678876713,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1077 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":5797.679413691,"data":"INFO:     127.0.0.1:45586 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5810.288845947,"data":"INFO:     127.0.0.1:37436 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5846.309981705,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=760 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":5846.310474726,"data":"INFO:     127.0.0.1:55594 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5872.003289892,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=421 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":5872.003876701,"data":"INFO:     127.0.0.1:55550 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5872.004633025,"data":"[225/469]\n"}
+,{"stream_name":"stderr","time":5906.903459306,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=1260 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":5906.904015187,"data":"INFO:     127.0.0.1:36938 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5938.480441528,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=836 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":5938.480917059,"data":"INFO:     127.0.0.1:45526 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":5973.492818924,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=879 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":5973.493419345,"data":"INFO:     127.0.0.1:47986 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6015.973488575,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=941 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6015.974162775,"data":"INFO:     127.0.0.1:39610 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6041.500295834,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=566 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":6041.501620292,"data":"INFO:     127.0.0.1:42962 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6073.222706084,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=601 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":6073.223383627,"data":"INFO:     127.0.0.1:54328 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6104.665657583,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=582 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":6104.66615752,"data":"INFO:     127.0.0.1:52672 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6146.558913672,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1158 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6146.559553209,"data":"INFO:     127.0.0.1:37694 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6184.938628487,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=982 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":6184.939150119,"data":"INFO:     127.0.0.1:50702 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6216.64610306,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=907 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":6216.646816119,"data":"INFO:     127.0.0.1:50594 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6258.731141938,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1200 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6258.731806854,"data":"INFO:     127.0.0.1:43596 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6296.864636678,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1579 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":6296.865233178,"data":"INFO:     127.0.0.1:50358 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6338.568280359,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=786 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6338.568744592,"data":"INFO:     127.0.0.1:38162 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6377.049352664,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1226 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":6377.050090832,"data":"INFO:     127.0.0.1:50648 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6420.418729376,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1081 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6420.422105894,"data":"INFO:     127.0.0.1:33940 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6462.385600859,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=992 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6462.386433057,"data":"INFO:     127.0.0.1:48640 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6504.524424996,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1140 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6504.525066726,"data":"INFO:     127.0.0.1:49262 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6539.799419999,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=965 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":6539.79990186,"data":"INFO:     127.0.0.1:55274 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6578.394026243,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1286 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":6578.3946719,"data":"INFO:     127.0.0.1:51310 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6613.785945618,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=529 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":6613.786442501,"data":"INFO:     127.0.0.1:56388 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6645.572554766,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=706 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":6645.573344969,"data":"INFO:     127.0.0.1:60760 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6684.593458668,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1274 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":6684.593994119,"data":"INFO:     127.0.0.1:35784 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6727.312152851,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1501 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6727.312761221,"data":"INFO:     127.0.0.1:38750 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6770.027831595,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1185 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6770.028461836,"data":"INFO:     127.0.0.1:35786 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6809.056062902,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1108 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":6809.056887507,"data":"INFO:     127.0.0.1:54586 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":6809.057881162,"data":"[250/469]\n"}
+,{"stream_name":"stderr","time":6837.662482456,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=909 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":6837.663219206,"data":"INFO:     127.0.0.1:42204 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6877.231499165,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=624 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":6877.232025948,"data":"INFO:     127.0.0.1:44774 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6917.043763593,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=983 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":6917.04446948,"data":"INFO:     127.0.0.1:37160 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6953.186533227,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=1297 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":6953.187184496,"data":"INFO:     127.0.0.1:44838 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":6996.834955757,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1542 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":6996.835495079,"data":"INFO:     127.0.0.1:51578 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7022.975562092,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=811 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":7022.976157678,"data":"INFO:     127.0.0.1:49188 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7066.123494352,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=930 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7066.124057334,"data":"INFO:     127.0.0.1:60020 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7098.553237825,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=677 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":7098.553901337,"data":"INFO:     127.0.0.1:45688 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7124.230561429,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=736 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":7124.231215587,"data":"INFO:     127.0.0.1:48110 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7167.443760435,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2179 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7167.444299589,"data":"INFO:     127.0.0.1:44400 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7210.651231965,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1205 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7210.652019099,"data":"INFO:     127.0.0.1:51752 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7258.508772505,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1271 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7258.510506347,"data":"INFO:     127.0.0.1:51432 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7302.406843209,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=981 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7302.407458198,"data":"INFO:     127.0.0.1:41580 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7324.437624457,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=231 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":7324.438308568,"data":"INFO:     127.0.0.1:54728 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7368.148534729,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1000 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7368.14915838,"data":"INFO:     127.0.0.1:57672 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7404.693126338,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=923 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":7404.693788766,"data":"INFO:     127.0.0.1:44340 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7448.28884299,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1357 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7448.289357167,"data":"INFO:     127.0.0.1:50548 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7491.746002959,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=568 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7491.746496483,"data":"INFO:     127.0.0.1:40222 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7521.025079914,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=518 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":7521.025928343,"data":"INFO:     127.0.0.1:36468 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7564.411658198,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1189 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7564.412435986,"data":"INFO:     127.0.0.1:46806 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7607.613037453,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=808 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7607.613635283,"data":"INFO:     127.0.0.1:59778 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7650.959512827,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2157 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7650.9602503,"data":"INFO:     127.0.0.1:56914 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7687.0727419,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=735 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":7687.073551958,"data":"INFO:     127.0.0.1:33214 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7730.431540467,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=936 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7730.432203402,"data":"INFO:     127.0.0.1:55666 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7766.630016561,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=330 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":7766.630722625,"data":"INFO:     127.0.0.1:60712 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":7766.631515229,"data":"[275/469]\n"}
+,{"stream_name":"stderr","time":7792.678046991,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=126 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":7792.678592983,"data":"INFO:     127.0.0.1:60506 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7836.110034954,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1506 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7836.110636045,"data":"INFO:     127.0.0.1:54762 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7879.545531874,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1041 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7879.545994785,"data":"INFO:     127.0.0.1:50966 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":7896.126660604,"data":"INFO:     127.0.0.1:37716 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7921.920955501,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=415 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":7921.921624002,"data":"INFO:     127.0.0.1:34218 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":7964.954721793,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=730 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":7964.955299478,"data":"INFO:     127.0.0.1:57218 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8009.501343425,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2190 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8009.504668954,"data":"INFO:     127.0.0.1:53158 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8028.069076846,"data":"INFO:     127.0.0.1:59644 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8057.196549731,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=555 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":8057.197236933,"data":"INFO:     127.0.0.1:41542 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8100.423954308,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=875 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8100.424564084,"data":"INFO:     127.0.0.1:49764 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8143.83067443,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=780 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8143.831240548,"data":"INFO:     127.0.0.1:51140 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8187.013029092,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2909 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8187.013672672,"data":"INFO:     127.0.0.1:49548 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8229.994328408,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=973 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8229.995073879,"data":"INFO:     127.0.0.1:34036 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8243.862750159,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=97 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":8243.86328969,"data":"INFO:     127.0.0.1:56652 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8287.079451416,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=891 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8287.080301857,"data":"INFO:     127.0.0.1:49996 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8330.193352711,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2167 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8330.194247207,"data":"INFO:     127.0.0.1:54486 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8366.164524244,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=507 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":8366.16507257,"data":"INFO:     127.0.0.1:55538 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8395.144688212,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=441 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":8395.145300873,"data":"INFO:     127.0.0.1:60816 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8438.094949375,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2200 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8438.095189001,"data":"INFO:     127.0.0.1:57632 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8459.873038974,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=7 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":8459.873579326,"data":"INFO:     127.0.0.1:40472 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8503.06371497,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2490 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8503.064283587,"data":"INFO:     127.0.0.1:35118 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8546.26291109,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1117 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8546.263594002,"data":"INFO:     127.0.0.1:48172 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8590.465263283,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2397 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8590.468121706,"data":"INFO:     127.0.0.1:42090 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8630.387631246,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=829 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":8630.388351559,"data":"INFO:     127.0.0.1:48472 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8673.76878624,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=961 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8673.769356319,"data":"INFO:     127.0.0.1:49280 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8673.770355258,"data":"[300/469]\n"}
+,{"stream_name":"stderr","time":8716.759362138,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=799 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8716.759851163,"data":"INFO:     127.0.0.1:47728 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8752.632311696,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=563 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":8752.632963239,"data":"INFO:     127.0.0.1:57150 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8795.630119344,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=536 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8795.630675617,"data":"INFO:     127.0.0.1:50354 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8838.486579482,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2134 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8838.487164147,"data":"INFO:     127.0.0.1:35060 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8877.805528364,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=851 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":8877.806173988,"data":"INFO:     127.0.0.1:47874 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8920.490566392,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=686 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":8920.49108546,"data":"INFO:     127.0.0.1:58496 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":8960.098816523,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=317 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":8960.100606747,"data":"INFO:     127.0.0.1:50206 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9003.193148698,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2710 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":9003.193885261,"data":"INFO:     127.0.0.1:51202 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9045.970889143,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1490 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":9045.971450879,"data":"INFO:     127.0.0.1:49294 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9048.241825812,"data":"INFO:     127.0.0.1:49316 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9049.463665448,"data":"INFO:     127.0.0.1:49322 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9050.78194975,"data":"INFO:     127.0.0.1:49334 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9052.050685133,"data":"INFO:     127.0.0.1:49350 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9053.298016784,"data":"INFO:     127.0.0.1:49354 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9054.471030894,"data":"INFO:     127.0.0.1:49368 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9055.792757592,"data":"INFO:     127.0.0.1:38378 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9056.985909424,"data":"INFO:     127.0.0.1:38386 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9058.279476924,"data":"INFO:     127.0.0.1:38388 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9059.499596231,"data":"INFO:     127.0.0.1:38400 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9060.839502382,"data":"INFO:     127.0.0.1:38414 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9062.226565278,"data":"INFO:     127.0.0.1:38422 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9063.508586619,"data":"INFO:     127.0.0.1:38426 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9064.788581964,"data":"INFO:     127.0.0.1:38430 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9066.113589146,"data":"INFO:     127.0.0.1:57680 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9067.362167247,"data":"INFO:     127.0.0.1:57692 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9067.363024287,"data":"[325/469]\n"}
+,{"stream_name":"stdout","time":9068.570670736,"data":"INFO:     127.0.0.1:57706 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9069.826648889,"data":"INFO:     127.0.0.1:57722 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9071.155519873,"data":"INFO:     127.0.0.1:57732 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9072.478499614,"data":"INFO:     127.0.0.1:57734 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9073.674989649,"data":"INFO:     127.0.0.1:57738 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9074.870457532,"data":"INFO:     127.0.0.1:57744 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9076.093551603,"data":"INFO:     127.0.0.1:56132 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9077.329873616,"data":"INFO:     127.0.0.1:56136 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9078.598034684,"data":"INFO:     127.0.0.1:56146 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9079.849571675,"data":"INFO:     127.0.0.1:56148 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9081.195646153,"data":"INFO:     127.0.0.1:56162 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9082.442963926,"data":"INFO:     127.0.0.1:56178 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9083.704579276,"data":"INFO:     127.0.0.1:56188 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9084.941564619,"data":"INFO:     127.0.0.1:56198 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9086.256812865,"data":"INFO:     127.0.0.1:53032 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9087.562649599,"data":"INFO:     127.0.0.1:53034 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9088.787563514,"data":"INFO:     127.0.0.1:53038 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9090.042264,"data":"INFO:     127.0.0.1:53046 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9091.429608881,"data":"INFO:     127.0.0.1:53052 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9092.702546649,"data":"INFO:     127.0.0.1:53068 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9094.013542934,"data":"INFO:     127.0.0.1:53072 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9095.408962888,"data":"INFO:     127.0.0.1:53086 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9198.654078105,"data":"state truncated on /v1/systemone model=english questions=27 state_tokens_dropped=4173 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26']\n"}
+,{"stream_name":"stdout","time":9198.656213477,"data":"INFO:     127.0.0.1:38058 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9390.572006317,"data":"state truncated on /v1/systemone model=english questions=50 state_tokens_dropped=7121 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26', 'triage_27', 'triage_28', 'triage_29', 'triage_30', 'triage_31', 'triage_32', 'triage_33', 'triage_34', 'triage_35', 'triage_36', 'triage_37', 'triage_38', 'triage_39', 'triage_40', 'triage_41', 'triage_42', 'triage_43', 'triage_44', 'triage_45', 'triage_46', 'triage_47', 'triage_48', 'triage_49']\n"}
+,{"stream_name":"stdout","time":9558.868129376,"data":"[350/469]\n"}
+,{"stream_name":"stderr","time":9582.067186402,"data":"state truncated on /v1/systemone model=english questions=50 state_tokens_dropped=7883 truncated_questions=['triage_0', 'triage_1', 'triage_2', 'triage_3', 'triage_4', 'triage_5', 'triage_6', 'triage_7', 'triage_8', 'triage_9', 'triage_10', 'triage_11', 'triage_12', 'triage_13', 'triage_14', 'triage_15', 'triage_16', 'triage_17', 'triage_18', 'triage_19', 'triage_20', 'triage_21', 'triage_22', 'triage_23', 'triage_24', 'triage_25', 'triage_26', 'triage_27', 'triage_28', 'triage_29', 'triage_30', 'triage_31', 'triage_32', 'triage_33', 'triage_34', 'triage_35', 'triage_36', 'triage_37', 'triage_38', 'triage_39', 'triage_40', 'triage_41', 'triage_42', 'triage_43', 'triage_44', 'triage_45', 'triage_46', 'triage_47', 'triage_48', 'triage_49']\n"}
+,{"stream_name":"stdout","time":9587.50526262,"data":"INFO:     127.0.0.1:36906 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9594.083119345,"data":"INFO:     127.0.0.1:39154 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9604.279945859,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=501 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9604.280275157,"data":"INFO:     127.0.0.1:39168 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9614.546801767,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=23 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9614.547355666,"data":"INFO:     127.0.0.1:60326 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9624.796997907,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=213 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9624.797551961,"data":"INFO:     127.0.0.1:60632 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9638.651302788,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=2538 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":9638.651769287,"data":"INFO:     127.0.0.1:40742 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9649.065879418,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=43 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9649.066369855,"data":"INFO:     127.0.0.1:58708 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9663.223146789,"data":"INFO:     127.0.0.1:48926 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9678.738552501,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=1393 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":9678.743586388,"data":"INFO:     127.0.0.1:54852 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9682.44750517,"data":"INFO:     127.0.0.1:48758 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9682.447501054,"data":"state truncated on /v1/systemone model=english questions=1 state_tokens_dropped=416 truncated_questions=['prop_0']\n"}
+,{"stream_name":"stderr","time":9693.052859601,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=257 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9693.053435432,"data":"INFO:     127.0.0.1:48774 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9703.456671347,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=182 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9703.457174187,"data":"INFO:     127.0.0.1:39324 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9710.204625834,"data":"INFO:     127.0.0.1:52966 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9720.572415723,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=530 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9720.572860015,"data":"INFO:     127.0.0.1:42434 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9723.787159202,"data":"INFO:     127.0.0.1:53472 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9741.206092313,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=805 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":9741.206593391,"data":"INFO:     127.0.0.1:53488 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9746.982464203,"data":"INFO:     127.0.0.1:39412 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9750.50660992,"data":"INFO:     127.0.0.1:54828 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9761.301725399,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=208 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9761.302196651,"data":"INFO:     127.0.0.1:54834 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9806.550423157,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1922 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":9806.551102149,"data":"INFO:     127.0.0.1:45066 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9816.865377184,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=236 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9816.86601494,"data":"INFO:     127.0.0.1:48372 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9823.725695345,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=2790 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":9823.72645863,"data":"INFO:     127.0.0.1:35672 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9826.25306794,"data":"INFO:     127.0.0.1:35686 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9847.938455872,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=422 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":9847.939256086,"data":"INFO:     127.0.0.1:47616 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9854.1589539,"data":"INFO:     127.0.0.1:36958 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9854.159786018,"data":"[375/469]\n"}
+,{"stream_name":"stderr","time":9867.911932557,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=31 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":9867.912591638,"data":"INFO:     127.0.0.1:36964 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9871.524051424,"data":"INFO:     127.0.0.1:59028 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9882.514279326,"data":"INFO:     127.0.0.1:59034 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9892.75953509,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=80 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9892.759989301,"data":"INFO:     127.0.0.1:54158 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9903.078281482,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=39 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9903.078888101,"data":"INFO:     127.0.0.1:44338 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9914.178462624,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=1077 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9914.178915832,"data":"INFO:     127.0.0.1:56270 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9920.93858835,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=414 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":9920.939320802,"data":"INFO:     127.0.0.1:40784 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9924.511633939,"data":"state truncated on /v1/systemone model=english questions=1 state_tokens_dropped=23 truncated_questions=['prop_0']\n"}
+,{"stream_name":"stdout","time":9924.512254983,"data":"INFO:     127.0.0.1:43500 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9946.153878954,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=959 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":9946.154379414,"data":"INFO:     127.0.0.1:42324 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9951.363175519,"data":"INFO:     127.0.0.1:40614 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9954.570082919,"data":"INFO:     127.0.0.1:40618 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9961.324746763,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=98 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":9961.325285826,"data":"INFO:     127.0.0.1:35656 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9978.386545623,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=561 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":9978.387024213,"data":"INFO:     127.0.0.1:35668 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9988.631172826,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=4 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9988.631619291,"data":"INFO:     127.0.0.1:54492 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":9998.828287513,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=310 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":9998.82870288,"data":"INFO:     127.0.0.1:34236 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10015.893240978,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=529 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":10015.893735211,"data":"INFO:     127.0.0.1:57132 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10026.131159048,"data":"state truncated on /v1/systemone model=english questions=3 state_tokens_dropped=114 truncated_questions=['prop_0', 'prop_1', 'prop_2']\n"}
+,{"stream_name":"stdout","time":10026.131657048,"data":"INFO:     127.0.0.1:48540 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10039.891347216,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=5463 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":10039.891926252,"data":"INFO:     127.0.0.1:50330 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10046.621613273,"data":"state truncated on /v1/systemone model=english questions=2 state_tokens_dropped=23 truncated_questions=['prop_0', 'prop_1']\n"}
+,{"stream_name":"stdout","time":10046.622163079,"data":"INFO:     127.0.0.1:57052 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10068.069798113,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=7297 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":10068.070455009,"data":"INFO:     127.0.0.1:52008 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":10076.262514875,"data":"INFO:     127.0.0.1:54152 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10119.050720804,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1036 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10119.051237879,"data":"INFO:     127.0.0.1:55370 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10144.462675056,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=580 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":10144.4632346,"data":"INFO:     127.0.0.1:46884 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10169.853309914,"data":"state truncated on /v1/systemone model=english questions=7 state_tokens_dropped=337 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6']\n"}
+,{"stream_name":"stdout","time":10169.853677614,"data":"INFO:     127.0.0.1:38518 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10212.679234873,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1003 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10212.679863391,"data":"INFO:     127.0.0.1:57700 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":10212.680813806,"data":"[400/469]\n"}
+,{"stream_name":"stderr","time":10241.402828627,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=768 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":10241.403347963,"data":"INFO:     127.0.0.1:52022 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10284.271426527,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1028 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10284.271946483,"data":"INFO:     127.0.0.1:45088 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10326.989312909,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1084 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10326.989998488,"data":"INFO:     127.0.0.1:45570 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10369.635276195,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1203 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10369.635878394,"data":"INFO:     127.0.0.1:60290 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10413.438648111,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1008 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10413.440320247,"data":"INFO:     127.0.0.1:54262 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10456.213658713,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1336 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10456.214480536,"data":"INFO:     127.0.0.1:55914 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10485.04127542,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=809 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":10485.042091401,"data":"INFO:     127.0.0.1:55784 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10506.735074209,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=430 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":10506.735836926,"data":"INFO:     127.0.0.1:46194 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10542.492069696,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=1229 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":10542.492591149,"data":"INFO:     127.0.0.1:60216 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10581.885320293,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=767 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":10581.886065755,"data":"INFO:     127.0.0.1:45692 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10624.894181381,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1389 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10624.89467025,"data":"INFO:     127.0.0.1:44310 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10667.79074087,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=884 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10667.79112526,"data":"INFO:     127.0.0.1:53768 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10710.688954087,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1056 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10710.689595685,"data":"INFO:     127.0.0.1:36394 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10753.64119382,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1485 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":10753.641798664,"data":"INFO:     127.0.0.1:45750 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10785.868458466,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=515 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":10785.869306437,"data":"INFO:     127.0.0.1:54734 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10818.111268798,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=755 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":10818.111971895,"data":"INFO:     127.0.0.1:34076 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10850.315993943,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=509 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":10850.31645975,"data":"INFO:     127.0.0.1:41024 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10889.866214672,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=691 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":10889.871063586,"data":"INFO:     127.0.0.1:38712 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10922.363523213,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=859 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":10922.364328728,"data":"INFO:     127.0.0.1:36558 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10951.352552252,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=719 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":10951.353211163,"data":"INFO:     127.0.0.1:57978 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":10990.42316659,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=914 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":10990.423819726,"data":"INFO:     127.0.0.1:33792 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11004.095875217,"data":"state truncated on /v1/systemone model=english questions=4 state_tokens_dropped=100 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3']\n"}
+,{"stream_name":"stdout","time":11004.096551475,"data":"INFO:     127.0.0.1:38526 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11046.727813227,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1108 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11046.728527592,"data":"INFO:     127.0.0.1:46188 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11089.640867158,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1289 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11089.642104227,"data":"INFO:     127.0.0.1:50526 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11132.634863927,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=704 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11132.635380808,"data":"INFO:     127.0.0.1:40386 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":11132.636185435,"data":"[425/469]\n"}
+,{"stream_name":"stderr","time":11175.676178228,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=3444 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11175.676865952,"data":"INFO:     127.0.0.1:43304 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11218.557159371,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=771 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11218.557978791,"data":"INFO:     127.0.0.1:45032 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11254.492740628,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=3596 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":11254.493313111,"data":"INFO:     127.0.0.1:41936 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11297.514227434,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=871 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11297.514864309,"data":"INFO:     127.0.0.1:34334 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11340.290975854,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=950 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11340.291733915,"data":"INFO:     127.0.0.1:35586 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":11358.010689486,"data":"INFO:     127.0.0.1:59574 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11400.894586844,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=655 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11400.8951945,"data":"INFO:     127.0.0.1:35306 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11443.881909079,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=879 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11443.88246737,"data":"INFO:     127.0.0.1:34840 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11486.683615668,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1157 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11486.684151655,"data":"INFO:     127.0.0.1:49950 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11529.680082528,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=904 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11529.680869606,"data":"INFO:     127.0.0.1:50512 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11572.82945233,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2242 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11572.83009149,"data":"INFO:     127.0.0.1:54750 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11620.012147954,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1797 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11620.014039199,"data":"INFO:     127.0.0.1:53484 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11665.770940036,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1141 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11665.771796057,"data":"INFO:     127.0.0.1:38662 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11711.102370958,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=757 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11711.103019279,"data":"INFO:     127.0.0.1:49724 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11728.557138978,"data":"state truncated on /v1/systemone model=english questions=5 state_tokens_dropped=162 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4']\n"}
+,{"stream_name":"stdout","time":11728.557722689,"data":"INFO:     127.0.0.1:33844 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11772.072340149,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2096 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11772.072989339,"data":"INFO:     127.0.0.1:40690 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11816.081756298,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=703 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":11816.082434088,"data":"INFO:     127.0.0.1:46934 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11857.930971895,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=696 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":11857.931580992,"data":"INFO:     127.0.0.1:42860 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11894.815321797,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=1029 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":11894.815991317,"data":"INFO:     127.0.0.1:52878 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11927.40634491,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=369 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":11927.407003822,"data":"INFO:     127.0.0.1:60684 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":11967.417178419,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=1051 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":11967.417846251,"data":"INFO:     127.0.0.1:46474 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12011.018088682,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1521 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12011.018840281,"data":"INFO:     127.0.0.1:56042 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12050.517417471,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=876 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":12050.51791401,"data":"INFO:     127.0.0.1:43680 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12072.319234415,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=87 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":12072.319919649,"data":"INFO:     127.0.0.1:57236 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12115.317429473,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1397 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12115.318078692,"data":"INFO:     127.0.0.1:34240 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":12115.318958448,"data":"[450/469]\n"}
+,{"stream_name":"stdout","time":12158.300765227,"data":"INFO:     127.0.0.1:41686 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12158.3007848,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=674 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stderr","time":12180.085102686,"data":"state truncated on /v1/systemone model=english questions=6 state_tokens_dropped=358 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5']\n"}
+,{"stream_name":"stdout","time":12180.085633728,"data":"INFO:     127.0.0.1:46026 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12224.128059292,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1441 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12224.133245162,"data":"INFO:     127.0.0.1:54322 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12253.197054193,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=271 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":12253.197952519,"data":"INFO:     127.0.0.1:51842 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12296.214836712,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=799 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12296.215606363,"data":"INFO:     127.0.0.1:48956 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12342.399599976,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2763 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12342.400430379,"data":"INFO:     127.0.0.1:59034 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12371.496744587,"data":"state truncated on /v1/systemone model=english questions=8 state_tokens_dropped=220 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7']\n"}
+,{"stream_name":"stdout","time":12371.497544646,"data":"INFO:     127.0.0.1:49030 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12414.678278239,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=1265 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12414.678961428,"data":"INFO:     127.0.0.1:55970 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12454.371639765,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=778 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":12454.372317606,"data":"INFO:     127.0.0.1:36010 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12490.426550057,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=689 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":12490.427097704,"data":"INFO:     127.0.0.1:34088 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12526.516723258,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=853 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":12526.517248213,"data":"INFO:     127.0.0.1:36456 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12559.006557723,"data":"state truncated on /v1/systemone model=english questions=9 state_tokens_dropped=553 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8']\n"}
+,{"stream_name":"stdout","time":12559.007412553,"data":"INFO:     127.0.0.1:55058 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12595.274867618,"data":"state truncated on /v1/systemone model=english questions=10 state_tokens_dropped=1268 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9']\n"}
+,{"stream_name":"stdout","time":12595.275519989,"data":"INFO:     127.0.0.1:35110 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12638.89902853,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=841 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12638.899694169,"data":"INFO:     127.0.0.1:49082 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12682.263597688,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=606 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12682.2643274,"data":"INFO:     127.0.0.1:47934 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12725.528485307,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=806 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12725.529305437,"data":"INFO:     127.0.0.1:42478 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12768.580706529,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=2347 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12768.581374448,"data":"INFO:     127.0.0.1:60496 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12808.189003421,"data":"state truncated on /v1/systemone model=english questions=11 state_tokens_dropped=2242 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10']\n"}
+,{"stream_name":"stdout","time":12808.189492166,"data":"INFO:     127.0.0.1:49918 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stderr","time":12851.236514714,"data":"state truncated on /v1/systemone model=english questions=12 state_tokens_dropped=3343 truncated_questions=['prop_0', 'prop_1', 'prop_2', 'prop_3', 'prop_4', 'prop_5', 'prop_6', 'prop_7', 'prop_8', 'prop_9', 'prop_10', 'prop_11']\n"}
+,{"stream_name":"stdout","time":12851.237208447,"data":"INFO:     127.0.0.1:53120 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":12851.278297607,"data":"{\n"}
+,{"stream_name":"stdout","time":12851.27837965,"data":" \"noul_n\": 3161,\n"}
+,{"stream_name":"stdout","time":12851.27841276,"data":" \"noul_mean_abs_delta\": 0.4502,\n"}
+,{"stream_name":"stdout","time":12851.278421574,"data":" \"noul_flip_0.5_rate\": 0.591,\n"}
+,{"stream_name":"stdout","time":12851.278427551,"data":" \"choice_n\": 8,\n"}
+,{"stream_name":"stdout","time":12851.278433223,"data":" \"choice_agree_rate\": 0.625\n"}
+,{"stream_name":"stdout","time":12851.278439104,"data":"}\n"}
+,{"stream_name":"stdout","time":12851.278445126,"data":"wrote /kaggle/working/results.json and /kaggle/working/diffs.jsonl\n"}
+,{"stream_name":"stderr","time":12851.361045832,"data":"INFO:     Shutting down\n"}
+,{"stream_name":"stderr","time":12851.462457775,"data":"INFO:     Waiting for application shutdown.\n"}
+,{"stream_name":"stderr","time":12851.475429289,"data":"INFO:     Application shutdown complete.\n"}
+,{"stream_name":"stderr","time":12851.476169839,"data":"INFO:     Finished server process [26]\n"}
+,{"stream_name":"stderr","time":12854.279283739,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":12854.279321566,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":12854.645001302,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":12854.64504798,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":12855.685491063,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":12857.18045777,"data":"[NbConvertApp] Writing 315144 bytes to __results__.html\n"}
+]

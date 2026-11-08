@@ -1,0 +1,26 @@
+{
+ "model": "DeepSeek-V3.2",
+ "n_asks": 395,
+ "n_errors": 97,
+ "wall_s": 8867,
+ "by_stage": {
+  "proposals": {
+   "asks": 190,
+   "rec_mean_n": 5.89,
+   "gen_mean_n": 6.79,
+   "claim_recall": 0.7196,
+   "claim_precision": 0.6757,
+   "matched_total": 513,
+   "empty_gen": 0
+  },
+  "data_proposals": {
+   "asks": 108,
+   "rec_mean_n": 10.77,
+   "gen_mean_n": 11.37,
+   "claim_recall": 0.6763,
+   "claim_precision": 0.6958,
+   "matched_total": 203,
+   "empty_gen": 0
+  }
+ }
+}

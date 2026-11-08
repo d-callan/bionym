@@ -1,0 +1,49 @@
+{
+ "model": "jev-latest",
+ "n_asks": 469,
+ "n_errors": 0,
+ "wall_s": 5,
+ "ms_p50": 87,
+ "ms_p90": 119,
+ "ms_max": 1141,
+ "in_tokens_total": 1123370,
+ "out_tokens_total": 66566,
+ "reproduced_answers": 1435,
+ "by_stage": {
+  "data_proposals": {
+   "n": 137,
+   "ms_p50": 90,
+   "errors": 0
+  },
+  "ncbi_link": {
+   "n": 57,
+   "ms_p50": 77,
+   "errors": 0
+  },
+  "proposals": {
+   "n": 258,
+   "ms_p50": 86,
+   "errors": 0
+  },
+  "proposals_triage": {
+   "n": 10,
+   "ms_p50": 163,
+   "errors": 0
+  },
+  "s2_rank": {
+   "n": 3,
+   "ms_p50": 79,
+   "errors": 0
+  },
+  "s4_annotate": {
+   "n": 3,
+   "ms_p50": 75,
+   "errors": 0
+  },
+  "s4_pick": {
+   "n": 1,
+   "ms_p50": 142,
+   "errors": 0
+  }
+ }
+}

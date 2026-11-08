@@ -1,0 +1,581 @@
+[{"stream_name":"stdout","time":1.653248188,"data":"[asks] 469 from /kaggle/input/datasets/daniellecallan/bionym-jev-asks/asks.jsonl\n"}
+,{"stream_name":"stdout","time":8.037399008,"data":"usage: opendecider serve [-h] [--model MODEL] [--revision REVISION]\n"}
+,{"stream_name":"stdout","time":8.037439126,"data":"                         [--device DEVICE] [--host HOST] [--port PORT]\n"}
+,{"stream_name":"stdout","time":8.037445329,"data":"                         [--max-batch MAX_BATCH]\n"}
+,{"stream_name":"stdout","time":8.037449074,"data":"                         [--batch-wait-ms BATCH_WAIT_MS]\n"}
+,{"stream_name":"stdout","time":8.037452855,"data":"                         [--max-in-flight MAX_IN_FLIGHT]\n"}
+,{"stream_name":"stdout","time":8.037456644,"data":"                         [--request-timeout-s REQUEST_TIMEOUT_S]\n"}
+,{"stream_name":"stdout","time":8.037460328,"data":"                         [--threads THREADS] [--dtype {float32,bfloat16}]\n"}
+,{"stream_name":"stdout","time":8.037464287,"data":"                         [--small-batch SMALL_BATCH] [--log-level LOG_LEVEL]\n"}
+,{"stream_name":"stdout","time":8.037467296,"data":"\n"}
+,{"stream_name":"stdout","time":8.037470099,"data":"Every flag can also be set as OPENDECIDER_\u003cNAME\u003e in the environment; flags\n"}
+,{"stream_name":"stdout","time":8.037473472,"data":"win.\n"}
+,{"stream_name":"stdout","time":8.037475939,"data":"\n"}
+,{"stream_name":"stdout","time":8.037478288,"data":"options:\n"}
+,{"stream_name":"stdout","time":8.03748062,"data":"  -h, --help            show this help message and exit\n"}
+,{"stream_name":"stdout","time":8.037482999,"data":"  --model MODEL         Hub name or local folder (default:\n"}
+,{"stream_name":"stdout","time":8.037485368,"data":"                        manjunathshiva/opendecider-nano)\n"}
+,{"stream_name":"stdout","time":8.037487853,"data":"  --revision REVISION   pin a Hub revision (tag, branch or commit)\n"}
+,{"stream_name":"stdout","time":8.037490277,"data":"  --device DEVICE       cuda, mps or cpu (default: auto)\n"}
+,{"stream_name":"stdout","time":8.037492608,"data":"  --host HOST\n"}
+,{"stream_name":"stdout","time":8.03749521,"data":"  --port PORT\n"}
+,{"stream_name":"stdout","time":8.037497587,"data":"  --max-batch MAX_BATCH\n"}
+,{"stream_name":"stdout","time":8.037499942,"data":"                        questions per inference batch (default 32)\n"}
+,{"stream_name":"stdout","time":8.037502353,"data":"  --batch-wait-ms BATCH_WAIT_MS\n"}
+,{"stream_name":"stdout","time":8.0375047,"data":"                        how long to wait to fill a batch (default 2)\n"}
+,{"stream_name":"stdout","time":8.037507268,"data":"  --max-in-flight MAX_IN_FLIGHT\n"}
+,{"stream_name":"stdout","time":8.037509576,"data":"                        admitted requests before answering 503 (default 256)\n"}
+,{"stream_name":"stdout","time":8.037511995,"data":"  --request-timeout-s REQUEST_TIMEOUT_S\n"}
+,{"stream_name":"stdout","time":8.037514489,"data":"                        504 after this long (default 30)\n"}
+,{"stream_name":"stdout","time":8.037516948,"data":"  --threads THREADS     torch CPU threads (default: torch's choice)\n"}
+,{"stream_name":"stdout","time":8.037519389,"data":"  --dtype {float32,bfloat16}\n"}
+,{"stream_name":"stdout","time":8.03752171,"data":"                        nano: bfloat16 is faster on CPUs with bf16 units\n"}
+,{"stream_name":"stdout","time":8.037524099,"data":"                        (default float32)\n"}
+,{"stream_name":"stdout","time":8.037527356,"data":"  --small-batch SMALL_BATCH\n"}
+,{"stream_name":"stdout","time":8.037530496,"data":"                        Qwen-based models: questions per forward pass (default\n"}
+,{"stream_name":"stdout","time":8.037551119,"data":"                        1 = exact)\n"}
+,{"stream_name":"stdout","time":8.03755452,"data":"  --log-level LOG_LEVEL\n"}
+,{"stream_name":"stderr","time":10.974418809,"data":"2026-11-07 02:07:07,436 INFO httpx: HTTP Request: GET https://huggingface.co/api/agent-harnesses \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.078832778,"data":"2026-11-07 02:07:07,540 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/manjunathshiva/opendecider-nano/revision/main \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.310805596,"data":"2026-11-07 02:07:07,772 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/manjunathshiva/opendecider-nano/tree/1e1f0a7322e446c5ae9bbe840df11680f18a752a?recursive=true\u0026expand=false \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.419255806,"data":"\rFetching 9 files:   0%|          | 0/9 [00:00\u003c?, ?it/s]2026-11-07 02:07:07,879 INFO httpx: HTTP Request: HEAD https://huggingface.co/manjunathshiva/opendecider-nano/resolve/1e1f0a7322e446c5ae9bbe840df11680f18a752a/.gitattributes \"HTTP/1.1 307 Temporary Redirect\"\n"}
+,{"stream_name":"stderr","time":11.419295935,"data":"Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":11.419301278,"data":"2026-11-07 02:07:07,880 WARNING huggingface_hub.utils._http: Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.\n"}
+,{"stream_name":"stderr","time":11.428136354,"data":"2026-11-07 02:07:07,889 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/.gitattributes?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2F.gitattributes=\u0026etag=%22a6344aac8c09253b3b630fb776ae94478aa0275b%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.439097579,"data":"2026-11-07 02:07:07,900 INFO httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/.gitattributes?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2F.gitattributes=\u0026etag=%22a6344aac8c09253b3b630fb776ae94478aa0275b%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.474144835,"data":"\rFetching 9 files:  11%|█         | 1/9 [00:00\u003c00:01,  7.89it/s]2026-11-07 02:07:07,935 INFO httpx: HTTP Request: HEAD https://huggingface.co/manjunathshiva/opendecider-nano/resolve/1e1f0a7322e446c5ae9bbe840df11680f18a752a/README.md \"HTTP/1.1 307 Temporary Redirect\"\n"}
+,{"stream_name":"stderr","time":11.484152422,"data":"2026-11-07 02:07:07,945 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/README.md?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2FREADME.md=\u0026etag=%22baceb472268b9dfe152a63a61fe335148930a47f%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.494614177,"data":"2026-11-07 02:07:07,956 INFO httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/README.md?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2FREADME.md=\u0026etag=%22baceb472268b9dfe152a63a61fe335148930a47f%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.520353661,"data":"2026-11-07 02:07:07,982 INFO httpx: HTTP Request: HEAD https://huggingface.co/manjunathshiva/opendecider-nano/resolve/1e1f0a7322e446c5ae9bbe840df11680f18a752a/LICENSE \"HTTP/1.1 307 Temporary Redirect\"\n"}
+,{"stream_name":"stderr","time":11.522598302,"data":"2026-11-07 02:07:07,984 INFO httpx: HTTP Request: HEAD https://huggingface.co/manjunathshiva/opendecider-nano/resolve/1e1f0a7322e446c5ae9bbe840df11680f18a752a/tokenizer.json \"HTTP/1.1 307 Temporary Redirect\"\n"}
+,{"stream_name":"stderr","time":11.524858985,"data":"2026-11-07 02:07:07,986 INFO httpx: HTTP Request: HEAD https://huggingface.co/manjunathshiva/opendecider-nano/resolve/1e1f0a7322e446c5ae9bbe840df11680f18a752a/config.json \"HTTP/1.1 307 Temporary Redirect\"\n"}
+,{"stream_name":"stderr","time":11.527198057,"data":"2026-11-07 02:07:07,988 INFO httpx: HTTP Request: HEAD https://huggingface.co/manjunathshiva/opendecider-nano/resolve/1e1f0a7322e446c5ae9bbe840df11680f18a752a/opendecider.json \"HTTP/1.1 307 Temporary Redirect\"\n"}
+,{"stream_name":"stderr","time":11.530401101,"data":"2026-11-07 02:07:07,992 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/LICENSE?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2FLICENSE=\u0026etag=%22511b201bb72c269089c8c11e28279761ef9a8b7c%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.532919233,"data":"2026-11-07 02:07:07,994 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/tokenizer.json?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2Ftokenizer.json=\u0026etag=%222f4d8583e507b7466d2490e2d6c045647a822698%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.53490937,"data":"2026-11-07 02:07:07,996 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/config.json?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2Fconfig.json=\u0026etag=%2251f0acff8211e03afae84128aecae4d1465a85c9%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.540676051,"data":"2026-11-07 02:07:08,002 INFO httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/LICENSE?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2FLICENSE=\u0026etag=%22511b201bb72c269089c8c11e28279761ef9a8b7c%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.541726962,"data":"2026-11-07 02:07:08,003 INFO httpx: HTTP Request: HEAD https://huggingface.co/manjunathshiva/opendecider-nano/resolve/1e1f0a7322e446c5ae9bbe840df11680f18a752a/tokenizer_config.json \"HTTP/1.1 307 Temporary Redirect\"\n"}
+,{"stream_name":"stderr","time":11.542840525,"data":"2026-11-07 02:07:08,004 INFO httpx: HTTP Request: GET https://huggingface.co/api/models/manjunathshiva/opendecider-nano/xet-read-token/1e1f0a7322e446c5ae9bbe840df11680f18a752a \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.555434387,"data":"2026-11-07 02:07:08,017 INFO httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/config.json?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2Fconfig.json=\u0026etag=%2251f0acff8211e03afae84128aecae4d1465a85c9%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.556505103,"data":"2026-11-07 02:07:08,018 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/tokenizer_config.json?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2Ftokenizer_config.json=\u0026etag=%2229f0f487f064886d136955a36bc79e5a8b4d0cb0%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.623739207,"data":"\rFetching 9 files:  33%|███▎      | 3/9 [00:00\u003c00:00, 13.08it/s]2026-11-07 02:07:08,085 INFO httpx: HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/opendecider.json?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2Fopendecider.json=\u0026etag=%22162f5617308378a58591ea6e556040c5b26d6044%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.63354387,"data":"2026-11-07 02:07:08,095 INFO httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/tokenizer.json?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2Ftokenizer.json=\u0026etag=%222f4d8583e507b7466d2490e2d6c045647a822698%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.635486678,"data":"2026-11-07 02:07:08,096 INFO httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/opendecider.json?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2Fopendecider.json=\u0026etag=%22162f5617308378a58591ea6e556040c5b26d6044%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stderr","time":11.658048278999999,"data":"2026-11-07 02:07:08,119 INFO httpx: HTTP Request: GET https://huggingface.co/api/resolve-cache/models/manjunathshiva/opendecider-nano/1e1f0a7322e446c5ae9bbe840df11680f18a752a/tokenizer_config.json?%2Fmanjunathshiva%2Fopendecider-nano%2Fresolve%2F1e1f0a7322e446c5ae9bbe840df11680f18a752a%2Ftokenizer_config.json=\u0026etag=%2229f0f487f064886d136955a36bc79e5a8b4d0cb0%22 \"HTTP/1.1 200 OK\"\n"}
+,{"stream_name":"stdout","time":18.053819979,"data":"[opendecider] booting (weight download on first run)…\n"}
+,{"stream_name":"stderr","time":18.113387575,"data":"\rFetching 9 files:  67%|██████▋   | 6/9 [00:00\u003c00:00, 19.92it/s]\rFetching 9 files: 100%|██████████| 9/9 [00:06\u003c00:00,  1.03s/it]\rFetching 9 files: 100%|██████████| 9/9 [00:06\u003c00:00,  1.32it/s]\n"}
+,{"stream_name":"stderr","time":56.375411883,"data":"\rLoading weights:   0%|          | 0/170 [00:00\u003c?, ?it/s]\rLoading weights:   1%|          | 2/170 [00:00\u003c00:19,  8.41it/s]\rLoading weights:  53%|█████▎    | 90/170 [00:00\u003c00:00, 327.53it/s]\rLoading weights:  82%|████████▏ | 139/170 [00:00\u003c00:00, 335.00it/s]\rLoading weights: 100%|██████████| 170/170 [00:00\u003c00:00, 303.88it/s]\n"}
+,{"stream_name":"stderr","time":56.459420108,"data":"2026-11-07 02:07:52,921 INFO opendecider.serve: loaded manjunathshiva/opendecider-nano in 46.7 s\n"}
+,{"stream_name":"stderr","time":56.628868008,"data":"INFO:     Started server process [27]\n"}
+,{"stream_name":"stderr","time":56.628899662,"data":"INFO:     Waiting for application startup.\n"}
+,{"stream_name":"stderr","time":56.630810249,"data":"INFO:     Application startup complete.\n"}
+,{"stream_name":"stderr","time":56.636338835,"data":"INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)\n"}
+,{"stream_name":"stdout","time":58.206246623,"data":"INFO:     127.0.0.1:48026 - \"GET /v1/models HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":58.206885353,"data":"[opendecider] up on :8000\n"}
+,{"stream_name":"stdout","time":58.206928973,"data":"[0/469]\n"}
+,{"stream_name":"stdout","time":60.536780642,"data":"INFO:     127.0.0.1:48034 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":61.554711658,"data":"INFO:     127.0.0.1:48038 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":62.666662522,"data":"INFO:     127.0.0.1:48052 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":63.773459444,"data":"INFO:     127.0.0.1:48064 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":64.809957466,"data":"INFO:     127.0.0.1:48066 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":78.970324973,"data":"INFO:     127.0.0.1:50684 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":81.690931215,"data":"INFO:     127.0.0.1:37510 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":83.038274868,"data":"INFO:     127.0.0.1:37516 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":113.043927614,"data":"INFO:     127.0.0.1:37532 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":143.051303019,"data":"INFO:     127.0.0.1:50340 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":173.057236727,"data":"INFO:     127.0.0.1:33324 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":203.060763654,"data":"INFO:     127.0.0.1:57948 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":233.063882437,"data":"INFO:     127.0.0.1:56378 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":263.069133959,"data":"INFO:     127.0.0.1:51578 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":293.073503572,"data":"INFO:     127.0.0.1:41608 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":323.077567821,"data":"INFO:     127.0.0.1:56002 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":353.081271766,"data":"INFO:     127.0.0.1:36248 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":383.086167234,"data":"INFO:     127.0.0.1:39354 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":413.090530913,"data":"INFO:     127.0.0.1:43064 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":443.095033579,"data":"INFO:     127.0.0.1:34726 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":473.099109804,"data":"INFO:     127.0.0.1:50254 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":503.104175172,"data":"INFO:     127.0.0.1:60440 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":533.108161647,"data":"INFO:     127.0.0.1:36388 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":563.111789738,"data":"INFO:     127.0.0.1:41556 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":593.114999684,"data":"INFO:     127.0.0.1:51484 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":593.116429745,"data":"[25/469]\n"}
+,{"stream_name":"stdout","time":623.121091029,"data":"INFO:     127.0.0.1:54496 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":653.12423251,"data":"INFO:     127.0.0.1:37800 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":683.127596909,"data":"INFO:     127.0.0.1:57390 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":713.130921345,"data":"INFO:     127.0.0.1:36322 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":743.136225459,"data":"INFO:     127.0.0.1:56032 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":773.14022279,"data":"INFO:     127.0.0.1:53884 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":803.143221789,"data":"INFO:     127.0.0.1:58538 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":833.147872787,"data":"INFO:     127.0.0.1:49016 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":863.151787215,"data":"INFO:     127.0.0.1:42304 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":893.155514956,"data":"INFO:     127.0.0.1:41886 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":923.159435437,"data":"INFO:     127.0.0.1:54908 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":953.162714355,"data":"INFO:     127.0.0.1:59802 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":983.166165307,"data":"INFO:     127.0.0.1:39768 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1013.169360488,"data":"INFO:     127.0.0.1:53874 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1043.173303234,"data":"INFO:     127.0.0.1:58812 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1064.176472647,"data":"INFO:     127.0.0.1:38956 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1066.224494673,"data":"INFO:     127.0.0.1:54946 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1076.995803362,"data":"INFO:     127.0.0.1:60804 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1107.000763495,"data":"INFO:     127.0.0.1:39020 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1137.004980123,"data":"INFO:     127.0.0.1:48894 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1167.009137027,"data":"INFO:     127.0.0.1:58778 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1187.416485003,"data":"INFO:     127.0.0.1:54458 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1203.116546556,"data":"INFO:     127.0.0.1:35730 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1205.727920195,"data":"INFO:     127.0.0.1:42560 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1235.731747569,"data":"INFO:     127.0.0.1:58134 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1235.73310434,"data":"[50/469]\n"}
+,{"stream_name":"stdout","time":1265.735463811,"data":"INFO:     127.0.0.1:51768 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1276.944100369,"data":"INFO:     127.0.0.1:35054 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1283.898594049,"data":"INFO:     127.0.0.1:35564 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1313.902335378,"data":"INFO:     127.0.0.1:35570 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1343.907232466,"data":"INFO:     127.0.0.1:60678 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1373.911506518,"data":"INFO:     127.0.0.1:39994 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1403.91642134,"data":"INFO:     127.0.0.1:39746 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1422.360275263,"data":"INFO:     127.0.0.1:56976 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1452.364659978,"data":"INFO:     127.0.0.1:56718 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1482.368428203,"data":"INFO:     127.0.0.1:52124 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1503.963176348,"data":"INFO:     127.0.0.1:54722 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1519.038271997,"data":"INFO:     127.0.0.1:45272 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1545.059098534,"data":"INFO:     127.0.0.1:46250 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1552.128860871,"data":"INFO:     127.0.0.1:51654 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":1582.132652135,"data":"INFO:     127.0.0.1:51668 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1612.136315071,"data":"INFO:     127.0.0.1:38468 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1642.14120849,"data":"INFO:     127.0.0.1:46436 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1672.14686517,"data":"INFO:     127.0.0.1:43272 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1702.151339075,"data":"INFO:     127.0.0.1:45850 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1732.156914171,"data":"INFO:     127.0.0.1:56622 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1762.161999883,"data":"INFO:     127.0.0.1:48816 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1792.166129486,"data":"INFO:     127.0.0.1:59522 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1822.170284902,"data":"INFO:     127.0.0.1:38766 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1852.174209489,"data":"INFO:     127.0.0.1:60744 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1882.179009352,"data":"INFO:     127.0.0.1:55684 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1882.180038841,"data":"[75/469]\n"}
+,{"stream_name":"stdout","time":1912.18414645,"data":"INFO:     127.0.0.1:43476 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1942.18998632,"data":"INFO:     127.0.0.1:42772 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":1972.197761318,"data":"INFO:     127.0.0.1:48004 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2002.203699633,"data":"INFO:     127.0.0.1:36978 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2032.210561418,"data":"INFO:     127.0.0.1:53902 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2062.213456457,"data":"INFO:     127.0.0.1:60474 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2092.217793391,"data":"INFO:     127.0.0.1:49186 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2122.2224796,"data":"INFO:     127.0.0.1:38134 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2152.226000237,"data":"INFO:     127.0.0.1:49348 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2182.231504351,"data":"INFO:     127.0.0.1:36636 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2212.235608629,"data":"INFO:     127.0.0.1:43602 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2242.240371381,"data":"INFO:     127.0.0.1:33976 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2272.244441058,"data":"INFO:     127.0.0.1:58410 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2302.248025525,"data":"INFO:     127.0.0.1:34146 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2332.252326047,"data":"INFO:     127.0.0.1:43812 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2362.256149376,"data":"INFO:     127.0.0.1:60100 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2392.259700301,"data":"INFO:     127.0.0.1:52986 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2422.265208564,"data":"INFO:     127.0.0.1:54268 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2452.26952095,"data":"INFO:     127.0.0.1:38092 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2482.27406416,"data":"INFO:     127.0.0.1:50546 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2512.279927791,"data":"INFO:     127.0.0.1:51978 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2542.283211167,"data":"INFO:     127.0.0.1:47394 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2572.287623743,"data":"INFO:     127.0.0.1:34548 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2602.291993502,"data":"INFO:     127.0.0.1:36858 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2632.296040098,"data":"INFO:     127.0.0.1:40774 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2632.29901825,"data":"[100/469]\n"}
+,{"stream_name":"stdout","time":2662.300189575,"data":"INFO:     127.0.0.1:41990 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2692.305179594,"data":"INFO:     127.0.0.1:57200 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2722.308821928,"data":"INFO:     127.0.0.1:43686 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2752.313323718,"data":"INFO:     127.0.0.1:51744 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2782.316391045,"data":"INFO:     127.0.0.1:43576 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2812.321845682,"data":"INFO:     127.0.0.1:44532 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2842.324221796,"data":"INFO:     127.0.0.1:35148 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2872.329588876,"data":"INFO:     127.0.0.1:34854 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2902.333258448,"data":"INFO:     127.0.0.1:38100 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2932.337132752,"data":"INFO:     127.0.0.1:43690 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2962.340543732,"data":"INFO:     127.0.0.1:49442 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":2992.344486908,"data":"INFO:     127.0.0.1:36234 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3022.350609565,"data":"INFO:     127.0.0.1:37376 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3052.353565204,"data":"INFO:     127.0.0.1:44216 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3082.35730229,"data":"INFO:     127.0.0.1:59796 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3112.361831131,"data":"INFO:     127.0.0.1:47378 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3142.365327716,"data":"INFO:     127.0.0.1:48870 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3172.369647146,"data":"INFO:     127.0.0.1:59466 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3202.373337453,"data":"INFO:     127.0.0.1:52722 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3232.377149891,"data":"INFO:     127.0.0.1:54168 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3262.38253742,"data":"INFO:     127.0.0.1:43724 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3292.386728143,"data":"INFO:     127.0.0.1:51878 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3322.39065153,"data":"INFO:     127.0.0.1:45116 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3352.394479803,"data":"INFO:     127.0.0.1:59836 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3382.399708183,"data":"INFO:     127.0.0.1:47628 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3382.400495993,"data":"[125/469]\n"}
+,{"stream_name":"stdout","time":3412.404574268,"data":"INFO:     127.0.0.1:59554 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3442.410047244,"data":"INFO:     127.0.0.1:37606 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3472.415800081,"data":"INFO:     127.0.0.1:53506 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3502.419221443,"data":"INFO:     127.0.0.1:44568 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3532.423500348,"data":"INFO:     127.0.0.1:59460 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3562.427687821,"data":"INFO:     127.0.0.1:55038 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3592.430816005,"data":"INFO:     127.0.0.1:54886 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3622.435672045,"data":"INFO:     127.0.0.1:37322 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3652.439811655,"data":"INFO:     127.0.0.1:36372 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3665.87038238,"data":"INFO:     127.0.0.1:53854 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3666.890028887,"data":"INFO:     127.0.0.1:35214 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3667.963996673,"data":"INFO:     127.0.0.1:35230 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3669.018122047,"data":"INFO:     127.0.0.1:35236 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3672.674012835,"data":"INFO:     127.0.0.1:35250 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3676.438907323,"data":"INFO:     127.0.0.1:35262 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3677.400794166,"data":"INFO:     127.0.0.1:56846 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3678.32964208,"data":"INFO:     127.0.0.1:56852 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3679.310804561,"data":"INFO:     127.0.0.1:56858 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3680.285204031,"data":"INFO:     127.0.0.1:56866 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3681.261223987,"data":"INFO:     127.0.0.1:56868 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3682.281994335,"data":"INFO:     127.0.0.1:56878 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3684.40302762,"data":"INFO:     127.0.0.1:56886 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3685.854634739,"data":"INFO:     127.0.0.1:54398 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3715.859004924,"data":"INFO:     127.0.0.1:54412 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3745.866724149,"data":"INFO:     127.0.0.1:60614 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3745.867869178,"data":"[150/469]\n"}
+,{"stream_name":"stdout","time":3775.872266188,"data":"INFO:     127.0.0.1:46218 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3805.87719473,"data":"INFO:     127.0.0.1:60892 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3835.880243762,"data":"INFO:     127.0.0.1:45528 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3865.885098674,"data":"INFO:     127.0.0.1:41732 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3895.88961465,"data":"INFO:     127.0.0.1:39402 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3925.893491129,"data":"INFO:     127.0.0.1:45872 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3955.897484584,"data":"INFO:     127.0.0.1:60846 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":3976.536405473,"data":"INFO:     127.0.0.1:49068 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":3978.515462615,"data":"INFO:     127.0.0.1:57678 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4000.489257118,"data":"INFO:     127.0.0.1:57680 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4030.492637384,"data":"INFO:     127.0.0.1:36844 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4060.496941647,"data":"INFO:     127.0.0.1:40720 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4090.501798529,"data":"INFO:     127.0.0.1:51400 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4120.506779896,"data":"INFO:     127.0.0.1:53982 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4150.511438394,"data":"INFO:     127.0.0.1:37394 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4180.514243586,"data":"INFO:     127.0.0.1:52928 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4210.519614111,"data":"INFO:     127.0.0.1:54570 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4240.52242055,"data":"INFO:     127.0.0.1:49808 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4270.526012069,"data":"INFO:     127.0.0.1:39876 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4300.531100558,"data":"INFO:     127.0.0.1:43736 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4330.536358293,"data":"INFO:     127.0.0.1:33172 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4360.542047221,"data":"INFO:     127.0.0.1:52224 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4390.5465345,"data":"INFO:     127.0.0.1:43162 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4420.552178663,"data":"INFO:     127.0.0.1:49652 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4450.559276491,"data":"INFO:     127.0.0.1:33952 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4450.560987982,"data":"[175/469]\n"}
+,{"stream_name":"stdout","time":4480.565268502,"data":"INFO:     127.0.0.1:54942 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4510.570125437,"data":"INFO:     127.0.0.1:47794 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4531.795670194,"data":"INFO:     127.0.0.1:56156 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4543.884934443,"data":"INFO:     127.0.0.1:43106 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4573.888807193,"data":"INFO:     127.0.0.1:43850 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4603.893488907,"data":"INFO:     127.0.0.1:39488 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4618.628508505,"data":"INFO:     127.0.0.1:40352 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4632.636661279,"data":"INFO:     127.0.0.1:59950 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4662.640453046,"data":"INFO:     127.0.0.1:34368 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4692.646308413,"data":"INFO:     127.0.0.1:47134 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4722.651133011,"data":"INFO:     127.0.0.1:56070 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4752.655294675,"data":"INFO:     127.0.0.1:39620 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4782.659955088,"data":"INFO:     127.0.0.1:54724 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4794.093339677,"data":"INFO:     127.0.0.1:48964 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4824.097673736,"data":"INFO:     127.0.0.1:55266 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4832.741047244,"data":"INFO:     127.0.0.1:45286 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4862.744474106,"data":"INFO:     127.0.0.1:39430 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4882.862014231,"data":"INFO:     127.0.0.1:41296 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4887.335711488,"data":"INFO:     127.0.0.1:35504 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4890.275502563,"data":"INFO:     127.0.0.1:57592 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4896.215195152,"data":"INFO:     127.0.0.1:57598 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4926.218993176,"data":"INFO:     127.0.0.1:49002 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4956.22391625,"data":"INFO:     127.0.0.1:39738 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4986.228150462,"data":"INFO:     127.0.0.1:48082 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":4999.722440003,"data":"INFO:     127.0.0.1:34246 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":4999.723011286,"data":"[200/469]\n"}
+,{"stream_name":"stdout","time":5029.7277109,"data":"INFO:     127.0.0.1:42008 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5059.732012754,"data":"INFO:     127.0.0.1:50336 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5089.736182015,"data":"INFO:     127.0.0.1:33636 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5119.739417016,"data":"INFO:     127.0.0.1:38026 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5149.744648944,"data":"INFO:     127.0.0.1:51734 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5179.748781802,"data":"INFO:     127.0.0.1:40988 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5199.324500645,"data":"INFO:     127.0.0.1:46862 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5204.474631336,"data":"INFO:     127.0.0.1:37128 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5234.478037557,"data":"INFO:     127.0.0.1:56792 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5264.482040922,"data":"INFO:     127.0.0.1:55768 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5294.486715559,"data":"INFO:     127.0.0.1:42572 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5324.490233599,"data":"INFO:     127.0.0.1:47668 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5354.49358665,"data":"INFO:     127.0.0.1:49498 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5384.497621811,"data":"INFO:     127.0.0.1:54426 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5414.50053618,"data":"INFO:     127.0.0.1:33410 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5444.506981235,"data":"INFO:     127.0.0.1:46794 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5474.512212734,"data":"INFO:     127.0.0.1:35982 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5504.514453732,"data":"INFO:     127.0.0.1:46488 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5534.518270792,"data":"INFO:     127.0.0.1:42466 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5564.523574189,"data":"INFO:     127.0.0.1:40276 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5594.529957351,"data":"INFO:     127.0.0.1:33100 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5624.53550755,"data":"INFO:     127.0.0.1:50666 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5640.591520155,"data":"INFO:     127.0.0.1:52674 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":5670.5950145,"data":"INFO:     127.0.0.1:42544 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5700.599421371,"data":"INFO:     127.0.0.1:45342 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5700.599508227,"data":"[225/469]\n"}
+,{"stream_name":"stdout","time":5730.602661265,"data":"INFO:     127.0.0.1:43118 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5760.606640447,"data":"INFO:     127.0.0.1:42508 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5790.61038381,"data":"INFO:     127.0.0.1:35972 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5820.614822389,"data":"INFO:     127.0.0.1:44176 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5850.619529908,"data":"INFO:     127.0.0.1:48868 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5880.623576765,"data":"INFO:     127.0.0.1:34404 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5910.628023875,"data":"INFO:     127.0.0.1:51986 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5940.632097082,"data":"INFO:     127.0.0.1:52082 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":5970.637046699,"data":"INFO:     127.0.0.1:39358 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6000.642177626,"data":"INFO:     127.0.0.1:33752 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6030.647160347,"data":"INFO:     127.0.0.1:42112 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6060.650394407,"data":"INFO:     127.0.0.1:53658 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6090.65480665,"data":"INFO:     127.0.0.1:54766 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6120.659384325,"data":"INFO:     127.0.0.1:46772 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6150.664468188,"data":"INFO:     127.0.0.1:47298 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6180.669176485,"data":"INFO:     127.0.0.1:59198 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6210.673442246,"data":"INFO:     127.0.0.1:54330 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6240.678169599,"data":"INFO:     127.0.0.1:32850 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6270.683899751,"data":"INFO:     127.0.0.1:41122 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6300.688098967,"data":"INFO:     127.0.0.1:52454 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6330.691944633,"data":"INFO:     127.0.0.1:37954 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6360.696404914,"data":"INFO:     127.0.0.1:56470 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6390.701037219,"data":"INFO:     127.0.0.1:38204 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6420.706251201,"data":"INFO:     127.0.0.1:60490 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6450.710224967,"data":"INFO:     127.0.0.1:40216 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6450.711226121,"data":"[250/469]\n"}
+,{"stream_name":"stdout","time":6480.714971817,"data":"INFO:     127.0.0.1:37734 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6510.721056848,"data":"INFO:     127.0.0.1:46436 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6540.723319708,"data":"INFO:     127.0.0.1:58402 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6570.727774291,"data":"INFO:     127.0.0.1:38848 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6600.732325121,"data":"INFO:     127.0.0.1:35020 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6630.736848997,"data":"INFO:     127.0.0.1:58766 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6660.741584991,"data":"INFO:     127.0.0.1:53520 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6690.745801784,"data":"INFO:     127.0.0.1:59764 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6720.750269221,"data":"INFO:     127.0.0.1:36950 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6750.755541703,"data":"INFO:     127.0.0.1:57286 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6780.759810505,"data":"INFO:     127.0.0.1:44638 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6810.764625463,"data":"INFO:     127.0.0.1:60740 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6840.769039752,"data":"INFO:     127.0.0.1:59190 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6870.774456011,"data":"INFO:     127.0.0.1:35100 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6900.777574649,"data":"INFO:     127.0.0.1:58370 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6930.781684994,"data":"INFO:     127.0.0.1:43914 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6960.78626511,"data":"INFO:     127.0.0.1:56362 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":6990.790812942,"data":"INFO:     127.0.0.1:37976 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7020.794725488,"data":"INFO:     127.0.0.1:54392 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7050.798648866,"data":"INFO:     127.0.0.1:43648 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7080.803046811,"data":"INFO:     127.0.0.1:41386 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7110.807936418,"data":"INFO:     127.0.0.1:57138 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7140.811263305,"data":"INFO:     127.0.0.1:32798 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7170.815654109,"data":"INFO:     127.0.0.1:33604 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7200.820064832,"data":"INFO:     127.0.0.1:57338 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7200.8211886,"data":"[275/469]\n"}
+,{"stream_name":"stdout","time":7230.824620175,"data":"INFO:     127.0.0.1:48714 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7260.828194776,"data":"INFO:     127.0.0.1:45942 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7290.833125723,"data":"INFO:     127.0.0.1:47170 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7320.836634701,"data":"INFO:     127.0.0.1:39150 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7350.842127022,"data":"INFO:     127.0.0.1:36960 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7380.845981958,"data":"INFO:     127.0.0.1:36920 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7410.849343886,"data":"INFO:     127.0.0.1:57138 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7440.853973016,"data":"INFO:     127.0.0.1:33156 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7470.858186267,"data":"INFO:     127.0.0.1:53118 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7500.86388861,"data":"INFO:     127.0.0.1:41914 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7530.870260433,"data":"INFO:     127.0.0.1:56090 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7560.872483475,"data":"INFO:     127.0.0.1:60058 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7590.876565056,"data":"INFO:     127.0.0.1:54456 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7620.880574972,"data":"INFO:     127.0.0.1:52416 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7650.885009663,"data":"INFO:     127.0.0.1:48002 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7680.889140808,"data":"INFO:     127.0.0.1:59782 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7710.892666414,"data":"INFO:     127.0.0.1:33974 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7740.89726529,"data":"INFO:     127.0.0.1:40550 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7770.901819151,"data":"INFO:     127.0.0.1:60792 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7800.906311663,"data":"INFO:     127.0.0.1:32776 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7830.909437505,"data":"INFO:     127.0.0.1:58224 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7860.913504976,"data":"INFO:     127.0.0.1:55734 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7890.917820744,"data":"INFO:     127.0.0.1:48790 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7920.923632403,"data":"INFO:     127.0.0.1:39318 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7950.926399814,"data":"INFO:     127.0.0.1:60546 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":7950.92742364,"data":"[300/469]\n"}
+,{"stream_name":"stdout","time":7980.930845388,"data":"INFO:     127.0.0.1:56990 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8010.934637056,"data":"INFO:     127.0.0.1:59004 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8040.938743778,"data":"INFO:     127.0.0.1:50130 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8070.943545038,"data":"INFO:     127.0.0.1:40714 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8100.947454543,"data":"INFO:     127.0.0.1:44120 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8130.952119682,"data":"INFO:     127.0.0.1:40494 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8160.955721959,"data":"INFO:     127.0.0.1:60042 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8190.959687899,"data":"INFO:     127.0.0.1:36538 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8220.965876579,"data":"INFO:     127.0.0.1:49484 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8250.970888514,"data":"INFO:     127.0.0.1:49932 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8280.975300957,"data":"INFO:     127.0.0.1:53328 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8310.978943832,"data":"INFO:     127.0.0.1:47990 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8340.982927445,"data":"INFO:     127.0.0.1:60100 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8370.986576614,"data":"INFO:     127.0.0.1:59676 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8400.990585573,"data":"INFO:     127.0.0.1:59274 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8427.963758219,"data":"INFO:     127.0.0.1:59976 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8428.996923929,"data":"INFO:     127.0.0.1:50494 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8430.113259983,"data":"INFO:     127.0.0.1:50500 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8431.204778474,"data":"INFO:     127.0.0.1:50508 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8432.538655331,"data":"INFO:     127.0.0.1:50510 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8433.705247668,"data":"INFO:     127.0.0.1:50518 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8434.811432858,"data":"INFO:     127.0.0.1:50534 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8435.910519508,"data":"INFO:     127.0.0.1:56404 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8437.077830058,"data":"INFO:     127.0.0.1:56420 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8438.151206878,"data":"INFO:     127.0.0.1:56436 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8438.152164024,"data":"[325/469]\n"}
+,{"stream_name":"stdout","time":8439.193535582,"data":"INFO:     127.0.0.1:56450 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8440.363559519,"data":"INFO:     127.0.0.1:56462 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8441.453066914,"data":"INFO:     127.0.0.1:56464 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8442.637489082,"data":"INFO:     127.0.0.1:56474 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8443.647331203,"data":"INFO:     127.0.0.1:56480 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8444.657096622,"data":"INFO:     127.0.0.1:56486 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8445.715741415,"data":"INFO:     127.0.0.1:59410 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8446.87116732,"data":"INFO:     127.0.0.1:59422 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8447.996059263,"data":"INFO:     127.0.0.1:59426 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8449.074869276,"data":"INFO:     127.0.0.1:59440 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8450.184360742,"data":"INFO:     127.0.0.1:59450 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8451.267268165,"data":"INFO:     127.0.0.1:59456 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8452.404067368,"data":"INFO:     127.0.0.1:59462 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8453.485648169,"data":"INFO:     127.0.0.1:59468 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8454.687452685,"data":"INFO:     127.0.0.1:59478 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8455.828880612,"data":"INFO:     127.0.0.1:35586 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8456.907205648,"data":"INFO:     127.0.0.1:35598 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8457.983336189,"data":"INFO:     127.0.0.1:35606 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8459.120596866,"data":"INFO:     127.0.0.1:35622 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8460.213209431,"data":"INFO:     127.0.0.1:35628 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8461.344202124,"data":"INFO:     127.0.0.1:35634 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8462.798793537,"data":"INFO:     127.0.0.1:35648 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":8492.803652076,"data":"INFO:     127.0.0.1:35662 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8522.810387601,"data":"INFO:     127.0.0.1:38124 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8552.818179767,"data":"INFO:     127.0.0.1:48740 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8552.819300567,"data":"[350/469]\n"}
+,{"stream_name":"stdout","time":8582.82225516,"data":"INFO:     127.0.0.1:53378 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8612.825949785,"data":"INFO:     127.0.0.1:38188 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8642.829792605,"data":"INFO:     127.0.0.1:44886 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8672.834268126,"data":"INFO:     127.0.0.1:44016 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8702.838833643,"data":"INFO:     127.0.0.1:40896 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8732.841732157,"data":"INFO:     127.0.0.1:51560 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8762.846519204,"data":"INFO:     127.0.0.1:42984 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8792.850604579,"data":"INFO:     127.0.0.1:50398 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8822.857500809,"data":"INFO:     127.0.0.1:52926 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8852.874337569,"data":"INFO:     127.0.0.1:58910 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8882.878925665,"data":"INFO:     127.0.0.1:44142 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8912.884699424,"data":"INFO:     127.0.0.1:45584 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8942.889618472,"data":"INFO:     127.0.0.1:50100 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8972.894153625,"data":"INFO:     127.0.0.1:37286 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":8989.751683027,"data":"INFO:     127.0.0.1:45690 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9019.756279343,"data":"INFO:     127.0.0.1:46398 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9045.731750363,"data":"INFO:     127.0.0.1:41998 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9048.63041964,"data":"INFO:     127.0.0.1:47244 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9063.337577013,"data":"INFO:     127.0.0.1:47248 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9093.341413436,"data":"INFO:     127.0.0.1:56774 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9123.345752491,"data":"INFO:     127.0.0.1:33264 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9153.350661727,"data":"INFO:     127.0.0.1:36502 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9183.354335719,"data":"INFO:     127.0.0.1:41818 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9213.358236438,"data":"INFO:     127.0.0.1:60554 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9243.363928062,"data":"INFO:     127.0.0.1:46296 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9243.364898695,"data":"[375/469]\n"}
+,{"stream_name":"stdout","time":9273.367238748,"data":"INFO:     127.0.0.1:52176 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9296.730400925,"data":"INFO:     127.0.0.1:38266 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9306.215555892,"data":"INFO:     127.0.0.1:51950 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9317.512925739,"data":"INFO:     127.0.0.1:59430 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9327.507505373,"data":"INFO:     127.0.0.1:55882 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9357.509848335,"data":"INFO:     127.0.0.1:52312 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9378.423328223,"data":"INFO:     127.0.0.1:43826 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9381.595408998,"data":"INFO:     127.0.0.1:59288 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9411.600128374,"data":"INFO:     127.0.0.1:59300 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9441.60519336,"data":"INFO:     127.0.0.1:58458 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9459.138375592,"data":"INFO:     127.0.0.1:32842 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9466.397424631,"data":"INFO:     127.0.0.1:55118 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9496.400768883,"data":"INFO:     127.0.0.1:50804 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9515.217986075,"data":"INFO:     127.0.0.1:60036 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9532.012535054,"data":"INFO:     127.0.0.1:36186 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9562.016519169,"data":"INFO:     127.0.0.1:57286 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9580.887566715,"data":"INFO:     127.0.0.1:33358 - \"POST /v1/systemone HTTP/1.1\" 200 OK\n"}
+,{"stream_name":"stdout","time":9610.891911265,"data":"INFO:     127.0.0.1:52116 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9640.895595346,"data":"INFO:     127.0.0.1:41132 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9670.900443163,"data":"INFO:     127.0.0.1:57462 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9700.905007654,"data":"INFO:     127.0.0.1:40958 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9730.909641867,"data":"INFO:     127.0.0.1:43044 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9760.914186078,"data":"INFO:     127.0.0.1:41342 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9790.918705656,"data":"INFO:     127.0.0.1:49734 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9820.924604042,"data":"INFO:     127.0.0.1:57374 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9820.925435514,"data":"[400/469]\n"}
+,{"stream_name":"stdout","time":9850.929218325,"data":"INFO:     127.0.0.1:44944 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9880.93413383,"data":"INFO:     127.0.0.1:55752 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9910.940404188,"data":"INFO:     127.0.0.1:45042 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9940.944307642,"data":"INFO:     127.0.0.1:41286 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":9970.948391618,"data":"INFO:     127.0.0.1:45514 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10000.953007105,"data":"INFO:     127.0.0.1:60350 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10030.957887688,"data":"INFO:     127.0.0.1:58674 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10060.963051875,"data":"INFO:     127.0.0.1:45438 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10090.968272305,"data":"INFO:     127.0.0.1:40308 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10120.971626854,"data":"INFO:     127.0.0.1:42864 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10150.975613753,"data":"INFO:     127.0.0.1:34368 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10180.98040675,"data":"INFO:     127.0.0.1:34378 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10210.985434556,"data":"INFO:     127.0.0.1:39452 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10240.992028831,"data":"INFO:     127.0.0.1:50790 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10270.995443007,"data":"INFO:     127.0.0.1:46868 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10300.999824685,"data":"INFO:     127.0.0.1:53036 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10331.004634373,"data":"INFO:     127.0.0.1:57864 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10361.008930888,"data":"INFO:     127.0.0.1:55698 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10391.01362408,"data":"INFO:     127.0.0.1:50160 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10421.017730465,"data":"INFO:     127.0.0.1:39104 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10451.023422757,"data":"INFO:     127.0.0.1:59546 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10481.028114746,"data":"INFO:     127.0.0.1:53770 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10511.032965026,"data":"INFO:     127.0.0.1:43074 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10541.036673881,"data":"INFO:     127.0.0.1:51070 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10571.041161752,"data":"INFO:     127.0.0.1:50036 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10571.042363728,"data":"[425/469]\n"}
+,{"stream_name":"stdout","time":10601.045544903,"data":"INFO:     127.0.0.1:56962 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10631.049641244,"data":"INFO:     127.0.0.1:52858 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10661.055119674,"data":"INFO:     127.0.0.1:44952 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10691.060239103,"data":"INFO:     127.0.0.1:57500 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10721.064828268,"data":"INFO:     127.0.0.1:40152 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10751.068244276,"data":"INFO:     127.0.0.1:41726 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10781.073143149,"data":"INFO:     127.0.0.1:47668 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10811.077782274,"data":"INFO:     127.0.0.1:52434 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10841.082582972,"data":"INFO:     127.0.0.1:53948 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10871.087985358,"data":"INFO:     127.0.0.1:59464 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10901.092135057,"data":"INFO:     127.0.0.1:49796 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10931.096540738,"data":"INFO:     127.0.0.1:43418 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10961.10180937,"data":"INFO:     127.0.0.1:50050 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":10991.105377007,"data":"INFO:     127.0.0.1:54538 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11021.109365228,"data":"INFO:     127.0.0.1:60118 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11051.113238614,"data":"INFO:     127.0.0.1:34114 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11081.118255496,"data":"INFO:     127.0.0.1:38286 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11111.122687302,"data":"INFO:     127.0.0.1:42172 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11141.128188079,"data":"INFO:     127.0.0.1:39828 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11171.132670895,"data":"INFO:     127.0.0.1:48150 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11201.13722813,"data":"INFO:     127.0.0.1:60866 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11231.140790787,"data":"INFO:     127.0.0.1:60364 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11261.145121642,"data":"INFO:     127.0.0.1:36182 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11291.148668577,"data":"INFO:     127.0.0.1:44756 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11321.153964483,"data":"INFO:     127.0.0.1:48370 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11321.15493204,"data":"[450/469]\n"}
+,{"stream_name":"stdout","time":11351.158780759,"data":"INFO:     127.0.0.1:33778 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11381.163687636,"data":"INFO:     127.0.0.1:51850 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11411.1686049,"data":"INFO:     127.0.0.1:56840 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11441.173506485,"data":"INFO:     127.0.0.1:41800 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11471.177110531,"data":"INFO:     127.0.0.1:55344 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11501.181298944,"data":"INFO:     127.0.0.1:51828 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11531.186228562,"data":"INFO:     127.0.0.1:58700 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11561.192638268,"data":"INFO:     127.0.0.1:46612 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11591.196035747,"data":"INFO:     127.0.0.1:40226 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11621.200215882,"data":"INFO:     127.0.0.1:43222 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11651.205014756,"data":"INFO:     127.0.0.1:51994 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11681.210336218,"data":"INFO:     127.0.0.1:52478 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11711.214313607,"data":"INFO:     127.0.0.1:46976 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11741.218526941,"data":"INFO:     127.0.0.1:41034 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11771.222822306,"data":"INFO:     127.0.0.1:45858 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11801.226583216,"data":"INFO:     127.0.0.1:57628 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11831.230597252,"data":"INFO:     127.0.0.1:33934 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11861.235095447,"data":"INFO:     127.0.0.1:45272 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11891.239350561,"data":"INFO:     127.0.0.1:48552 - \"POST /v1/systemone HTTP/1.1\" 504 Gateway Timeout\n"}
+,{"stream_name":"stdout","time":11891.254334626,"data":"{\n"}
+,{"stream_name":"stdout","time":11891.254397899,"data":" \"noul_n\": 149,\n"}
+,{"stream_name":"stdout","time":11891.254404731,"data":" \"noul_mean_abs_delta\": 0.1638,\n"}
+,{"stream_name":"stdout","time":11891.254409985,"data":" \"noul_flip_0.5_rate\": 0.2416,\n"}
+,{"stream_name":"stdout","time":11891.254414829,"data":" \"choice_n\": 6,\n"}
+,{"stream_name":"stdout","time":11891.254419677,"data":" \"choice_agree_rate\": 0.6667\n"}
+,{"stream_name":"stdout","time":11891.255439779,"data":"}\n"}
+,{"stream_name":"stdout","time":11891.255462202,"data":"wrote /kaggle/working/results.json and /kaggle/working/diffs.jsonl\n"}
+,{"stream_name":"stderr","time":11891.291387775,"data":"INFO:     Shutting down\n"}
+,{"stream_name":"stderr","time":11891.3925556,"data":"INFO:     Waiting for application shutdown.\n"}
+,{"stream_name":"stderr","time":11891.39261735,"data":"INFO:     Application shutdown complete.\n"}
+,{"stream_name":"stderr","time":11891.3926252,"data":"INFO:     Finished server process [27]\n"}
+,{"stream_name":"stderr","time":11894.290633118,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":11894.290681252,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":11894.70746081,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":11894.707497627,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":11895.682207557,"data":"[NbConvertApp] Converting notebook __script__.ipynb to html\n"}
+,{"stream_name":"stderr","time":11897.312617254,"data":"[NbConvertApp] Writing 317516 bytes to __results__.html\n"}
+]
