@@ -1,0 +1,528 @@
+{"gene": "PF3D7_1133400", "stage": "s2_rank", "ask_i": 0, "qid": "rank", "ms": 2330, "qtype": "choice", "jev": "species", "laya": "species", "agree": true}
+{"gene": "PF3D7_1133400", "stage": "ncbi_link", "ask_i": 1, "qid": "gene_match", "ms": 1017, "qtype": "noul", "jev": 0.37, "laya": 0.4759364128112793, "abs_delta": 0.1059, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "ncbi_link", "ask_i": 2, "qid": "gene_match", "ms": 1110, "qtype": "noul", "jev": 0.32, "laya": 0.34877440333366394, "abs_delta": 0.0288, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "ncbi_link", "ask_i": 3, "qid": "gene_match", "ms": 1107, "qtype": "noul", "jev": 0.27, "laya": 0.39905160665512085, "abs_delta": 0.1291, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "ncbi_link", "ask_i": 4, "qid": "gene_match", "ms": 1036, "qtype": "noul", "jev": 0.25, "laya": 0.4445817172527313, "abs_delta": 0.1946, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "ncbi_link", "ask_i": 5, "qid": "gene_match", "ms": 14160, "qtype": "choice", "jev": "0", "laya": "0", "agree": true}
+{"gene": "PF3D7_1133400", "stage": "s4_pick", "ask_i": 6, "qid": "uniprot_match", "ms": 2720, "qtype": "choice", "jev": "2", "laya": "0", "agree": false}
+{"gene": "PF3D7_1133400", "stage": "s4_annotate", "ask_i": 7, "qid": "characterization", "ms": 1347, "qtype": "score", "jev": 0.99, "laya": 0.7206457257270813, "abs_delta": 0.2694}
+{"gene": "PF3D7_1133400", "stage": "proposals_triage", "ask_i": 8, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals_triage", "ask_i": 9, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals_triage", "ask_i": 10, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 11, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 12, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 13, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 14, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 15, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 16, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 17, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 18, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 19, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 20, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 21, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 22, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 23, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 24, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 25, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 26, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 27, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 28, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 29, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 30, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 31, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 32, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 33, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 34, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 35, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 36, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 37, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 38, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 39, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 40, "qid": "prop_0", "ms": 21002, "qtype": "noul", "jev": 0.82, "laya": 0.6496937274932861, "abs_delta": 0.1703, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 40, "qid": "prop_1", "ms": 21002, "qtype": "noul", "jev": 0.66, "laya": 0.6528181433677673, "abs_delta": 0.0072, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 41, "qid": "prop_0", "ms": 2048, "qtype": "noul", "jev": 0.93, "laya": 0.630170464515686, "abs_delta": 0.2998, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 42, "qid": "prop_0", "ms": 10770, "qtype": "noul", "jev": 0.53, "laya": 0.5478940606117249, "abs_delta": 0.0179, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 42, "qid": "prop_1", "ms": 10770, "qtype": "noul", "jev": 0.81, "laya": 0.5498610138893127, "abs_delta": 0.2601, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 42, "qid": "prop_2", "ms": 10770, "qtype": "noul", "jev": 0.78, "laya": 0.5410605072975159, "abs_delta": 0.2389, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 43, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 44, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 45, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 46, "qid": "prop_0", "ms": 20407, "qtype": "noul", "jev": 0.89, "laya": 0.6118428707122803, "abs_delta": 0.2782, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 46, "qid": "prop_1", "ms": 20407, "qtype": "noul", "jev": 0.27, "laya": 0.6140396595001221, "abs_delta": 0.344, "flip_0.5": true}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 47, "qid": "prop_0", "ms": 15699, "qtype": "noul", "jev": 0.75, "laya": 0.6061137914657593, "abs_delta": 0.1439, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 47, "qid": "prop_1", "ms": 15699, "qtype": "noul", "jev": 0.56, "laya": 0.6097728610038757, "abs_delta": 0.0498, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 47, "qid": "prop_2", "ms": 15699, "qtype": "noul", "jev": 0.58, "laya": 0.6063971519470215, "abs_delta": 0.0264, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 48, "qid": "prop_0", "ms": 2610, "qtype": "noul", "jev": 0.81, "laya": 0.5098046660423279, "abs_delta": 0.3002, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 49, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 50, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 51, "qid": "prop_0", "ms": 11208, "qtype": "noul", "jev": 0.74, "laya": 0.6541670560836792, "abs_delta": 0.0858, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 51, "qid": "prop_1", "ms": 11208, "qtype": "noul", "jev": 0.72, "laya": 0.6572397351264954, "abs_delta": 0.0628, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 51, "qid": "prop_2", "ms": 11208, "qtype": "noul", "jev": 0.25, "laya": 0.6575223803520203, "abs_delta": 0.4075, "flip_0.5": true}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 52, "qid": "prop_0", "ms": 6954, "qtype": "noul", "jev": 0.66, "laya": 0.6514134407043457, "abs_delta": 0.0086, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 52, "qid": "prop_1", "ms": 6954, "qtype": "noul", "jev": 0.75, "laya": 0.6538754105567932, "abs_delta": 0.0961, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 52, "qid": "prop_2", "ms": 6954, "qtype": "noul", "jev": 0.74, "laya": 0.6518599987030029, "abs_delta": 0.0881, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 53, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 54, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 55, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 56, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 57, "qid": "prop_0", "ms": 18443, "qtype": "noul", "jev": 0.65, "laya": 0.618443489074707, "abs_delta": 0.0316, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 57, "qid": "prop_1", "ms": 18443, "qtype": "noul", "jev": 0.7, "laya": 0.6182441115379333, "abs_delta": 0.0818, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 57, "qid": "prop_2", "ms": 18443, "qtype": "noul", "jev": 0.48, "laya": 0.6169766187667847, "abs_delta": 0.137, "flip_0.5": true}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 57, "qid": "prop_3", "ms": 18443, "qtype": "noul", "jev": 0.56, "laya": 0.6163535714149475, "abs_delta": 0.0564, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 58, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 59, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 60, "qid": "prop_0", "ms": 21593, "qtype": "noul", "jev": 0.85, "laya": 0.562640905380249, "abs_delta": 0.2874, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 61, "qid": "prop_0", "ms": 15075, "qtype": "noul", "jev": 0.68, "laya": 0.6642293334007263, "abs_delta": 0.0158, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 61, "qid": "prop_1", "ms": 15075, "qtype": "noul", "jev": 0.74, "laya": 0.6648486852645874, "abs_delta": 0.0752, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 61, "qid": "prop_2", "ms": 15075, "qtype": "noul", "jev": 0.62, "laya": 0.6616411209106445, "abs_delta": 0.0416, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 62, "qid": "prop_0", "ms": 26020, "qtype": "noul", "jev": 0.99, "laya": 0.35494470596313477, "abs_delta": 0.6351, "flip_0.5": true}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 62, "qid": "prop_1", "ms": 26020, "qtype": "noul", "jev": 0.97, "laya": 0.3578338921070099, "abs_delta": 0.6122, "flip_0.5": true}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 62, "qid": "prop_2", "ms": 26020, "qtype": "noul", "jev": 0.65, "laya": 0.35943108797073364, "abs_delta": 0.2906, "flip_0.5": true}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 62, "qid": "prop_3", "ms": 26020, "qtype": "noul", "jev": 0.65, "laya": 0.675139844417572, "abs_delta": 0.0251, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 62, "qid": "prop_4", "ms": 26020, "qtype": "noul", "jev": 0.68, "laya": 0.6720378398895264, "abs_delta": 0.008, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 63, "qid": "prop_0", "ms": 7069, "qtype": "noul", "jev": 0.65, "laya": 0.6489311456680298, "abs_delta": 0.0011, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 63, "qid": "prop_1", "ms": 7069, "qtype": "noul", "jev": 0.72, "laya": 0.6500827670097351, "abs_delta": 0.0699, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 63, "qid": "prop_2", "ms": 7069, "qtype": "noul", "jev": 0.55, "laya": 0.6493982076644897, "abs_delta": 0.0994, "flip_0.5": false}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 64, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 65, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 66, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 67, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 68, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 69, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 70, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 71, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 72, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 73, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 74, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 75, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 76, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 77, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 78, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 79, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 80, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 81, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 82, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "proposals", "ask_i": 83, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 84, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 85, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 86, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 87, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 88, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 89, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 90, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 91, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 92, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 93, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 94, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 95, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 96, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 97, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 98, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 99, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 100, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 101, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 102, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 103, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 104, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 105, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 106, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 107, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 108, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 109, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 110, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 111, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 112, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 113, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 114, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 115, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 116, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 117, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 118, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 119, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 120, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 121, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 122, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 123, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 124, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 125, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 126, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 127, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 128, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1133400", "stage": "data_proposals", "ask_i": 129, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "s2_rank", "ask_i": 130, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 131, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 132, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 133, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 134, "qid": "gene_match", "ms": 13430, "qtype": "noul", "jev": 0.04, "laya": 0.31224796175956726, "abs_delta": 0.2722, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 135, "qid": "gene_match", "ms": 1019, "qtype": "noul", "jev": 0.34, "laya": 0.3170381188392639, "abs_delta": 0.023, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 136, "qid": "gene_match", "ms": 1074, "qtype": "noul", "jev": 0.02, "laya": 0.358012855052948, "abs_delta": 0.338, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 137, "qid": "gene_match", "ms": 1053, "qtype": "noul", "jev": 0.15, "laya": 0.26657140254974365, "abs_delta": 0.1166, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 138, "qid": "gene_match", "ms": 3655, "qtype": "choice", "jev": "0", "laya": "0", "agree": true}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 139, "qid": "gene_match", "ms": 3765, "qtype": "choice", "jev": "0", "laya": "0", "agree": true}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 140, "qid": "gene_match", "ms": 961, "qtype": "noul", "jev": 0.06, "laya": 0.2695256471633911, "abs_delta": 0.2095, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 141, "qid": "gene_match", "ms": 929, "qtype": "noul", "jev": 0.32, "laya": 0.4235181510448456, "abs_delta": 0.1035, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 142, "qid": "gene_match", "ms": 980, "qtype": "noul", "jev": 0.37, "laya": 0.40487828850746155, "abs_delta": 0.0349, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 143, "qid": "gene_match", "ms": 973, "qtype": "noul", "jev": 0.8, "laya": 0.5286939740180969, "abs_delta": 0.2713, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 144, "qid": "gene_match", "ms": 975, "qtype": "noul", "jev": 0.32, "laya": 0.41334232687950134, "abs_delta": 0.0933, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 145, "qid": "gene_match", "ms": 1021, "qtype": "noul", "jev": 0.38, "laya": 0.41009482741355896, "abs_delta": 0.0301, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "ncbi_link", "ask_i": 146, "qid": "gene_match", "ms": 2120, "qtype": "choice", "jev": "none", "laya": "0", "agree": false}
+{"gene": "PF3D7_0709000", "stage": "s4_annotate", "ask_i": 147, "qid": "characterization", "ms": 1452, "qtype": "score", "jev": 1.0, "laya": 0.8652453422546387, "abs_delta": 0.1348}
+{"gene": "PF3D7_0709000", "stage": "proposals_triage", "ask_i": 148, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals_triage", "ask_i": 149, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals_triage", "ask_i": 150, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals_triage", "ask_i": 151, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 152, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 153, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 154, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 155, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 156, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 157, "qid": "prop_0", "ms": 20638, "qtype": "noul", "jev": 0.66, "laya": 0.6829188466072083, "abs_delta": 0.0229, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 157, "qid": "prop_1", "ms": 20638, "qtype": "noul", "jev": 0.66, "laya": 0.684470534324646, "abs_delta": 0.0245, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 157, "qid": "prop_2", "ms": 20638, "qtype": "noul", "jev": 0.5, "laya": 0.6834889054298401, "abs_delta": 0.1835, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 157, "qid": "prop_3", "ms": 20638, "qtype": "noul", "jev": 0.43, "laya": 0.6832282543182373, "abs_delta": 0.2532, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 158, "qid": "prop_0", "ms": 1978, "qtype": "noul", "jev": 0.89, "laya": 0.6231602430343628, "abs_delta": 0.2668, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 159, "qid": "prop_0", "ms": 21973, "qtype": "noul", "jev": 0.87, "laya": 0.6146791577339172, "abs_delta": 0.2553, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 159, "qid": "prop_1", "ms": 21973, "qtype": "noul", "jev": 0.83, "laya": 0.6176941394805908, "abs_delta": 0.2123, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 159, "qid": "prop_2", "ms": 21973, "qtype": "noul", "jev": 0.77, "laya": 0.6164714694023132, "abs_delta": 0.1535, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 160, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 161, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 162, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 163, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 164, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 165, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 166, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 167, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 168, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 169, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 170, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 171, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 172, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 173, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 174, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 175, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 176, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 177, "qid": "prop_0", "ms": 21225, "qtype": "noul", "jev": 0.75, "laya": 0.5948973298072815, "abs_delta": 0.1551, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 178, "qid": "prop_0", "ms": 12088, "qtype": "noul", "jev": 0.73, "laya": 0.6330685615539551, "abs_delta": 0.0969, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 178, "qid": "prop_1", "ms": 12088, "qtype": "noul", "jev": 0.19, "laya": 0.6342397928237915, "abs_delta": 0.4442, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 179, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 180, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 181, "qid": "prop_0", "ms": 14734, "qtype": "noul", "jev": 0.81, "laya": 0.5476400852203369, "abs_delta": 0.2624, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 182, "qid": "prop_0", "ms": 14008, "qtype": "noul", "jev": 0.38, "laya": 0.5690802931785583, "abs_delta": 0.1891, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 182, "qid": "prop_1", "ms": 14008, "qtype": "noul", "jev": 0.28, "laya": 0.5739859342575073, "abs_delta": 0.294, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 182, "qid": "prop_2", "ms": 14008, "qtype": "noul", "jev": 0.28, "laya": 0.5730661749839783, "abs_delta": 0.2931, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 182, "qid": "prop_3", "ms": 14008, "qtype": "noul", "jev": 0.11, "laya": 0.5722368955612183, "abs_delta": 0.4622, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 183, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 184, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 185, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 186, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 187, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 188, "qid": "prop_0", "ms": 11432, "qtype": "noul", "jev": 0.46, "laya": 0.6806884407997131, "abs_delta": 0.2207, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 188, "qid": "prop_1", "ms": 11432, "qtype": "noul", "jev": 0.43, "laya": 0.6830950975418091, "abs_delta": 0.2531, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 188, "qid": "prop_2", "ms": 11432, "qtype": "noul", "jev": 0.2, "laya": 0.682816743850708, "abs_delta": 0.4828, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 189, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 190, "qid": "prop_0", "ms": 8643, "qtype": "noul", "jev": 0.26, "laya": 0.6057370901107788, "abs_delta": 0.3457, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 191, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 192, "qid": "prop_0", "ms": 20117, "qtype": "noul", "jev": 0.74, "laya": 0.5646647810935974, "abs_delta": 0.1753, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 192, "qid": "prop_1", "ms": 20117, "qtype": "noul", "jev": 0.7, "laya": 0.568227231502533, "abs_delta": 0.1318, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 193, "qid": "prop_0", "ms": 4473, "qtype": "noul", "jev": 0.71, "laya": 0.563625156879425, "abs_delta": 0.1464, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 193, "qid": "prop_1", "ms": 4473, "qtype": "noul", "jev": 0.67, "laya": 0.5683349370956421, "abs_delta": 0.1017, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 194, "qid": "prop_0", "ms": 2939, "qtype": "noul", "jev": 0.41, "laya": 0.4561496376991272, "abs_delta": 0.0461, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 195, "qid": "prop_0", "ms": 5938, "qtype": "noul", "jev": 0.35, "laya": 0.4997226893901825, "abs_delta": 0.1497, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 195, "qid": "prop_1", "ms": 5938, "qtype": "noul", "jev": 0.4, "laya": 0.5032305717468262, "abs_delta": 0.1032, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 196, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 197, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 198, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 199, "qid": "prop_0", "ms": 13494, "qtype": "noul", "jev": 0.74, "laya": 0.5929574966430664, "abs_delta": 0.147, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 199, "qid": "prop_1", "ms": 13494, "qtype": "noul", "jev": 0.71, "laya": 0.5935012698173523, "abs_delta": 0.1165, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 199, "qid": "prop_2", "ms": 13494, "qtype": "noul", "jev": 0.64, "laya": 0.5908053517341614, "abs_delta": 0.0492, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 200, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 201, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 202, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 203, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 204, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 205, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 206, "qid": "prop_0", "ms": 19576, "qtype": "noul", "jev": 0.45, "laya": 0.6438354849815369, "abs_delta": 0.1938, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 206, "qid": "prop_1", "ms": 19576, "qtype": "noul", "jev": 0.55, "laya": 0.6471325755119324, "abs_delta": 0.0971, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 207, "qid": "prop_0", "ms": 5149, "qtype": "noul", "jev": 0.78, "laya": 0.5648179054260254, "abs_delta": 0.2152, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 207, "qid": "prop_1", "ms": 5149, "qtype": "noul", "jev": 0.85, "laya": 0.5675920248031616, "abs_delta": 0.2824, "flip_0.5": false}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 208, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 209, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 210, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 211, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 212, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 213, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 214, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 215, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 216, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 217, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 218, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 219, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 220, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 221, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 222, "qid": "prop_0", "ms": 16055, "qtype": "noul", "jev": 0.34, "laya": 0.5826267004013062, "abs_delta": 0.2426, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 222, "qid": "prop_1", "ms": 16055, "qtype": "noul", "jev": 0.46, "laya": 0.5834273099899292, "abs_delta": 0.1234, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 222, "qid": "prop_2", "ms": 16055, "qtype": "noul", "jev": 0.46, "laya": 0.5825806856155396, "abs_delta": 0.1226, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 222, "qid": "prop_3", "ms": 16055, "qtype": "noul", "jev": 0.2, "laya": 0.5827713012695312, "abs_delta": 0.3828, "flip_0.5": true}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 223, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 224, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 225, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 226, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 227, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 228, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 229, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 230, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 231, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 232, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 233, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 234, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 235, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 236, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 237, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 238, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 239, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 240, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 241, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 242, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 243, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 244, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 245, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 246, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 247, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 248, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 249, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 250, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 251, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 252, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 253, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 254, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 255, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 256, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 257, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 258, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 259, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 260, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 261, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "proposals", "ask_i": 262, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 263, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 264, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 265, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 266, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 267, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 268, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 269, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 270, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 271, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 272, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 273, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 274, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 275, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 276, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 277, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 278, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 279, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 280, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 281, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 282, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 283, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 284, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 285, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 286, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 287, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 288, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 289, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 290, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 291, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 292, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 293, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 294, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 295, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 296, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 297, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 298, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 299, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 300, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 301, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 302, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 303, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 304, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 305, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 306, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 307, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_0709000", "stage": "data_proposals", "ask_i": 308, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "s2_rank", "ask_i": 309, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 310, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 311, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 312, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 313, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 314, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 315, "qid": "gene_match", "ms": 26972, "qtype": "noul", "jev": 0.42, "laya": 0.4680383503437042, "abs_delta": 0.048, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 316, "qid": "gene_match", "ms": 1032, "qtype": "noul", "jev": 0.29, "laya": 0.31180107593536377, "abs_delta": 0.0218, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 317, "qid": "gene_match", "ms": 1116, "qtype": "noul", "jev": 0.45, "laya": 0.5042921900749207, "abs_delta": 0.0543, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 318, "qid": "gene_match", "ms": 1091, "qtype": "noul", "jev": 0.43, "laya": 0.4203413426876068, "abs_delta": 0.0097, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 319, "qid": "gene_match", "ms": 1333, "qtype": "noul", "jev": 0.75, "laya": 0.6062151193618774, "abs_delta": 0.1438, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 320, "qid": "gene_match", "ms": 1166, "qtype": "noul", "jev": 0.77, "laya": 0.6150984168052673, "abs_delta": 0.1549, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 321, "qid": "gene_match", "ms": 1105, "qtype": "noul", "jev": 0.48, "laya": 0.5490016937255859, "abs_delta": 0.069, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 322, "qid": "gene_match", "ms": 1098, "qtype": "noul", "jev": 0.41, "laya": 0.44631123542785645, "abs_delta": 0.0363, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 323, "qid": "gene_match", "ms": 1167, "qtype": "noul", "jev": 0.44, "laya": 0.4513022005558014, "abs_delta": 0.0113, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 324, "qid": "gene_match", "ms": 1073, "qtype": "noul", "jev": 0.39, "laya": 0.5341745018959045, "abs_delta": 0.1442, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 325, "qid": "gene_match", "ms": 1042, "qtype": "noul", "jev": 0.45, "laya": 0.30121296644210815, "abs_delta": 0.1488, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 326, "qid": "gene_match", "ms": 1170, "qtype": "noul", "jev": 0.46, "laya": 0.48305320739746094, "abs_delta": 0.0231, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 327, "qid": "gene_match", "ms": 1089, "qtype": "noul", "jev": 0.46, "laya": 0.5237328410148621, "abs_delta": 0.0637, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 328, "qid": "gene_match", "ms": 1183, "qtype": "noul", "jev": 0.82, "laya": 0.6431530117988586, "abs_delta": 0.1768, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 329, "qid": "gene_match", "ms": 1009, "qtype": "noul", "jev": 0.53, "laya": 0.4224545955657959, "abs_delta": 0.1075, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 330, "qid": "gene_match", "ms": 1010, "qtype": "noul", "jev": 0.58, "laya": 0.4410107135772705, "abs_delta": 0.139, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 331, "qid": "gene_match", "ms": 1058, "qtype": "noul", "jev": 0.32, "laya": 0.4711448848247528, "abs_delta": 0.1511, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 332, "qid": "gene_match", "ms": 1154, "qtype": "noul", "jev": 0.08, "laya": 0.29168254137039185, "abs_delta": 0.2117, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 333, "qid": "gene_match", "ms": 1124, "qtype": "noul", "jev": 0.16, "laya": 0.3394540250301361, "abs_delta": 0.1795, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 334, "qid": "gene_match", "ms": 1078, "qtype": "noul", "jev": 0.78, "laya": 0.6538461446762085, "abs_delta": 0.1262, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 335, "qid": "gene_match", "ms": 1109, "qtype": "noul", "jev": 0.05, "laya": 0.3575358986854553, "abs_delta": 0.3075, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 336, "qid": "gene_match", "ms": 1082, "qtype": "noul", "jev": 0.71, "laya": 0.6714427471160889, "abs_delta": 0.0386, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 337, "qid": "gene_match", "ms": 1136, "qtype": "noul", "jev": 0.34, "laya": 0.30601537227630615, "abs_delta": 0.034, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 338, "qid": "gene_match", "ms": 1081, "qtype": "noul", "jev": 0.71, "laya": 0.6656555533409119, "abs_delta": 0.0443, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 339, "qid": "gene_match", "ms": 1202, "qtype": "noul", "jev": 0.93, "laya": 0.6076887249946594, "abs_delta": 0.3223, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 340, "qid": "gene_match", "ms": 1140, "qtype": "noul", "jev": 0.92, "laya": 0.6007544994354248, "abs_delta": 0.3192, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 341, "qid": "gene_match", "ms": 1078, "qtype": "noul", "jev": 0.79, "laya": 0.5553292632102966, "abs_delta": 0.2347, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 342, "qid": "gene_match", "ms": 1075, "qtype": "noul", "jev": 0.67, "laya": 0.6723421216011047, "abs_delta": 0.0023, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 343, "qid": "gene_match", "ms": 1137, "qtype": "noul", "jev": 0.06, "laya": 0.2621910274028778, "abs_delta": 0.2022, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 344, "qid": "gene_match", "ms": 1092, "qtype": "noul", "jev": 0.35, "laya": 0.3949419856071472, "abs_delta": 0.0449, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "ncbi_link", "ask_i": 345, "qid": "gene_match", "ms": 1130, "qtype": "noul", "jev": 0.31, "laya": 0.3563511371612549, "abs_delta": 0.0464, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "s4_annotate", "ask_i": 346, "qid": "characterization", "ms": 1454, "qtype": "score", "jev": 0.62, "laya": 0.06216483563184738, "abs_delta": 0.5578}
+{"gene": "PF3D7_1343700", "stage": "proposals_triage", "ask_i": 347, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals_triage", "ask_i": 348, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals_triage", "ask_i": 349, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 350, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 351, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 352, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 353, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 354, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 355, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 356, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 357, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 358, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 359, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 360, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 361, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 362, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 363, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 364, "qid": "prop_0", "ms": 16857, "qtype": "noul", "jev": 0.72, "laya": 0.5324376225471497, "abs_delta": 0.1876, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 365, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 366, "qid": "prop_0", "ms": 25974, "qtype": "noul", "jev": 0.4, "laya": 0.7133421301841736, "abs_delta": 0.3133, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 366, "qid": "prop_1", "ms": 25974, "qtype": "noul", "jev": 0.14, "laya": 0.7112828493118286, "abs_delta": 0.5713, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 367, "qid": "prop_0", "ms": 2898, "qtype": "noul", "jev": 0.49, "laya": 0.466213196516037, "abs_delta": 0.0238, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 368, "qid": "prop_0", "ms": 14706, "qtype": "noul", "jev": 0.4, "laya": 0.6412302851676941, "abs_delta": 0.2412, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 368, "qid": "prop_1", "ms": 14706, "qtype": "noul", "jev": 0.31, "laya": 0.6432919502258301, "abs_delta": 0.3333, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 368, "qid": "prop_2", "ms": 14706, "qtype": "noul", "jev": 0.31, "laya": 0.6433040499687195, "abs_delta": 0.3333, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 369, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 370, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 371, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 372, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 373, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 374, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 375, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 376, "qid": "prop_0", "ms": 23362, "qtype": "noul", "jev": 0.87, "laya": 0.6336243152618408, "abs_delta": 0.2364, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 377, "qid": "prop_0", "ms": 9485, "qtype": "noul", "jev": 0.66, "laya": 0.7217978835105896, "abs_delta": 0.0618, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 377, "qid": "prop_1", "ms": 9485, "qtype": "noul", "jev": 0.64, "laya": 0.721728503704071, "abs_delta": 0.0817, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 377, "qid": "prop_2", "ms": 9485, "qtype": "noul", "jev": 0.33, "laya": 0.720374345779419, "abs_delta": 0.3904, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 378, "qid": "prop_0", "ms": 11296, "qtype": "noul", "jev": 0.56, "laya": 0.6252750158309937, "abs_delta": 0.0653, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 378, "qid": "prop_1", "ms": 11296, "qtype": "noul", "jev": 0.45, "laya": 0.6286493539810181, "abs_delta": 0.1786, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 378, "qid": "prop_2", "ms": 11296, "qtype": "noul", "jev": 0.59, "laya": 0.6248009204864502, "abs_delta": 0.0348, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 379, "qid": "prop_0", "ms": 9994, "qtype": "noul", "jev": 0.81, "laya": 0.6479215621948242, "abs_delta": 0.1621, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 379, "qid": "prop_1", "ms": 9994, "qtype": "noul", "jev": 0.65, "laya": 0.6493640542030334, "abs_delta": 0.0006, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 379, "qid": "prop_2", "ms": 9994, "qtype": "noul", "jev": 0.76, "laya": 0.6478042006492615, "abs_delta": 0.1122, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 380, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 381, "qid": "prop_0", "ms": 20912, "qtype": "noul", "jev": 0.85, "laya": 0.6173957586288452, "abs_delta": 0.2326, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 381, "qid": "prop_1", "ms": 20912, "qtype": "noul", "jev": 0.6, "laya": 0.6152849793434143, "abs_delta": 0.0153, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 382, "qid": "prop_0", "ms": 3171, "qtype": "noul", "jev": 0.83, "laya": 0.6453918218612671, "abs_delta": 0.1846, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 383, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 384, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 385, "qid": "prop_0", "ms": 17532, "qtype": "noul", "jev": 0.77, "laya": 0.5902694463729858, "abs_delta": 0.1797, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 386, "qid": "prop_0", "ms": 7258, "qtype": "noul", "jev": 0.86, "laya": 0.5976080894470215, "abs_delta": 0.2624, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 386, "qid": "prop_1", "ms": 7258, "qtype": "noul", "jev": 0.8, "laya": 0.5973660349845886, "abs_delta": 0.2026, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 387, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 388, "qid": "prop_0", "ms": 18815, "qtype": "noul", "jev": 0.72, "laya": 0.6300880908966064, "abs_delta": 0.0899, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 388, "qid": "prop_1", "ms": 18815, "qtype": "noul", "jev": 0.62, "laya": 0.630435585975647, "abs_delta": 0.0104, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 388, "qid": "prop_2", "ms": 18815, "qtype": "noul", "jev": 0.49, "laya": 0.6280176043510437, "abs_delta": 0.138, "flip_0.5": true}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 389, "qid": "prop_0", "ms": 16794, "qtype": "noul", "jev": 0.83, "laya": 0.5514153838157654, "abs_delta": 0.2786, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 389, "qid": "prop_1", "ms": 16794, "qtype": "noul", "jev": 0.83, "laya": 0.5536475777626038, "abs_delta": 0.2764, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 389, "qid": "prop_2", "ms": 16794, "qtype": "noul", "jev": 0.82, "laya": 0.5519887804985046, "abs_delta": 0.268, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 390, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 391, "qid": "prop_0", "ms": 18867, "qtype": "noul", "jev": 0.81, "laya": 0.6314125061035156, "abs_delta": 0.1786, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 391, "qid": "prop_1", "ms": 18867, "qtype": "noul", "jev": 0.71, "laya": 0.6329042315483093, "abs_delta": 0.0771, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 391, "qid": "prop_2", "ms": 18867, "qtype": "noul", "jev": 0.7, "laya": 0.6302071809768677, "abs_delta": 0.0698, "flip_0.5": false}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 392, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 393, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 394, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 395, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 396, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 397, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 398, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 399, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 400, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 401, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 402, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 403, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 404, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 405, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 406, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 407, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 408, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 409, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 410, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 411, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 412, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 413, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 414, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 415, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 416, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 417, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 418, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 419, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 420, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 421, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 422, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "proposals", "ask_i": 423, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 424, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 425, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 426, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 427, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 428, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 429, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 430, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 431, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 432, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 433, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 434, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 435, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 436, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 437, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 438, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 439, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 440, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 441, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 442, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 443, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 444, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 445, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 446, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 447, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 448, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 449, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 450, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 451, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 452, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 453, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 454, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 455, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 456, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 457, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 458, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 459, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 460, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 461, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 462, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 463, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 464, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 465, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 466, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 467, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}
+{"gene": "PF3D7_1343700", "stage": "data_proposals", "ask_i": 468, "error": "http_504", "detail": "{\"detail\":\"no answer within 30 s\"}"}

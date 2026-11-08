@@ -1,0 +1,135 @@
+{
+ "n_asks": 469,
+ "n_question_rows": 528,
+ "n_errors": 370,
+ "wall_s": 11833,
+ "laya_model": "opendecider-nano",
+ "overall": {
+  "noul_n": 149,
+  "noul_mean_abs_delta": 0.1638,
+  "noul_flip_0.5_rate": 0.2416,
+  "choice_n": 6,
+  "choice_agree_rate": 0.6667
+ },
+ "by_stage": {
+  "data_proposals": {
+   "questions": 137,
+   "ask_errors": 137,
+   "noul": {
+    "n": 0,
+    "mean_abs_delta": null,
+    "flip_0.5_rate": null
+   },
+   "choice": {
+    "n": 0,
+    "agree_rate": null
+   },
+   "score": {
+    "n": 0,
+    "mean_abs_delta": null
+   }
+  },
+  "ncbi_link": {
+   "questions": 57,
+   "ask_errors": 8,
+   "noul": {
+    "n": 45,
+    "mean_abs_delta": 0.1237,
+    "flip_0.5_rate": 0.1333
+   },
+   "choice": {
+    "n": 4,
+    "agree_rate": 0.75
+   },
+   "score": {
+    "n": 0,
+    "mean_abs_delta": null
+   }
+  },
+  "proposals": {
+   "questions": 317,
+   "ask_errors": 213,
+   "noul": {
+    "n": 104,
+    "mean_abs_delta": 0.1812,
+    "flip_0.5_rate": 0.2885
+   },
+   "choice": {
+    "n": 0,
+    "agree_rate": null
+   },
+   "score": {
+    "n": 0,
+    "mean_abs_delta": null
+   }
+  },
+  "proposals_triage": {
+   "questions": 10,
+   "ask_errors": 10,
+   "noul": {
+    "n": 0,
+    "mean_abs_delta": null,
+    "flip_0.5_rate": null
+   },
+   "choice": {
+    "n": 0,
+    "agree_rate": null
+   },
+   "score": {
+    "n": 0,
+    "mean_abs_delta": null
+   }
+  },
+  "s2_rank": {
+   "questions": 3,
+   "ask_errors": 2,
+   "noul": {
+    "n": 0,
+    "mean_abs_delta": null,
+    "flip_0.5_rate": null
+   },
+   "choice": {
+    "n": 1,
+    "agree_rate": 1.0
+   },
+   "score": {
+    "n": 0,
+    "mean_abs_delta": null
+   }
+  },
+  "s4_annotate": {
+   "questions": 3,
+   "ask_errors": 0,
+   "noul": {
+    "n": 0,
+    "mean_abs_delta": null,
+    "flip_0.5_rate": null
+   },
+   "choice": {
+    "n": 0,
+    "agree_rate": null
+   },
+   "score": {
+    "n": 3,
+    "mean_abs_delta": 0.3207
+   }
+  },
+  "s4_pick": {
+   "questions": 1,
+   "ask_errors": 0,
+   "noul": {
+    "n": 0,
+    "mean_abs_delta": null,
+    "flip_0.5_rate": null
+   },
+   "choice": {
+    "n": 1,
+    "agree_rate": 0.0
+   },
+   "score": {
+    "n": 0,
+    "mean_abs_delta": null
+   }
+  }
+ }
+}

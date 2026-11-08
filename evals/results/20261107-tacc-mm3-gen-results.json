@@ -1,0 +1,26 @@
+{
+ "model": "MiniMax-M3",
+ "n_asks": 395,
+ "n_errors": 138,
+ "wall_s": 4431,
+ "by_stage": {
+  "proposals": {
+   "asks": 186,
+   "rec_mean_n": 5.69,
+   "gen_mean_n": 6.46,
+   "claim_recall": 0.7443,
+   "claim_precision": 0.693,
+   "matched_total": 536,
+   "empty_gen": 1
+  },
+  "data_proposals": {
+   "asks": 71,
+   "rec_mean_n": 10.48,
+   "gen_mean_n": 10.89,
+   "claim_recall": 0.6801,
+   "claim_precision": 0.6504,
+   "matched_total": 117,
+   "empty_gen": 0
+  }
+ }
+}

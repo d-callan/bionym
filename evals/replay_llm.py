@@ -9,7 +9,7 @@ format dump_asks.py produces and the Kaggle systemone kernels replay),
 sends each ask to an OpenAI-compatible chat endpoint, instructs the
 model to return JEV-shaped {"answers": {qid: {"noul"|"choice"|"score":
 ...}}}, then diffs typed answers against Jev's — same metrics as
-kaggle/*/kernel.py (keep diff_one and the summary block in sync).
+evals/kaggle/*/kernel.py (keep diff_one and the summary block in sync).
 
 Config (env or flags; repo .env is auto-loaded):
   LLM_API_KEY / OPENROUTER_API_KEY  required
