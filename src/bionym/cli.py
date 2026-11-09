@@ -16,6 +16,7 @@ from .clients.veupathdb import VEuPathDBClient
 from .graph import KnowledgeGraph
 from .jev import JevClient, JevError
 from .llm import LlmClient, LlmError
+from .proposals import parse_categories
 from .resolver import Resolver
 
 app = typer.Typer(
@@ -44,6 +45,7 @@ def resolve(
     mock_jev: bool = typer.Option(False, "--mock-jev", help="Offline dev: no API key needed."),
     mock_llm: bool = typer.Option(False, "--mock-llm", help="Offline dev: canned LLM proposals."),
     propose: bool = typer.Option(True, "--propose/--no-propose", help="LLM proposal passes (claims). --no-propose = quick scan."),
+    claim_categories: str = typer.Option("", "--claim-categories", help="Categories JEV assigns text-path claims: comma-separated list or a file with one per line (default: built-in vocabulary; 'other' is always offered)."),
     summarize: bool = typer.Option(False, "--summarize", help="Also write a JEV-verified gene summary into metadata."),
     report: bool = typer.Option(False, "--report", help="Also write an HTML report next to the JSON."),
     verbose: bool = typer.Option(False, "-v", "--verbose"),
@@ -65,6 +67,7 @@ def resolve(
         ncbi=NcbiClient(cache_dir=cache),
         veupathdb=VEuPathDBClient(cache_dir=cache),
         llm=LlmClient(mock=mock_llm, cache_dir=cache),
+        claim_categories=parse_categories(claim_categories) or None,
     )
     graph = resolver.resolve(
         identifier, depth=depth, summarize=summarize, propose=propose
