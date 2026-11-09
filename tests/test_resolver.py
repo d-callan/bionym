@@ -1010,3 +1010,16 @@ def test_publication_condition_becomes_condition_node():
     ]
     assert cond_edges, "no publication-sourced condition edge"
     assert g.nodes[cond_edges[0].object].type == NodeType.CONDITION
+
+
+def test_provenance_metadata():
+    # every graph records which bionym + models produced it
+    from datetime import datetime
+
+    g = _resolver().resolve("672", depth=1)
+    prov = g.metadata["provenance"]
+    assert prov["bionym"]
+    datetime.fromisoformat(prov["generated_at"])
+    # mock clients still report their configured model names
+    assert prov["models"]["jev"]
+    assert "llm" in prov["models"]
