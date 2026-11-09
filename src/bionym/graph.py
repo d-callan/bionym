@@ -4,16 +4,22 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 import time
 from enum import Enum
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from pydantic import BaseModel, Field, PrivateAttr, computed_field
 
 from .evidence import Evidence
 
 log = logging.getLogger(__name__)
+
+# hostnames the browser's URL parser also accepts; urlsplit is more lenient
+# (spaces, "%"), and a url the browser rejects would hide the template link
+_HOST_RE = re.compile(r"[a-z0-9._-]+|[0-9a-f:.]+")  # name, or IPv6 (brackets stripped)
 
 
 class NodeType(str, Enum):
@@ -47,12 +53,21 @@ class Node(BaseModel):
         """External database page for this entity, derived from id/namespace.
 
         Single source of truth — flows to CLI JSON, API, web UI and HTML
-        report automatically via model_dump.
+        report automatically via model_dump. Only https: URLs are returned;
+        ``attrs["url"]`` stays as raw upstream data and is not safe to link.
         """
         # an explicit url recorded on the node wins (e.g. VEuPathDB
-        # project-specific gene pages, OrthoMCL sequence_link)
-        if self.attrs.get("url"):
-            return self.attrs["url"]
+        # project-specific gene pages, OrthoMCL sequence_link) if it is https:
+        explicit = self.attrs.get("url")
+        if isinstance(explicit, str):
+            try:
+                parts = urlsplit(explicit)
+                parts.port  # urlsplit validates the port only when it is read
+            except ValueError:  # malformed host or port, e.g. "http://[broken"
+                parts = None
+            if (parts and parts.scheme == "https" and parts.hostname
+                    and _HOST_RE.fullmatch(parts.hostname)):
+                return explicit
         ns, nid = self.id_namespace, self.id
         if ":" in nid:
             prefix, _, rest = nid.partition(":")

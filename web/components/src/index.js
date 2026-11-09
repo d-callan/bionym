@@ -15,6 +15,8 @@ export {
   resolveId,
   ellipsize,
   esc,
+  safeHref,
+  externalLink,
   TYPE_ORDER,
 } from "./data.js";
 // palettes also ship at the "bionym-components/palettes" subpath
