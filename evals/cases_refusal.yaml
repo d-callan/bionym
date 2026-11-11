@@ -1,0 +1,260 @@
+# Suite 2 — refusal, near-miss, wrong-entity, and ambiguity-trap corpus.
+#
+# 40 inputs a robust resolver must handle honestly:
+#   * garbage / nonsense strings          -> refuse
+#   * near-miss fabricated IDs            -> refuse (valid format, no record)
+#   * wrong-entity real IDs               -> refuse (not a gene)
+#   * ambiguity traps                     -> resolve correctly OR refuse;
+#                                          honest-uncertainty outcomes are
+#                                          recorded (expect: {}), not guessed
+#
+# expect.outcome semantics: "refused" asserts the resolver must not resolve;
+# "resolved" asserts it must; omitted/empty expect records the outcome for
+# the ambiguity report without asserting either way.
+
+# ------------------------------------------------------------- garbage
+- id: abc123
+  tier: t1
+  name: refuse-garbage-alnum
+  quick: true
+  expect: { outcome: refused }
+
+- id: xyzzy
+  tier: t1
+  name: refuse-garbage-word
+  quick: true
+  expect: { outcome: refused }
+
+- id: "!!!!"
+  tier: t1
+  name: refuse-garbage-symbols
+  quick: true
+  expect: { outcome: refused }
+
+- id: "not a gene at all"
+  tier: t1
+  name: refuse-garbage-phrase
+  quick: true
+  expect: { outcome: refused }
+
+- id: "12345678901"   # 11 digits — outside ncbi_gene {1,10} -> other
+  tier: t1
+  name: refuse-overlong-numeric
+  quick: true
+  expect: { outcome: refused }
+
+- id: "00000000"
+  tier: t1
+  name: refuse-zero-padded-number
+  quick: true
+  expect: { outcome: refused }
+
+# ------------------------------------------------- near-miss fake IDs
+- id: PF3D7_9999999        # valid locus format, fabricated locus
+  tier: t1
+  name: nearmiss-fake-veupathdb
+  quick: true
+  expect: { outcome: refused }
+
+- id: ENSG99999999999      # valid Ensembl format, nonexistent
+  tier: t1
+  name: nearmiss-fake-ensembl
+  quick: true
+  expect: { outcome: refused }
+
+- id: Q9XYZ1               # valid UniProt pattern, no such entry
+  tier: t1
+  name: nearmiss-fake-uniprot
+  quick: true
+  expect: { outcome: refused }
+
+- id: NM_999999.9          # valid RefSeq format, nonexistent record
+  tier: t1
+  name: nearmiss-fake-refseq
+  quick: true
+  expect: { outcome: refused }
+
+- id: BRCA9                # plausible symbol, no such gene
+  tier: t1
+  name: nearmiss-fake-symbol
+  quick: true
+  expect: { outcome: refused }
+
+- id: TGME99_000000        # plausible ToxoDB-style locus, fabricated
+  tier: t1
+  name: nearmiss-fake-locus
+  quick: true
+  expect: { outcome: refused }
+
+- id: PF3D7_134370         # truncated kelch13 — one digit short
+  tier: t1
+  name: nearmiss-truncated-locus
+  quick: true
+  expect: { outcome: refused }
+
+- id: ENSG00000123456      # valid format, fabricated Ensembl
+  tier: t1
+  name: nearmiss-fake-ensembl2
+  quick: true
+  expect: { outcome: refused }
+
+# -------------------------------------------------- wrong-entity IDs
+# Real identifiers from adjacent databases — every one is a valid accession
+# for SOMETHING, just not a gene.
+- id: "10.1038/nature12345"     # DOI
+  tier: t1
+  name: wrongent-doi
+  quick: true
+  expect: { outcome: refused }
+
+- id: K00001                  # KEGG ortholog group
+  tier: t1
+  name: wrongent-kegg
+  quick: true
+  expect: { outcome: refused }
+
+- id: "GO:0006915"            # GO term (apoptotic process)
+  tier: t1
+  name: wrongent-go
+  quick: true
+  expect: { outcome: refused }
+
+- id: PF00069                 # Pfam protein kinase family
+  tier: t1
+  name: wrongent-pfam
+  quick: true
+  expect: { outcome: refused }
+
+- id: GSE2553                 # GEO series
+  tier: t1
+  name: wrongent-geo
+  quick: true
+  expect: { outcome: refused }
+
+- id: SRR1234567              # SRA run accession
+  tier: t1
+  name: wrongent-sra
+  quick: true
+  expect: { outcome: refused }
+
+- id: GCA_000002765.2         # P. falciparum genome assembly
+  tier: t1
+  name: wrongent-assembly
+  quick: true
+  expect: { outcome: refused }
+
+- id: GCA_000001405.15        # GRCh38 human assembly
+  tier: t1
+  name: wrongent-assembly-human
+  quick: true
+  expect: { outcome: refused }
+
+- id: PRJNA257197             # BioProject
+  tier: t1
+  name: wrongent-bioproject
+  quick: true
+  expect: { outcome: refused }
+
+- id: IPR000719               # InterPro kinase-like domain
+  tier: t1
+  name: wrongent-interpro
+  quick: true
+  expect: { outcome: refused }
+
+- id: "CHEBI:15365"           # ChEBI molecular entity
+  tier: t1
+  name: wrongent-chebi
+  quick: true
+  expect: { outcome: refused }
+
+- id: GDS5000                 # GEO dataset
+  tier: t1
+  name: wrongent-gds
+  quick: true
+  expect: { outcome: refused }
+
+# ---------------------------------------------------- ambiguity traps
+# Honest-uncertainty cases: outcome is recorded, not asserted.
+- id: ama1                  # apical membrane antigen — Pf/Pv/Toxo homonym
+  tier: t1
+  name: ambig-ama1
+  quick: true
+  expect: {}                # resolves to one AMA1 — record which anchor
+
+- id: mdr1                  # human ABCB1 vs Plasmodium Pgh1 homonym
+  tier: t1
+  name: ambig-mdr1
+  quick: true
+  expect: {}
+
+- id: gapdh                 # housekeeping gene across all kingdoms
+  tier: t1
+  name: ambig-gapdh
+  quick: true
+  expect: {}
+
+- id: cdc2                  # S. pombe cdc2 vs human CDK1 name
+  tier: t1
+  name: ambig-cdc2
+  quick: true
+  expect: {}
+
+- id: COX1                  # cytochrome-c oxidase I vs cyclooxygenase-1 (PTGS1)
+  tier: t1
+  name: ambig-cox1
+  quick: true
+  expect: {}
+
+- id: ins                   # insulin vs bacterial insertion sequence
+  tier: t1
+  name: ambig-ins
+  quick: true
+  expect: {}
+
+- id: his3                  # yeast HIS3 vs histone H3 loci elsewhere
+  tier: t1
+  name: ambig-his3
+  quick: true
+  expect: {}
+
+- id: rpoB                  # bacterial RNAP beta — ubiquitous homolog
+  tier: t1
+  name: ambig-rpob
+  quick: true
+  expect: {}
+
+- id: orf1                  # generic "open reading frame 1" label
+  tier: t1
+  name: ambig-orf1
+  quick: true
+  expect: { outcome: refused }   # too generic to mean any gene — must refuse
+
+- id: p53                   # TP53 common name (bare symbol)
+  tier: t1
+  name: ambig-p53
+  quick: true
+  expect: {}
+
+- id: NM_000059             # BRCA2 transcript accession — a gene-level
+  tier: t1                     #   mapping is defensible; record behavior
+  name: ambig-refseq-transcript
+  quick: true
+  expect: {}
+
+- id: XP_005252405.1        # human protein accession — same question
+  tier: t1
+  name: ambig-refseq-protein
+  quick: true
+  expect: {}
+
+- id: "23558729"            # looks like a PMID — but NCBI GeneID 23558729
+  tier: t1                     #   also exists. Numeric trap: no way to tell.
+  name: ambig-pmid-vs-geneid
+  quick: true
+  expect: {}
+
+- id: "5833"                # Plasmodium taxid — also a real NCBI GeneID
+  tier: t1                     #   (human GPR17). Same numeric trap.
+  name: ambig-taxid-vs-geneid
+  quick: true
+  expect: {}

@@ -141,6 +141,9 @@ def run_case(resolver: Resolver, case: dict) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--cases", default=str(CASES),
+                    help="corpus yaml (default evals/cases.yaml; e.g. "
+                         "evals/cases_refusal.yaml for Suite 2)")
     ap.add_argument("--tier", choices=["t1", "t2", "t3"], help="run only this tier")
     ap.add_argument("--case", help="run a single case by name")
     ap.add_argument("--name", default="run", help="run label in the filename")
@@ -152,7 +155,7 @@ def main() -> None:
     )
     args = ap.parse_args()
 
-    cases = yaml.safe_load(CASES.read_text())
+    cases = yaml.safe_load(Path(args.cases).read_text())
     if args.tier:
         cases = [c for c in cases if c["tier"] == args.tier]
     if args.case:
