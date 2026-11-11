@@ -1,0 +1,1062 @@
+{
+ "suite": "1a-confidence-distribution",
+ "asks": "evals/asks-claimsplit.jsonl",
+ "diffs": [
+  "evals/results/20261106-laya-claimsplit-diffs.jsonl",
+  "evals/results/20261107-glm53flash-claimsplit.diffs.jsonl",
+  "evals/results/20261107-layabase-claimsplit-diffs.jsonl",
+  "evals/results/20261107-llama8b-claimsplit.diffs.jsonl",
+  "evals/results/20261107-opendecider-claimsplit-diffs.jsonl",
+  "evals/results/20261107-qwen32b-claimsplit.diffs.jsonl",
+  "evals/results/20261107-tacc-dsv32-claimsplit.diffs.jsonl",
+  "evals/results/20261107-tacc-gptoss120-claimsplit.diffs.jsonl",
+  "evals/results/20261107-tacc-qwen32b-claimsplit.diffs.jsonl"
+ ],
+ "judges": {
+  "jev": {
+   "overall": {
+    "noul": {
+     "n": 3161,
+     "distinct": 99,
+     "mean": 0.8476,
+     "p10": 0.53,
+     "p50": 0.95,
+     "p90": 0.99,
+     "entropy_norm": 0.6376,
+     "spike_share": 0.1588,
+     "frac_0_or_1": 0.0082
+    },
+    "score": {
+     "n": 423,
+     "distinct": 189,
+     "mean": 1.7983,
+     "p10": 0.45,
+     "p50": 1.98,
+     "p90": 2.88,
+     "entropy_norm": 0.9538,
+     "spike_share": 0.0284
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 1469,
+      "distinct": 76,
+      "mean": 0.9057,
+      "p10": 0.78,
+      "p50": 0.96,
+      "p90": 0.99,
+      "entropy_norm": 0.4953,
+      "spike_share": 0.1572,
+      "frac_0_or_1": 0.0177
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 53,
+      "distinct": 39,
+      "mean": 0.42,
+      "p10": 0.08,
+      "p50": 0.38,
+      "p90": 0.78,
+      "entropy_norm": 0.8472,
+      "spike_share": 0.0755,
+      "frac_0_or_1": 0.0
+     },
+     "choice": {
+      "n": 4
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1639,
+      "distinct": 93,
+      "mean": 0.8093,
+      "p10": 0.48,
+      "p50": 0.92,
+      "p90": 0.99,
+      "entropy_norm": 0.6995,
+      "spike_share": 0.1721,
+      "frac_0_or_1": 0.0
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 420,
+      "distinct": 186,
+      "mean": 1.8049,
+      "p10": 0.45,
+      "p50": 1.99,
+      "p90": 2.88,
+      "entropy_norm": 0.954,
+      "spike_share": 0.0286
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 3
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 3,
+      "mean": 0.87,
+      "p10": 0.62,
+      "p50": 0.99,
+      "p90": 1.0,
+      "entropy_norm": 1.0,
+      "spike_share": 0.3333
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   }
+  },
+  "laya": {
+   "overall": {
+    "noul": {
+     "n": 3152,
+     "distinct": 45,
+     "mean": 0.4488,
+     "p10": 0.3177,
+     "p50": 0.4722,
+     "p90": 0.5667,
+     "entropy_norm": 0.6503,
+     "spike_share": 0.066,
+     "frac_0_or_1": 0.0
+    },
+    "score": {
+     "n": 17,
+     "distinct": 5,
+     "mean": 1.989,
+     "p10": 0.9423,
+     "p50": 2.2269,
+     "p90": 2.2297,
+     "entropy_norm": 0.5417,
+     "spike_share": 0.7647
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 1469,
+      "distinct": 31,
+      "mean": 0.3548,
+      "p10": 0.2999,
+      "p50": 0.3496,
+      "p90": 0.4147,
+      "entropy_norm": 0.4788,
+      "spike_share": 0.1076,
+      "frac_0_or_1": 0.0
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 53,
+      "distinct": 23,
+      "mean": 0.3947,
+      "p10": 0.282,
+      "p50": 0.3892,
+      "p90": 0.494,
+      "entropy_norm": 0.5946,
+      "spike_share": 0.1132,
+      "frac_0_or_1": 0.0
+     },
+     "choice": {
+      "n": 4
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1630,
+      "distinct": 28,
+      "mean": 0.5353,
+      "p10": 0.4863,
+      "p50": 0.5348,
+      "p90": 0.5889,
+      "entropy_norm": 0.4242,
+      "spike_share": 0.1276,
+      "frac_0_or_1": 0.0
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 14,
+      "distinct": 2,
+      "mean": 2.2277,
+      "p10": 2.2262,
+      "p50": 2.2274,
+      "p90": 2.2297,
+      "entropy_norm": 0.3712,
+      "spike_share": 0.9286
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 3
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 3,
+      "mean": 0.8749,
+      "p10": 0.7548,
+      "p50": 0.9275,
+      "p90": 0.9423,
+      "entropy_norm": 1.0,
+      "spike_share": 0.3333
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.4318,
+    "noul_flip_0.5_rate": 0.6047,
+    "choice_agree_rate": 0.375
+   }
+  },
+  "glm53flash": {
+   "overall": {
+    "noul": {
+     "n": 3066,
+     "distinct": 39,
+     "mean": 0.8914,
+     "p10": 0.75,
+     "p50": 0.95,
+     "p90": 1.0,
+     "entropy_norm": 0.4635,
+     "spike_share": 0.2078,
+     "frac_0_or_1": 0.2071
+    },
+    "score": {
+     "n": 273,
+     "distinct": 6,
+     "mean": 2.1255,
+     "p10": 1.0,
+     "p50": 2.0,
+     "p90": 3.0,
+     "entropy_norm": 0.6727,
+     "spike_share": 0.4652
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 1374,
+      "distinct": 37,
+      "mean": 0.9236,
+      "p10": 0.85,
+      "p50": 0.97,
+      "p90": 1.0,
+      "entropy_norm": 0.3115,
+      "spike_share": 0.2576,
+      "frac_0_or_1": 0.2627
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 53,
+      "distinct": 18,
+      "mean": 0.5283,
+      "p10": 0.05,
+      "p50": 0.65,
+      "p90": 0.95,
+      "entropy_norm": 0.8403,
+      "spike_share": 0.1509,
+      "frac_0_or_1": 0.1132
+     },
+     "choice": {
+      "n": 4
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1639,
+      "distinct": 35,
+      "mean": 0.8762,
+      "p10": 0.7,
+      "p50": 0.95,
+      "p90": 1.0,
+      "entropy_norm": 0.5384,
+      "spike_share": 0.2276,
+      "frac_0_or_1": 0.1635
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 270,
+      "distinct": 4,
+      "mean": 2.1407,
+      "p10": 1.0,
+      "p50": 2.0,
+      "p90": 3.0,
+      "entropy_norm": 0.8299,
+      "spike_share": 0.4704
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 3
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 2,
+      "mean": 0.75,
+      "p10": 0.45,
+      "p50": 0.9,
+      "p90": 0.9,
+      "entropy_norm": 0.9183,
+      "spike_share": 0.6667
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.098,
+    "noul_flip_0.5_rate": 0.0685,
+    "choice_agree_rate": 0.0
+   }
+  },
+  "layabase": {
+   "overall": {
+    "noul": {
+     "n": 3161,
+     "distinct": 83,
+     "mean": 0.4552,
+     "p10": 0.195,
+     "p50": 0.4528,
+     "p90": 0.7297,
+     "entropy_norm": 0.8965,
+     "spike_share": 0.0326,
+     "frac_0_or_1": 0.0
+    },
+    "score": {
+     "n": 73,
+     "distinct": 16,
+     "mean": 1.9053,
+     "p10": 1.7738,
+     "p50": 2.0459,
+     "p90": 2.0775,
+     "entropy_norm": 0.8365,
+     "spike_share": 0.2055
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 1469,
+      "distinct": 65,
+      "mean": 0.2978,
+      "p10": 0.1692,
+      "p50": 0.2663,
+      "p90": 0.4788,
+      "entropy_norm": 0.7358,
+      "spike_share": 0.0667,
+      "frac_0_or_1": 0.0
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 53,
+      "distinct": 35,
+      "mean": 0.5774,
+      "p10": 0.3193,
+      "p50": 0.6265,
+      "p90": 0.805,
+      "entropy_norm": 0.8225,
+      "spike_share": 0.0755,
+      "frac_0_or_1": 0.0
+     },
+     "choice": {
+      "n": 4
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1639,
+      "distinct": 73,
+      "mean": 0.5923,
+      "p10": 0.3714,
+      "p50": 0.61,
+      "p90": 0.7705,
+      "entropy_norm": 0.8234,
+      "spike_share": 0.039,
+      "frac_0_or_1": 0.0
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 70,
+      "distinct": 14,
+      "mean": 1.9473,
+      "p10": 1.7797,
+      "p50": 2.0465,
+      "p90": 2.0775,
+      "entropy_norm": 0.8384,
+      "spike_share": 0.2143
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 3
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 2,
+      "mean": 0.9244,
+      "p10": 0.9155,
+      "p50": 0.918,
+      "p90": 0.9398,
+      "entropy_norm": 0.9183,
+      "spike_share": 0.6667
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.4502,
+    "noul_flip_0.5_rate": 0.591,
+    "choice_agree_rate": 0.625
+   }
+  },
+  "llama8b": {
+   "overall": {
+    "noul": {
+     "n": 3159,
+     "distinct": 18,
+     "mean": 0.1487,
+     "p10": 0.0,
+     "p50": 0.0,
+     "p90": 1.0,
+     "entropy_norm": 0.1619,
+     "spike_share": 0.8474,
+     "frac_0_or_1": 0.9788
+    },
+    "score": {
+     "n": 423,
+     "distinct": 12,
+     "mean": 0.3764,
+     "p10": 0.0,
+     "p50": 0.1,
+     "p90": 0.9,
+     "entropy_norm": 0.7846,
+     "spike_share": 0.4539
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 1468,
+      "distinct": 13,
+      "mean": 0.1257,
+      "p10": 0.0,
+      "p50": 0.0,
+      "p90": 1.0,
+      "entropy_norm": 0.1414,
+      "spike_share": 0.8699,
+      "frac_0_or_1": 0.9789
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 52,
+      "distinct": 2,
+      "mean": 0.6154,
+      "p10": 0.0,
+      "p50": 1.0,
+      "p90": 1.0,
+      "entropy_norm": 0.2224,
+      "spike_share": 0.6154,
+      "frac_0_or_1": 1.0
+     },
+     "choice": {
+      "n": 3
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1639,
+      "distinct": 8,
+      "mean": 0.1544,
+      "p10": 0.0,
+      "p50": 0.0,
+      "p90": 1.0,
+      "entropy_norm": 0.167,
+      "spike_share": 0.842,
+      "frac_0_or_1": 0.978
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 420,
+      "distinct": 12,
+      "mean": 0.3757,
+      "p10": 0.0,
+      "p50": 0.1,
+      "p90": 0.9,
+      "entropy_norm": 0.7834,
+      "spike_share": 0.4548
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 1
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 3,
+      "mean": 0.4667,
+      "p10": 0.0,
+      "p50": 0.6,
+      "p90": 0.8,
+      "entropy_norm": 1.0,
+      "spike_share": 0.3333
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.7576,
+    "noul_flip_0.5_rate": 0.8006,
+    "choice_agree_rate": 0.5
+   }
+  },
+  "opendecider": {
+   "overall": {
+    "noul": {
+     "n": 149,
+     "distinct": 39,
+     "mean": 0.5613,
+     "p10": 0.358,
+     "p50": 0.6008,
+     "p90": 0.6714,
+     "entropy_norm": 0.6685,
+     "spike_share": 0.1007,
+     "frac_0_or_1": 0.0
+    },
+    "score": {
+     "n": 3,
+     "distinct": 3,
+     "mean": 0.5494,
+     "p10": 0.0622,
+     "p50": 0.7206,
+     "p90": 0.8652,
+     "entropy_norm": 1.0,
+     "spike_share": 0.3333
+    }
+   },
+   "by_stage": {
+    "ncbi_link": {
+     "noul": {
+      "n": 45,
+      "distinct": 28,
+      "mean": 0.4511,
+      "p10": 0.3012,
+      "p50": 0.441,
+      "p90": 0.6432,
+      "entropy_norm": 0.7019,
+      "spike_share": 0.0667,
+      "frac_0_or_1": 0.0
+     },
+     "choice": {
+      "n": 4
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 104,
+      "distinct": 24,
+      "mean": 0.609,
+      "p10": 0.5476,
+      "p50": 0.6184,
+      "p90": 0.6828,
+      "entropy_norm": 0.5203,
+      "spike_share": 0.1346,
+      "frac_0_or_1": 0.0
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 1
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 3,
+      "mean": 0.5494,
+      "p10": 0.0622,
+      "p50": 0.7206,
+      "p90": 0.8652,
+      "entropy_norm": 1.0,
+      "spike_share": 0.3333
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.1638,
+    "noul_flip_0.5_rate": 0.2416,
+    "choice_agree_rate": 0.6667
+   }
+  },
+  "qwen32b": {
+   "overall": {
+    "noul": {
+     "n": 3161,
+     "distinct": 18,
+     "mean": 0.9163,
+     "p10": 0.85,
+     "p50": 1.0,
+     "p90": 1.0,
+     "entropy_norm": 0.2548,
+     "spike_share": 0.7396,
+     "frac_0_or_1": 0.7713
+    },
+    "score": {
+     "n": 82,
+     "distinct": 8,
+     "mean": 1.4567,
+     "p10": 0.25,
+     "p50": 1.0,
+     "p90": 3.0,
+     "entropy_norm": 0.7298,
+     "spike_share": 0.3537
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 1469,
+      "distinct": 16,
+      "mean": 0.9497,
+      "p10": 0.95,
+      "p50": 1.0,
+      "p90": 1.0,
+      "entropy_norm": 0.147,
+      "spike_share": 0.7645,
+      "frac_0_or_1": 0.7897
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 53,
+      "distinct": 13,
+      "mean": 0.4692,
+      "p10": 0.1,
+      "p50": 0.3,
+      "p90": 0.98,
+      "entropy_norm": 0.6374,
+      "spike_share": 0.2264,
+      "frac_0_or_1": 0.0755
+     },
+     "choice": {
+      "n": 4
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1639,
+      "distinct": 18,
+      "mean": 0.9009,
+      "p10": 0.6,
+      "p50": 1.0,
+      "p90": 1.0,
+      "entropy_norm": 0.3076,
+      "spike_share": 0.7389,
+      "frac_0_or_1": 0.7773
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 79,
+      "distinct": 5,
+      "mean": 1.4905,
+      "p10": 0.25,
+      "p50": 1.0,
+      "p90": 3.0,
+      "entropy_norm": 0.8516,
+      "spike_share": 0.3671
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 3
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 3,
+      "mean": 0.5667,
+      "p10": 0.2,
+      "p50": 0.7,
+      "p90": 0.8,
+      "entropy_norm": 1.0,
+      "spike_share": 0.3333
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.124,
+    "noul_flip_0.5_rate": 0.0734,
+    "choice_agree_rate": 0.375
+   }
+  },
+  "tacc-dsv32": {
+   "overall": {
+    "noul": {
+     "n": 2345,
+     "distinct": 15,
+     "mean": 0.9259,
+     "p10": 0.8,
+     "p50": 1.0,
+     "p90": 1.0,
+     "entropy_norm": 0.267,
+     "spike_share": 0.7646,
+     "frac_0_or_1": 0.806
+    },
+    "score": {
+     "n": 180,
+     "distinct": 10,
+     "mean": 0.8086,
+     "p10": 0.1,
+     "p50": 0.3,
+     "p90": 3.0,
+     "entropy_norm": 0.7143,
+     "spike_share": 0.4222
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 918,
+      "distinct": 11,
+      "mean": 0.9616,
+      "p10": 0.95,
+      "p50": 1.0,
+      "p90": 1.0,
+      "entropy_norm": 0.118,
+      "spike_share": 0.8747,
+      "frac_0_or_1": 0.9009
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 25,
+      "distinct": 6,
+      "mean": 0.764,
+      "p10": 0.5,
+      "p50": 0.9,
+      "p90": 0.95,
+      "entropy_norm": 0.4448,
+      "spike_share": 0.48,
+      "frac_0_or_1": 0.08
+     },
+     "choice": {
+      "n": 3
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1402,
+      "distinct": 12,
+      "mean": 0.9055,
+      "p10": 0.8,
+      "p50": 1.0,
+      "p90": 1.0,
+      "entropy_norm": 0.3266,
+      "spike_share": 0.7054,
+      "frac_0_or_1": 0.7568
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 179,
+      "distinct": 9,
+      "mean": 0.8089,
+      "p10": 0.1,
+      "p50": 0.2,
+      "p90": 3.0,
+      "entropy_norm": 0.7369,
+      "spike_share": 0.4246
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 2
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 1,
+      "distinct": 1,
+      "mean": 0.75,
+      "p10": 0.75,
+      "p50": 0.75,
+      "p90": 0.75,
+      "entropy_norm": null,
+      "spike_share": 1.0
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.1226,
+    "noul_flip_0.5_rate": 0.0695,
+    "choice_agree_rate": 0.0
+   }
+  },
+  "tacc-gptoss120": {
+   "overall": {
+    "noul": {
+     "n": 3073,
+     "distinct": 56,
+     "mean": 0.8734,
+     "p10": 0.6,
+     "p50": 0.96,
+     "p90": 0.99,
+     "entropy_norm": 0.3975,
+     "spike_share": 0.2607,
+     "frac_0_or_1": 0.0166
+    },
+    "score": {
+     "n": 323,
+     "distinct": 7,
+     "mean": 1.7682,
+     "p10": 0.9,
+     "p50": 2.0,
+     "p90": 3.0,
+     "entropy_norm": 0.6802,
+     "spike_share": 0.3715
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 1381,
+      "distinct": 36,
+      "mean": 0.8999,
+      "p10": 0.85,
+      "p50": 0.97,
+      "p90": 0.99,
+      "entropy_norm": 0.3219,
+      "spike_share": 0.294,
+      "frac_0_or_1": 0.0123
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 53,
+      "distinct": 14,
+      "mean": 0.3136,
+      "p10": 0.05,
+      "p50": 0.1,
+      "p90": 0.96,
+      "entropy_norm": 0.5125,
+      "spike_share": 0.3208,
+      "frac_0_or_1": 0.0189
+     },
+     "choice": {
+      "n": 4
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1639,
+      "distinct": 52,
+      "mean": 0.8691,
+      "p10": 0.42,
+      "p50": 0.96,
+      "p90": 0.99,
+      "entropy_norm": 0.4288,
+      "spike_share": 0.2398,
+      "frac_0_or_1": 0.0201
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 320,
+      "distinct": 4,
+      "mean": 1.7781,
+      "p10": 1.0,
+      "p50": 2.0,
+      "p90": 3.0,
+      "entropy_norm": 0.9179,
+      "spike_share": 0.375
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 3
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 3,
+      "mean": 0.71,
+      "p10": 0.45,
+      "p50": 0.78,
+      "p90": 0.9,
+      "entropy_norm": 1.0,
+      "spike_share": 0.3333
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.1135,
+    "noul_flip_0.5_rate": 0.0778,
+    "choice_agree_rate": 0.0
+   }
+  },
+  "tacc-qwen32b": {
+   "overall": {
+    "noul": {
+     "n": 3161,
+     "distinct": 22,
+     "mean": 0.9095,
+     "p10": 0.75,
+     "p50": 1.0,
+     "p90": 1.0,
+     "entropy_norm": 0.2798,
+     "spike_share": 0.7181,
+     "frac_0_or_1": 0.752
+    },
+    "score": {
+     "n": 180,
+     "distinct": 7,
+     "mean": 1.7375,
+     "p10": 0.0,
+     "p50": 2.0,
+     "p90": 3.0,
+     "entropy_norm": 0.7001,
+     "spike_share": 0.4278
+    }
+   },
+   "by_stage": {
+    "data_proposals": {
+     "noul": {
+      "n": 1469,
+      "distinct": 20,
+      "mean": 0.9479,
+      "p10": 0.9,
+      "p50": 1.0,
+      "p90": 1.0,
+      "entropy_norm": 0.1795,
+      "spike_share": 0.74,
+      "frac_0_or_1": 0.7611
+     }
+    },
+    "ncbi_link": {
+     "noul": {
+      "n": 53,
+      "distinct": 11,
+      "mean": 0.484,
+      "p10": 0.1,
+      "p50": 0.3,
+      "p90": 0.95,
+      "entropy_norm": 0.6433,
+      "spike_share": 0.3208,
+      "frac_0_or_1": 0.0189
+     },
+     "choice": {
+      "n": 4
+     }
+    },
+    "proposals": {
+     "noul": {
+      "n": 1639,
+      "distinct": 15,
+      "mean": 0.8888,
+      "p10": 0.4,
+      "p50": 1.0,
+      "p90": 1.0,
+      "entropy_norm": 0.3287,
+      "spike_share": 0.7212,
+      "frac_0_or_1": 0.7675
+     }
+    },
+    "proposals_triage": {
+     "score": {
+      "n": 177,
+      "distinct": 4,
+      "mean": 1.7571,
+      "p10": 0.0,
+      "p50": 2.0,
+      "p90": 3.0,
+      "entropy_norm": 0.9238,
+      "spike_share": 0.435
+     }
+    },
+    "s2_rank": {
+     "choice": {
+      "n": 3
+     }
+    },
+    "s4_annotate": {
+     "score": {
+      "n": 3,
+      "distinct": 3,
+      "mean": 0.5833,
+      "p10": 0.2,
+      "p50": 0.6,
+      "p90": 0.95,
+      "entropy_norm": 1.0,
+      "spike_share": 0.3333
+     }
+    },
+    "s4_pick": {
+     "choice": {
+      "n": 1
+     }
+    }
+   },
+   "vs_jev": {
+    "noul_mean_abs_delta": 0.1235,
+    "noul_flip_0.5_rate": 0.0804,
+    "choice_agree_rate": 0.375
+   }
+  }
+ }
+}
