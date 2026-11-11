@@ -1,0 +1,398 @@
+# Suite 1B — controlled evidence-ladder counterfactuals.
+#
+# 30 probe families (10 per task) x 4 evidence rungs. Within a family the
+# input/question/claim is held fixed; only the evidence the judge sees
+# varies. Rung semantics (expected JEV noul order L3 > L2 > L1 > L0):
+#
+#   L3  direct support — the evidence answers the question outright
+#   L2  partial/hedged — right ballpark, weaker or indirect support
+#   L1  wrong species or paralog — real biology, wrong target
+#   L0  unsupported/contradicted — plausible-looking noise, no support
+#
+# Per-rung payload keys:
+#   s1_resolve:   candidate record fields (as NcbiClient normalizes them)
+#   s5_expression: dataset candidate fields (as GEO/GXA fetchers emit)
+#   proposals:    text (numbered source units) + quote (cited span)
+families:
+  # ---------------------------------------------------------------- s1
+  - family: s1_brca1_human
+    task: s1_resolve
+    input: "672"
+    rungs:
+      L3: {gene_id: "672", symbol: "BRCA1", description: "BRCA1 DNA repair associated", organism: "Homo sapiens", tax_id: 9606, locus_tag: null, source: ncbi_datasets}
+      L2: {gene_id: "672", symbol: "BRCA1", description: "RING-type E3 ubiquitin transferase BRCA1", organism: "Homo sapiens", tax_id: 9606, locus_tag: null, source: ncbi_eutils}
+      L1: {gene_id: "12189", symbol: "Brca1", description: "BRCA1 DNA repair associated", organism: "Mus musculus", tax_id: 10090, locus_tag: null, source: ncbi_datasets}
+      L0: {gene_id: "83879", symbol: "DCAF17", description: "DDB1 and CUL4 associated factor 17", organism: "Homo sapiens", tax_id: 9606, locus_tag: null, source: ncbi_datasets}
+
+  - family: s1_kelch13_plasmodium
+    task: s1_resolve
+    input: "PF3D7_1343700"
+    rungs:
+      L3: {gene_id: "PF3D7_1343700", symbol: "K13", description: "kelch protein K13", organism: "Plasmodium falciparum 3D7", tax_id: 5833, locus_tag: "PF3D7_1343700", source: veupathdb}
+      L2: {gene_id: "8130725", symbol: "PF3D7_1343700", description: "kelch-like protein, putative", organism: "Plasmodium falciparum 3D7", tax_id: 5833, locus_tag: "PF3D7_1343700", source: ncbi_eutils}
+      L1: {gene_id: "PF3D7_1469600", symbol: "kelch-like", description: "kelch-like protein, putative", organism: "Plasmodium falciparum 3D7", tax_id: 5833, locus_tag: "PF3D7_1469600", source: veupathdb}
+      L0: {gene_id: "PF3D7_0100100", symbol: "hyp1", description: "conserved Plasmodium protein, unknown function", organism: "Plasmodium falciparum 3D7", tax_id: 5833, locus_tag: "PF3D7_0100100", source: veupathdb}
+
+  - family: s1_tp53_human
+    task: s1_resolve
+    input: "7157"
+    rungs:
+      L3: {gene_id: "7157", symbol: "TP53", description: "tumor protein p53", organism: "Homo sapiens", tax_id: 9606, locus_tag: null, source: ncbi_datasets}
+      L2: {gene_id: "7157", symbol: "TP53", description: "cellular tumor antigen p53", organism: "Homo sapiens", tax_id: 9606, locus_tag: null, source: ncbi_eutils}
+      L1: {gene_id: "7161", symbol: "TP73", description: "tumor protein p73", organism: "Homo sapiens", tax_id: 9606, locus_tag: null, source: ncbi_datasets}
+      L0: {gene_id: "901", symbol: "CCNG1", description: "cyclin G1", organism: "Homo sapiens", tax_id: 9606, locus_tag: null, source: ncbi_datasets}
+
+  - family: s1_crt_plasmodium
+    task: s1_resolve
+    input: "PF3D7_0709000"
+    rungs:
+      L3: {gene_id: "PF3D7_0709000", symbol: "CRT", description: "chloroquine resistance transporter", organism: "Plasmodium falciparum 3D7", tax_id: 5833, locus_tag: "PF3D7_0709000", source: veupathdb}
+      L2: {gene_id: "2655194", symbol: "crt", description: "chloroquine resistance transporter, putative", organism: "Plasmodium vivax", tax_id: 5855, locus_tag: "PVX_087980", source: ncbi_eutils}
+      L1: {gene_id: "PF3D7_1352200", symbol: "MFRP", description: "multidrug resistance-associated protein", organism: "Plasmodium falciparum 3D7", tax_id: 5833, locus_tag: "PF3D7_1352200", source: veupathdb}
+      L0: {gene_id: "PF3D7_1477700", symbol: "MAL13P1.100", description: "conserved Plasmodium protein, unknown function", organism: "Plasmodium falciparum 3D7", tax_id: 5833, locus_tag: "PF3D7_1477700", source: veupathdb}
+
+  - family: s1_vgsc_anopheles
+    task: s1_resolve
+    input: "AGAP004707"
+    rungs:
+      L3: {gene_id: "AGAP004707", symbol: "Vgsc", description: "voltage-gated sodium channel", organism: "Anopheles gambiae", tax_id: 7165, locus_tag: "AGAP004707", source: veupathdb}
+      L2: {gene_id: "AGAP004707", symbol: "para", description: "voltage-dependent sodium channel, putative", organism: "Anopheles gambiae", tax_id: 7165, locus_tag: "AGAP004707", source: veupathdb}
+      L1: {gene_id: "AGAP004708", symbol: "Nav", description: "voltage-gated sodium channel-like protein", organism: "Anopheles gambiae", tax_id: 7165, locus_tag: "AGAP004708", source: veupathdb}
+      L0: {gene_id: "AGAP000001", symbol: "Or7", description: "odorant receptor 7", organism: "Anopheles gambiae", tax_id: 7165, locus_tag: "AGAP000001", source: veupathdb}
+
+  - family: s1_dhfr_toxoplasma
+    task: s1_resolve
+    input: "TGME49_250290"
+    rungs:
+      L3: {gene_id: "TGME49_250290", symbol: "DHFR-TS", description: "dihydrofolate reductase-thymidylate synthase", organism: "Toxoplasma gondii ME49", tax_id: 508771, locus_tag: "TGME49_250290", source: veupathdb}
+      L2: {gene_id: "TGME49_250290", symbol: "dhfr", description: "folate pathway enzyme, putative", organism: "Toxoplasma gondii ME49", tax_id: 508771, locus_tag: "TGME49_250290", source: veupathdb}
+      L1: {gene_id: "TGGT1_238550", symbol: "DHFR-TS", description: "dihydrofolate reductase-thymidylate synthase", organism: "Toxoplasma gondii GT1", tax_id: 507601, locus_tag: "TGGT1_238550", source: veupathdb}
+      L0: {gene_id: "TGME49_200030", symbol: "GRA7", description: "dense granule protein 7", organism: "Toxoplasma gondii ME49", tax_id: 508771, locus_tag: "TGME49_200030", source: veupathdb}
+
+  - family: s1_pbp2x_strep
+    task: s1_resolve
+    input: "17124404"
+    rungs:
+      L3: {gene_id: "17124404", symbol: "pbp2x", description: "penicillin-binding protein 2X", organism: "Streptococcus pneumoniae", tax_id: 1313, locus_tag: "SP_0336", source: ncbi_datasets}
+      L2: {gene_id: "17124404", symbol: "pbpX", description: "peptidoglycan transpeptidase, putative", organism: "Streptococcus pneumoniae", tax_id: 1313, locus_tag: "SP_0336", source: ncbi_eutils}
+      L1: {gene_id: "17123555", symbol: "pbp2b", description: "penicillin-binding protein 2B", organism: "Streptococcus pneumoniae", tax_id: 1313, locus_tag: "SP_0568", source: ncbi_datasets}
+      L0: {gene_id: "17124398", symbol: "recA", description: "recombinase A", organism: "Streptococcus pneumoniae", tax_id: 1313, locus_tag: "SP_0957", source: ncbi_datasets}
+
+  - family: s1_env_hiv
+    task: s1_resolve
+    input: "155971"
+    rungs:
+      L3: {gene_id: "155971", symbol: "env", description: "envelope glycoprotein gp160", organism: "Human immunodeficiency virus 1", tax_id: 11676, locus_tag: "env", source: ncbi_datasets}
+      L2: {gene_id: "155971", symbol: "env", description: "surface polyprotein, putative", organism: "Human immunodeficiency virus 1", tax_id: 11676, locus_tag: "env", source: ncbi_eutils}
+      L1: {gene_id: "155967", symbol: "env", description: "envelope glycoprotein gp160", organism: "Simian immunodeficiency virus", tax_id: 11723, locus_tag: "env", source: ncbi_datasets}
+      L0: {gene_id: "155975", symbol: "nef", description: "negative factor", organism: "Human immunodeficiency virus 1", tax_id: 11676, locus_tag: "nef", source: ncbi_datasets}
+
+  - family: s1_ace_arabidopsis
+    task: s1_resolve
+    input: "843784"
+    rungs:
+      L3: {gene_id: "843784", symbol: "FLC", description: "FLOWERING LOCUS C", organism: "Arabidopsis thaliana", tax_id: 3702, locus_tag: "AT5G10140", source: ncbi_datasets}
+      L2: {gene_id: "843784", symbol: "FLC", description: "MADS-box transcription factor, flowering regulator", organism: "Arabidopsis thaliana", tax_id: 3702, locus_tag: "AT5G10140", source: ncbi_eutils}
+      L1: {gene_id: "843783", symbol: "MAF1", description: "MADS AFFECTING FLOWERING 1", organism: "Arabidopsis thaliana", tax_id: 3702, locus_tag: "AT1G77080", source: ncbi_datasets}
+      L0: {gene_id: "819885", symbol: "CYP71B1", description: "cytochrome P450 71B1", organism: "Arabidopsis thaliana", tax_id: 3702, locus_tag: "AT3G26180", source: ncbi_datasets}
+
+  - family: s1_rvbd_mtb
+    task: s1_resolve
+    input: "885807"
+    rungs:
+      L3: {gene_id: "885807", symbol: "katG", description: "catalase-peroxidase-peroxynitritase T", organism: "Mycobacterium tuberculosis H37Rv", tax_id: 83332, locus_tag: "Rv1908c", source: ncbi_datasets}
+      L2: {gene_id: "885807", symbol: "katG", description: "heme-dependent peroxidase, isoniazid resistance-associated", organism: "Mycobacterium tuberculosis H37Rv", tax_id: 83332, locus_tag: "Rv1908c", source: ncbi_eutils}
+      L1: {gene_id: "885814", symbol: "Rv1909c", description: "furA ferric uptake regulator", organism: "Mycobacterium tuberculosis H37Rv", tax_id: 83332, locus_tag: "Rv1909c", source: ncbi_datasets}
+      L0: {gene_id: "888543", symbol: "esxA", description: "ESAT-6-like protein EsxA", organism: "Mycobacterium tuberculosis H37Rv", tax_id: 83332, locus_tag: "Rv3875", source: ncbi_datasets}
+
+  # ---------------------------------------------------------------- s5
+  - family: s5_vgsc_pyrethroid
+    task: s5_expression
+    input: "AGAP004707"
+    match: {gene_id: "AGAP004707", symbol: "Vgsc", description: "voltage-gated sodium channel", organism: "Anopheles gambiae"}
+    rungs:
+      L3: {accession: "GSE211144", title: "RNA-seq of pyrethroid-resistant Anopheles gambiae mosquitoes profiling the voltage-gated sodium channel Vgsc", source: geo, type: "Expression profiling by high throughput sequencing", species: "Anopheles gambiae", n_samples: 24, technology: "Illumina"}
+      L2: {accession: "GSE98312", title: "Whole-transcriptome microarray of Anopheles gambiae blood-feeding time course", source: geo, type: "Expression profiling by array", species: "Anopheles gambiae", n_samples: 36, technology: "Agilent"}
+      L1: {accession: "GSE77608", title: "RNA-seq of Drosophila melanogaster para sodium channel knockdown in adult head", source: geo, type: "Expression profiling by high throughput sequencing", species: "Drosophila melanogaster", n_samples: 12, technology: "Illumina"}
+      L0: {accession: "GSE31415", title: "ChIP-seq of ER-alpha in human MCF-7 breast cancer cells (vgsc-containing region enriched)", source: geo, type: "Genome binding/occupancy profiling", species: "Homo sapiens", n_samples: 8, technology: "Illumina"}
+
+  - family: s5_ama1_invasion
+    task: s5_expression
+    input: "PF3D7_1133400"
+    match: {gene_id: "PF3D7_1133400", symbol: "AMA1", description: "apical membrane antigen 1", organism: "Plasmodium falciparum 3D7"}
+    rungs:
+      L3: {accession: "E-MTAB-8871", title: "Single-cell RNA-seq of Plasmodium falciparum blood stages covering merozoite invasion genes including AMA1", source: gxa, type: "Baseline", species: "Plasmodium falciparum", n_samples: 7, technology: "RNA-seq"}
+      L2: {accession: "GSE152312", title: "Bulk transcriptome of P. falciparum schizont-stage cultures under drug pressure", source: geo, type: "Expression profiling by high throughput sequencing", species: "Plasmodium falciparum", n_samples: 18, technology: "Illumina"}
+      L1: {accession: "E-MTAB-3329", title: "RNA-seq of Plasmodium berghei ookinete development in Anopheles stephensi midguts", source: gxa, type: "Baseline", species: "Plasmodium berghei", n_samples: 10, technology: "RNA-seq"}
+      L0: {accession: "GSE99114", title: "Metabolomic profiling of dried blood spots from malaria-endemic regions", source: geo, type: "Non-coding RNA profiling", species: "Homo sapiens", n_samples: 44, technology: "LC-MS"}
+
+  - family: s5_tp53_dna_damage
+    task: s5_expression
+    input: "7157"
+    match: {gene_id: "7157", symbol: "TP53", description: "tumor protein p53", organism: "Homo sapiens"}
+    rungs:
+      L3: {accession: "GSE183947", title: "RNA-seq of TP53 wild-type and knockout HCT116 cells after doxorubicin-induced DNA damage", source: geo, type: "Expression profiling by high throughput sequencing", species: "Homo sapiens", n_samples: 12, technology: "Illumina"}
+      L2: {accession: "GSE46993", title: "Pan-cancer microarray compendium including p53-mutant and wild-type tumors", source: geo, type: "Expression profiling by array", species: "Homo sapiens", n_samples: 400, technology: "Affymetrix"}
+      L1: {accession: "GSE61585", title: "RNA-seq of Trp53-deficient mouse embryonic fibroblasts under genotoxic stress", source: geo, type: "Expression profiling by high throughput sequencing", species: "Mus musculus", n_samples: 9, technology: "Illumina"}
+      L0: {accession: "GSE102556", title: "Methylation array of human buccal swabs from a population cohort", source: geo, type: "Methylation profiling by array", species: "Homo sapiens", n_samples: 600, technology: "Infinium"}
+
+  - family: s5_dhfr_antifolate
+    task: s5_expression
+    input: "TGME49_250290"
+    match: {gene_id: "TGME49_250290", symbol: "DHFR-TS", description: "dihydrofolate reductase-thymidylate synthase", organism: "Toxoplasma gondii ME49"}
+    rungs:
+      L3: {accession: "GSE165018", title: "RNA-seq of Toxoplasma gondii tachyzoites exposed to pyrimethamine targeting DHFR-TS", source: geo, type: "Expression profiling by high throughput sequencing", species: "Toxoplasma gondii", n_samples: 9, technology: "Illumina"}
+      L2: {accession: "GSE132743", title: "Time-course transcriptome of T. gondii lytic cycle in human fibroblasts", source: geo, type: "Expression profiling by high throughput sequencing", species: "Toxoplasma gondii", n_samples: 24, technology: "Illumina"}
+      L1: {accession: "GSE114966", title: "RNA-seq of Plasmodium falciparum dhfr-ts mutant under antifolate selection", source: geo, type: "Expression profiling by high throughput sequencing", species: "Plasmodium falciparum", n_samples: 6, technology: "Illumina"}
+      L0: {accession: "GSE77321", title: "Proteomic atlas of human skeletal muscle aging", source: geo, type: "Protein expression profiling", species: "Homo sapiens", n_samples: 58, technology: "Mass spectrometry"}
+
+  - family: s5_katg_isoniazid
+    task: s5_expression
+    input: "885807"
+    match: {gene_id: "885807", symbol: "katG", description: "catalase-peroxidase", organism: "Mycobacterium tuberculosis H37Rv"}
+    rungs:
+      L3: {accession: "GSE142883", title: "RNA-seq of Mycobacterium tuberculosis katG isoniazid-resistant mutants versus wild type", source: geo, type: "Expression profiling by high throughput sequencing", species: "Mycobacterium tuberculosis", n_samples: 12, technology: "Illumina"}
+      L2: {accession: "GSE113417", title: "Transcriptional response of M. tuberculosis to antibiotic stress panel", source: geo, type: "Expression profiling by high throughput sequencing", species: "Mycobacterium tuberculosis", n_samples: 30, technology: "Illumina"}
+      L1: {accession: "GSE99876", title: "RNA-seq of Mycobacterium bovis BCG katG deletion under oxidative stress", source: geo, type: "Expression profiling by high throughput sequencing", species: "Mycobacterium bovis", n_samples: 8, technology: "Illumina"}
+      L0: {accession: "GSE55442", title: "Histone modification ChIP-seq in human macrophage cell line THP-1", source: geo, type: "Genome binding/occupancy profiling", species: "Homo sapiens", n_samples: 4, technology: "Illumina"}
+
+  - family: s5_crt_chloroquine
+    task: s5_expression
+    input: "PF3D7_0709000"
+    match: {gene_id: "PF3D7_0709000", symbol: "CRT", description: "chloroquine resistance transporter", organism: "Plasmodium falciparum 3D7"}
+    rungs:
+      L3: {accession: "GSE119875", title: "RNA-seq of chloroquine-sensitive and resistant Plasmodium falciparum with pfcrt allelic variation", source: geo, type: "Expression profiling by high throughput sequencing", species: "Plasmodium falciparum", n_samples: 16, technology: "Illumina"}
+      L2: {accession: "GSE97105", title: "Ring-stage transcriptome of P. falciparum exposed to escalating chloroquine doses", source: geo, type: "Expression profiling by high throughput sequencing", species: "Plasmodium falciparum", n_samples: 20, technology: "Illumina"}
+      L1: {accession: "GSE66550", title: "RNA-seq of Plasmodium chabaudi pfcrt ortholog under chloroquine selection in mouse infections", source: geo, type: "Expression profiling by high throughput sequencing", species: "Plasmodium chabaudi", n_samples: 10, technology: "Illumina"}
+      L0: {accession: "GSE41188", title: "Copy-number array of human glioblastoma multiforme samples", source: geo, type: "Genome variation profiling", species: "Homo sapiens", n_samples: 90, technology: "SNP array"}
+
+  - family: s5_flc_vernalization
+    task: s5_expression
+    input: "843784"
+    match: {gene_id: "843784", symbol: "FLC", description: "FLOWERING LOCUS C", organism: "Arabidopsis thaliana"}
+    rungs:
+      L3: {accession: "GSE150216", title: "RNA-seq of Arabidopsis thaliana flc mutants and wild type before and after vernalization", source: geo, type: "Expression profiling by high throughput sequencing", species: "Arabidopsis thaliana", n_samples: 18, technology: "Illumina"}
+      L2: {accession: "GSE125843", title: "Time-series transcriptome of A. thaliana floral transition under long-day photoperiod", source: geo, type: "Expression profiling by high throughput sequencing", species: "Arabidopsis thaliana", n_samples: 27, technology: "Illumina"}
+      L1: {accession: "GSE108392", title: "RNA-seq of Brassica rapa FLC homologs under cold treatment", source: geo, type: "Expression profiling by high throughput sequencing", species: "Brassica rapa", n_samples: 9, technology: "Illumina"}
+      L0: {accession: "GSE66990", title: "Small RNA sequencing of Drosophila ovaries for piRNA pathway analysis", source: geo, type: "Non-coding RNA profiling", species: "Drosophila melanogaster", n_samples: 6, technology: "Illumina"}
+
+  - family: s5_ace2_respiratory
+    task: s5_expression
+    input: "59272"
+    match: {gene_id: "59272", symbol: "ACE2", description: "angiotensin converting enzyme 2", organism: "Homo sapiens"}
+    rungs:
+      L3: {accession: "GSE147507", title: "RNA-seq of human lung epithelial cells infected with SARS-CoV-2 profiling the ACE2 entry receptor", source: geo, type: "Expression profiling by high throughput sequencing", species: "Homo sapiens", n_samples: 15, technology: "Illumina"}
+      L2: {accession: "GSE153970", title: "Bulk airway transcriptome compendium across respiratory viral infections", source: geo, type: "Expression profiling by high throughput sequencing", species: "Homo sapiens", n_samples: 60, technology: "Illumina"}
+      L1: {accession: "GSE148729", title: "RNA-seq of Ace2 knockout mouse lung under SARS-CoV challenge", source: geo, type: "Expression profiling by high throughput sequencing", species: "Mus musculus", n_samples: 8, technology: "Illumina"}
+      L0: {accession: "GSE80144", title: "ATAC-seq of human cardiac fibroblasts in hypertrophy models", source: geo, type: "Genome binding/occupancy profiling", species: "Homo sapiens", n_samples: 10, technology: "ATAC-seq"}
+
+  - family: s5_fecv_crypto
+    task: s5_expression
+    input: "cgd6_550"
+    match: {gene_id: "cgd6_550", symbol: "gp60", description: "glycoprotein 60", organism: "Cryptosporidium parvum"}
+    rungs:
+      L3: {accession: "GSE158222", title: "RNA-seq of Cryptosporidium parvum sporozoite and intracellular stages including gp60", source: geo, type: "Expression profiling by high throughput sequencing", species: "Cryptosporidium parvum", n_samples: 9, technology: "Illumina"}
+      L2: {accession: "GSE140112", title: "Transcriptome of C. parvum in vitro infection of HCT-8 cells at 24 and 48 hours", source: geo, type: "Expression profiling by high throughput sequencing", species: "Cryptosporidium parvum", n_samples: 12, technology: "Illumina"}
+      L1: {accession: "GSE100233", title: "RNA-seq of Cryptosporidium hominis gp60 locus expressed in sporozoites", source: geo, type: "Expression profiling by high throughput sequencing", species: "Cryptosporidium hominis", n_samples: 5, technology: "Illumina"}
+      L0: {accession: "GSE72905", title: "16S microbiome survey of bovine fecal samples", source: geo, type: "Non-coding RNA profiling", species: "Bos taurus", n_samples: 40, technology: "Amplicon seq"}
+
+  - family: s5_myo7a_hearing
+    task: s5_expression
+    input: "4647"
+    match: {gene_id: "4647", symbol: "MYO7A", description: "myosin VIIA", organism: "Homo sapiens"}
+    rungs:
+      L3: {accession: "GSE169134", title: "Single-cell RNA-seq of human cochlear hair cells profiling MYO7A in Usher syndrome", source: geo, type: "Expression profiling by high throughput sequencing", species: "Homo sapiens", n_samples: 11, technology: "Illumina"}
+      L2: {accession: "GSE137455", title: "Inner-ear transcriptome atlas across developmental stages", source: geo, type: "Expression profiling by high throughput sequencing", species: "Homo sapiens", n_samples: 22, technology: "Illumina"}
+      L1: {accession: "GSE102939", title: "RNA-seq of Myo7a shaker-1 mouse cochlea", source: geo, type: "Expression profiling by high throughput sequencing", species: "Mus musculus", n_samples: 7, technology: "Illumina"}
+      L0: {accession: "GSE58710", title: "Whole-genome bisulfite sequencing of human liver fibrosis", source: geo, type: "Methylation profiling", species: "Homo sapiens", n_samples: 14, technology: "WGBS"}
+
+  # ------------------------------------------------------------ props
+  - family: prop_erg11_azoles
+    task: proposals
+    match: {gene_id: "ERG11", symbol: "ERG11", organism: "Candida albicans"}
+    node: "pubmed:31001001"
+    claim: "ERG11 expression increases upon fluconazole exposure"
+    rungs:
+      L3:
+        text: "Candida albicans ERG11 mRNA increased 4.8-fold after 24 h of fluconazole treatment, consistent with azole-driven upregulation of the sterol pathway."
+        quote: "ERG11 mRNA increased 4.8-fold after 24 h of fluconazole treatment"
+      L2:
+        text: "Putative sterol-pathway transcripts, including those of the lanosterol demethylase family, showed modest non-significant upward trends under azole stress."
+        quote: "sterol-pathway transcripts showed modest non-significant upward trends under azole stress"
+      L1:
+        text: "ERG3 transcript abundance rose markedly after fluconazole treatment, whereas ERG11 levels were unchanged in the matched samples."
+        quote: "ERG11 levels were unchanged"
+      L0:
+        text: "Cultures were grown at 30 degrees C in YPD medium supplemented with 2% glucose, and cells were harvested in mid-log phase for RNA extraction."
+        quote: "cells were harvested in mid-log phase for RNA extraction"
+
+  - family: prop_crt_transport
+    task: proposals
+    match: {gene_id: "PF3D7_0709000", symbol: "CRT", organism: "Plasmodium falciparum 3D7"}
+    node: "pubmed:31001002"
+    claim: "pfcrt K76T mutation confers chloroquine resistance"
+    rungs:
+      L3:
+        text: "Parasites carrying the K76T mutation in pfcrt displayed 8-fold higher chloroquine IC50 values than wild-type controls, establishing K76T as a marker of chloroquine resistance."
+        quote: "K76T mutation in pfcrt displayed 8-fold higher chloroquine IC50 values"
+      L2:
+        text: "Several digestive-vacuole membrane polymorphisms were observed at higher frequency in resistant isolates, though their individual contributions remain unclear."
+        quote: "polymorphisms were observed at higher frequency in resistant isolates"
+      L1:
+        text: "The pfmdr1 N86Y substitution was enriched among chloroquine-resistant lines, while pfcrt remained wild type across all resistant clones examined."
+        quote: "pfcrt remained wild type across all resistant clones"
+      L0:
+        text: "Blood samples were collected from patients presenting with uncomplicated malaria and stored in EDTA tubes at -20 degrees C until DNA extraction."
+        quote: "stored in EDTA tubes at -20 degrees C"
+
+  - family: prop_katg_inh
+    task: proposals
+    match: {gene_id: "885807", symbol: "katG", organism: "Mycobacterium tuberculosis H37Rv"}
+    node: "pubmed:31001003"
+    claim: "katG is required for isoniazid activation"
+    rungs:
+      L3:
+        text: "Isoniazid is a prodrug activated by the catalase-peroxidase KatG; katG deletion mutants were fully resistant to isoniazid in vitro."
+        quote: "katG deletion mutants were fully resistant to isoniazid"
+      L2:
+        text: "Loss of catalase-peroxidase activity was frequently associated with reduced drug susceptibility in the clinical isolates examined."
+        quote: "loss of catalase-peroxidase activity was frequently associated with reduced drug susceptibility"
+      L1:
+        text: "The inhA promoter up-mutation conferred isoniazid resistance independently of katG, which remained functional in all resistant strains tested."
+        quote: "katG remained functional in all resistant strains"
+      L0:
+        text: "Genomic DNA was extracted using the cetyltrimethylammonium bromide method and quantified spectrophotometrically before sequencing."
+        quote: "quantified spectrophotometrically before sequencing"
+
+  - family: prop_brca1_hr
+    task: proposals
+    match: {gene_id: "672", symbol: "BRCA1", organism: "Homo sapiens"}
+    node: "pubmed:31001004"
+    claim: "BRCA1 is required for homologous recombination repair"
+    rungs:
+      L3:
+        text: "Cells depleted of BRCA1 showed an 85% reduction in homologous recombination reporter activity, demonstrating that BRCA1 is required for HR repair."
+        quote: "BRCA1 showed an 85% reduction in homologous recombination reporter activity"
+      L2:
+        text: "Homologous recombination defects were observed in several DNA-repair gene knockdowns, with BRCA-pathway members showing the strongest effects."
+        quote: "BRCA-pathway members showing the strongest effects"
+      L1:
+        text: "BRCA2-deficient cells lost nearly all RAD51 filament formation, while BRCA1 knockdown retained partial recombination activity in this assay."
+        quote: "BRCA1 knockdown retained partial recombination activity"
+      L0:
+        text: "The cell lines were maintained in Dulbecco's modified Eagle medium with 10% fetal bovine serum at 37 degrees C and 5% CO2."
+        quote: "maintained in Dulbecco's modified Eagle medium"
+
+  - family: prop_vgsc_kdr
+    task: proposals
+    match: {gene_id: "AGAP004707", symbol: "Vgsc", organism: "Anopheles gambiae"}
+    node: "pubmed:31001005"
+    claim: "Vgsc L1014F confers knockdown resistance to pyrethroids"
+    rungs:
+      L3:
+        text: "The L1014F substitution in the voltage-gated sodium channel reduced permethrin binding and conferred a 20-fold knockdown-resistance phenotype in Anopheles gambiae."
+        quote: "L1014F substitution in the voltage-gated sodium channel conferred a 20-fold knockdown-resistance"
+      L2:
+        text: "Sodium channel polymorphisms near the S6 transmembrane segment were enriched in field populations surviving pyrethroid exposure."
+        quote: "polymorphisms near the S6 transmembrane segment were enriched"
+      L1:
+        text: "The N1575Y mutation in para of Drosophila increased pyrethroid tolerance, whereas the Anopheles L1014F allele was absent from all surveyed pools."
+        quote: "the Anopheles L1014F allele was absent"
+      L0:
+        text: "Mosquito larvae were reared in distilled water at 28 degrees C and fed ground fish food until pupation."
+        quote: "fed ground fish food until pupation"
+
+  - family: prop_ama1_invasion
+    task: proposals
+    match: {gene_id: "PF3D7_1133400", symbol: "AMA1", organism: "Plasmodium falciparum 3D7"}
+    node: "pubmed:31001006"
+    claim: "AMA1 is essential for merozoite invasion of erythrocytes"
+    rungs:
+      L3:
+        text: "Conditional knockdown of AMA1 reduced merozoite invasion of erythrocytes by over 90%, confirming that AMA1 is essential for invasion."
+        quote: "knockdown of AMA1 reduced merozoite invasion of erythrocytes by over 90%"
+      L2:
+        text: "Apical organelle proteins were implicated in host-cell entry, with several rhoptry and microneme antigens showing invasion phenotypes."
+        quote: "microneme antigens showing invasion phenotypes"
+      L1:
+        text: "In Plasmodium berghei, AMA1 disruption impaired sporozoite motility, while erythrocyte invasion by P. falciparum AMA1 mutants was not assessed here."
+        quote: "erythrocyte invasion by P. falciparum AMA1 mutants was not assessed"
+      L0:
+        text: "Parasite cultures were synchronized using 5% sorbitol treatment and maintained at 2% hematocrit in complete RPMI 1640."
+        quote: "synchronized using 5% sorbitol treatment"
+
+  - family: prop_dhfr_pyrimethamine
+    task: proposals
+    match: {gene_id: "TGME49_250290", symbol: "DHFR-TS", organism: "Toxoplasma gondii ME49"}
+    node: "pubmed:31001007"
+    claim: "DHFR mutations reduce pyrimethamine susceptibility"
+    rungs:
+      L3:
+        text: "Toxoplasma gondii lines engineered with DHFR W25R/T91N substitutions tolerated 100-fold higher pyrimethamine concentrations than wild type."
+        quote: "DHFR W25R/T91N substitutions tolerated 100-fold higher pyrimethamine"
+      L2:
+        text: "Folate-pathway variants accumulated under long-term pyrimethamine selection in several apicomplexan parasites."
+        quote: "variants accumulated under long-term pyrimethamine selection"
+      L1:
+        text: "In Plasmodium falciparum, the dhfr S108N mutation drives pyrimethamine resistance, while the Toxoplasma DHFR residues were not tested in this study."
+        quote: "the Toxoplasma DHFR residues were not tested"
+      L0:
+        text: "Tachyzoites were purified by filtration through a 3-micron polycarbonate membrane and counted using a hemocytometer."
+        quote: "counted using a hemocytometer"
+
+  - family: prop_ace2_sarscov2
+    task: proposals
+    match: {gene_id: "59272", symbol: "ACE2", organism: "Homo sapiens"}
+    node: "pubmed:31001008"
+    claim: "ACE2 is the entry receptor for SARS-CoV-2"
+    rungs:
+      L3:
+        text: "ACE2-transduced non-permissive cells became susceptible to SARS-CoV-2 entry, and soluble ACE2 blocked infection, identifying ACE2 as the viral receptor."
+        quote: "ACE2-transduced non-permissive cells became susceptible to SARS-CoV-2 entry"
+      L2:
+        text: "Several surface proteins were proposed as candidate attachment factors, with expression correlating loosely with permissiveness."
+        quote: "candidate attachment factors"
+      L1:
+        text: "TMPRSS2 was shown to be essential for spike priming and entry, while ACE2-knockout cells remained fully permissive in this culture system."
+        quote: "ACE2-knockout cells remained fully permissive"
+      L0:
+        text: "Vero E6 cells were seeded in 96-well plates and incubated overnight before virus inoculation at MOI 0.05."
+        quote: "seeded in 96-well plates"
+
+  - family: prop_pbp2x_penicillin
+    task: proposals
+    match: {gene_id: "17124404", symbol: "pbp2x", organism: "Streptococcus pneumoniae"}
+    node: "pubmed:31001009"
+    claim: "pbp2x mosaic alleles confer beta-lactam resistance"
+    rungs:
+      L3:
+        text: "Transformation with mosaic pbp2x alleles from resistant donors raised penicillin MICs 32-fold in susceptible pneumococci."
+        quote: "mosaic pbp2x alleles raised penicillin MICs 32-fold"
+      L2:
+        text: "Penicillin-binding protein variants were repeatedly recovered from non-susceptible isolates, though their relative contributions varied."
+        quote: "penicillin-binding protein variants were repeatedly recovered"
+      L1:
+        text: "pbp1a mosaicism alone increased cephalosporin tolerance, while pbp2x remained sensitive in the same genetic background."
+        quote: "pbp2x remained sensitive"
+      L0:
+        text: "Pneumococci were grown on blood agar plates and identified by optochin susceptibility and bile solubility tests."
+        quote: "identified by optochin susceptibility"
+
+  - family: prop_flc_flowering
+    task: proposals
+    match: {gene_id: "843784", symbol: "FLC", organism: "Arabidopsis thaliana"}
+    node: "pubmed:31001010"
+    claim: "FLC represses flowering until vernalization"
+    rungs:
+      L3:
+        text: "FLC-overexpressing plants flowered 4 weeks late, and prolonged cold silenced FLC and accelerated flowering, establishing FLC as a vernalization-responsive floral repressor."
+        quote: "prolonged cold silenced FLC and accelerated flowering"
+      L2:
+        text: "MADS-box transcription factors were enriched among differentially expressed genes during the floral transition."
+        quote: "enriched among differentially expressed genes during the floral transition"
+      L1:
+        text: "The FLC homolog MAF1 delayed flowering in the same assay, while FLC expression was unaffected by the cold treatment used."
+        quote: "FLC expression was unaffected"
+      L0:
+        text: "Seeds were surface-sterilized in 10% bleach and stratified on MS agar plates at 4 degrees C for three days."
+        quote: "stratified on MS agar plates at 4 degrees C"
