@@ -12,6 +12,78 @@ Everything lives under `evals/` — in the repo but outside the shipped
   (+ per stage via `graph.metadata["jev_usage"]`).
 - **Repeatability**: corpus + config recorded per run; re-run and diff.
 
+## Manuscript suites (branch `eval-suites`)
+
+Five suites per `EVAL_IMPLEMENTATION_PLAN.md`; corpora live in `data/`.
+
+### Determinism
+
+- **Inputs are deterministic**: corpora/question shapes/prompts are
+  fixed files — every run asks identical questions.
+- **Live answers are stochastic**: JEV/LLM outputs and public-DB state
+  can drift between runs (Suite 4 measures that variance directly).
+- **Same-machine reruns replay exactly**: `evals/.cache` (diskcache,
+  gitignored) stores every paid call — a rerun returns recorded answers
+  free and identical. Delete it for genuinely fresh calls.
+- **Analyzers are deterministic**: Suite 1A/5A compute over committed
+  recorded artifacts only.
+- **Suite 4 replication**: ask generations use per-(regime, rep) caches
+  (`evals/.cache/suite4_<regime>_rep<k>`) so K=3 runs are genuinely
+  independent; graphs share `evals/.cache` for zero re-spend.
+
+### Environment
+
+```bash
+TYPESAFE_API_KEY=...        # JEV judge (paid — required for live runs)
+LLM_API_KEY=...             # generator/judge-replay LLM
+LLM_MODEL=MiniMax-M3        # or other OpenAI-compatible model id
+LLM_BASE_URL=https://ai.tejas.tacc.utexas.edu/v1
+```
+
+Scripts auto-load `../.env`. `--mock` runs plumbing without model spend
+(public-DB calls still run); `--dry` where present emits asks only.
+
+### Quota contract
+
+Any runner hitting `JevQuotaError` writes a `stopped` row, prints a
+refill banner, and exits **75** (EX_TEMPFAIL). Refill, then rerun with
+`--resume <rows file>` — completed cases skip, cached calls replay free.
+
+### Run order (cheapest first)
+
+```bash
+# 0. Corpus pre-flight — all 63 ToL IDs verified live (free)
+python evals/verify_corpus_ids.py
+
+# 1A. $0 — JEV confidence distributions vs replayed judges
+python evals/eval_confidence_dist.py --tag suite1a-confidence-dist
+
+# 1B. pennies — 120-ask evidence ladder (L3>L2>L1>L0)
+python evals/eval_jev_counterfactuals.py            # JEV run + metrics
+python evals/eval_jev_counterfactuals.py --dry      # asks only, no spend
+LLM_MODEL=<judge> python evals/replay_llm.py \
+    --asks evals/data/jev_counterfactuals_asks.jsonl --tag <judge>-cf
+python evals/eval_jev_counterfactuals.py --diffs evals/results/*cf*.diffs.jsonl
+
+# 2. pennies — refusal / near-miss / wrong-entity / ambiguity traps
+python evals/run.py --cases evals/cases_refusal.yaml --name suite2-refusal
+
+# 3A. ~1.5-2.5M JEV tokens — 63-gene quick scan
+python evals/eval_tree_of_life.py --stage 3a
+# 3B. stratified 21-gene full graphs (propose+summarize)
+python evals/eval_tree_of_life.py --stage 3b
+
+# 4. 12 targets x 4 questions x {grounded,bare} x K=3 x {t0,t07}
+for rep in 1 2 3; do
+  python evals/eval_grounded_ask_vs_bare.py --regime t0  --rep $rep
+  python evals/eval_grounded_ask_vs_bare.py --regime t07 --rep $rep
+done
+python evals/eval_grounded_ask_vs_bare.py --analyze evals/results/<rows>.jsonl
+
+# 5A. $0 — unified judge/generator/resolve runtime table
+python evals/eval_runtime.py
+```
+
 ## Layout
 
 ```
