@@ -5,8 +5,11 @@ since pytest prepends the tests/ dir to sys.path.
 """
 import json
 
+from bionym.evidence import Evidence
 from bionym.graph import Edge, KnowledgeGraph, Node, NodeType
 from bionym.jev import JevError
+
+_EV = [Evidence(source="fake", endpoint="fake://x", summary="fake", payload={})]
 
 
 class FakeJev:
@@ -84,3 +87,48 @@ def mini_graph() -> KnowledgeGraph:
         )
     )
     return g
+
+
+class FakeNcbiClient:
+    """Offline stand-in for NcbiClient — constructor-compatible so it can
+    patch `bionym.cli.NcbiClient` directly. Covers only what a depth-1
+    `resolve` calls: candidate fetch + enrich."""
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def gene_by_id(self, gene_id):
+        return [
+            {
+                "source": "ncbi_datasets",
+                "gene_id": str(gene_id),
+                "symbol": "BRCA1",
+                "description": "BRCA1 DNA repair associated",
+                "locus_tag": None,
+                "tax_id": 9606,
+                "organism": "Homo sapiens",
+                "assembly_accession": "GCF_000001405.40",
+                "assembly_accessions": ["GCF_000001405.40"],
+                "genomic_accessions": ["NC_000017.11"],
+                "raw": {},
+            }
+        ], _EV
+
+    def find_gene(self, term):
+        return [], []
+
+    def gene_products(self, gene_id):
+        return {"transcripts": [], "proteins": []}, _EV
+
+    def gene_pubmed(self, gene_id):
+        return [], _EV
+
+
+class FakeVeuPathDBClient:
+    """Offline stand-in for VEuPathDBClient — no records, no network."""
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def lookup_gene(self, gene_id):
+        return [], []

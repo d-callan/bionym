@@ -1,5 +1,7 @@
 """Unit tests for bionym.proposals parsing."""
 
+import logging
+
 from bionym import proposals
 
 
@@ -150,3 +152,39 @@ def test_build_state_has_gene_and_type():
     )
     assert state["source_gene"]["symbol"] == "BRCA1"
     assert state["proposals"][0]["type"] == "claim"
+def test_parse_categories(tmp_path, caplog):
+    assert proposals.parse_categories("a, b ,c") == {"a": "", "b": "", "c": ""}
+    assert proposals.parse_categories("") == {}
+    f = tmp_path / "cats.txt"
+    f.write_text("# a comment\nmolecular function\n\nexpression\n")
+    assert proposals.parse_categories(str(f)) == {
+        "molecular function": "",
+        "expression": "",
+    }
+    # a spec that isn't a file falls back to comma parsing, even if it
+    # looks like a path — but a lone dotted token warns, since it's
+    # almost always a mistyped filename
+    with caplog.at_level(logging.WARNING, logger="bionym.proposals"):
+        assert proposals.parse_categories("no_such_file.txt") == {
+            "no_such_file.txt": ""
+        }
+    assert "no such file" in caplog.text
+
+
+def test_build_category_questions():
+    # claim-typed proposals get a cat_i choice question; condition-
+    # typed ones don't — they're self-describing
+    props = [
+        {"node": "pubmed:1", "type": "claim", "claim": "a"},
+        {"node": "ds:1", "type": "condition", "claim": "b"},
+    ]
+    q = proposals.build_category_questions(
+        props, {"molecular function": "what it does"}
+    )
+    assert list(q) == ["cat_0"]
+    assert q["cat_0"]["type"] == "choice"
+    assert set(q["cat_0"]["criteria"]) == {"molecular function", "other"}
+    # a caller-supplied 'other' keeps its own description
+    q = proposals.build_category_questions(props, {"other": "custom"})
+    assert list(q["cat_0"]["criteria"]) == ["other"]
+    assert q["cat_0"]["criteria"]["other"] == "custom"

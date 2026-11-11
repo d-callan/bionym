@@ -139,6 +139,7 @@ class Resolver:
         llm: LlmClient | None = None,
         proposal_min_score: float | None = None,
         proposal_concurrency: int | None = None,
+        claim_categories: dict[str, str] | None = None,
     ) -> None:
         self.jev = jev
         self.llm = llm or LlmClient()
@@ -154,6 +155,17 @@ class Resolver:
             proposal_concurrency
             if proposal_concurrency is not None
             else int(os.environ.get("BIONYM_PROPOSAL_CONCURRENCY", "8"))
+        )
+        # Vocabulary JEV assigns text-path claims to (name -> judge
+        # hint). BIONYM_CLAIM_CATEGORIES is a comma list of bare names
+        # or a path to a one-per-line file; 'other' is appended at ask
+        # time so the judge always has an out. Empty -> built-in
+        # default.
+        env_cats = proposals.parse_categories(
+            os.environ.get("BIONYM_CLAIM_CATEGORIES", "")
+        )
+        self.claim_categories = (
+            claim_categories or env_cats or proposals.DEFAULT_CLAIM_CATEGORIES
         )
         self.ncbi = ncbi or NcbiClient()
         self.veupathdb = veupathdb or VEuPathDBClient()
@@ -2131,7 +2143,12 @@ class Resolver:
                     proposals.build_state(
                         {it["node"]: text}, props, match
                     ),
-                    proposals.build_questions(props),
+                    {
+                        **proposals.build_questions(props),
+                        **proposals.build_category_questions(
+                            props, self.claim_categories
+                        ),
+                    },
                     stage="proposals",
                 )
             except JevError as e:
@@ -2148,6 +2165,7 @@ class Resolver:
                 # no JEV answer -> unverified; never present the claim
                 if not ans:
                     continue
+                p["category"] = (answers.get(f"cat_{i}") or {}).get("choice")
                 if p["type"] == "condition":
                     ntype, predicate = NodeType.CONDITION, "has_condition"
                 else:
@@ -2183,7 +2201,20 @@ class Resolver:
         """Add the claim/condition node + edge for one JEV-scored proposal."""
         prefix = "condition" if ntype == NodeType.CONDITION else "claim"
         obj = f"{prefix}:{p['claim'].lower()}"
-        graph.add_node(Node(id=obj, type=ntype, label=p["claim"]))
+        # None-attrs stay off the node — same rule add_node applies
+        # when merging into an existing node (no "category": null).
+        graph.add_node(
+            Node(
+                id=obj,
+                type=ntype,
+                label=p["claim"],
+                attrs={
+                    k: v
+                    for k, v in {"category": p.get("category")}.items()
+                    if v is not None
+                },
+            )
+        )
         graph.add_edge(
             Edge(
                 subject=it["node"],
@@ -2200,6 +2231,7 @@ class Resolver:
                             "claim": p["claim"],
                             "quote": p.get("quote"),
                             "citations": p.get("citations"),
+                            "category": p.get("category"),
                             "answer": ans,
                             **(extra_payload or {}),
                         },
@@ -2260,14 +2292,19 @@ class Resolver:
                 return [], {}, 0
             props = [
                 {"node": it["node"], "kind": "dataset", **p}
-                for p in proposals.parse(content, units)
+                for p in proposals.parse(content, units, default="claim")
             ]
             if not props:
                 return [], {}, 0
             try:
                 answers = self.jev.ask(
                     proposals.build_data_state(meta, data_text, props),
-                    proposals.build_data_questions(props),
+                    {
+                        **proposals.build_data_questions(props),
+                        **proposals.build_category_questions(
+                            props, self.claim_categories
+                        ),
+                    },
                     stage="data_proposals",
                 )
             except JevError as e:
@@ -2286,6 +2323,9 @@ class Resolver:
                 ans = answers.get(f"prop_{i}") or {}
                 if not ans:
                     continue
+                p["category"] = (answers.get(f"cat_{i}") or {}).get(
+                    "choice"
+                )
                 self._add_proposal_edge(
                     graph,
                     it,

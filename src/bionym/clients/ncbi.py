@@ -535,14 +535,34 @@ class NcbiClient:
                 time.sleep(wait)
             self._last_request = time.monotonic()
 
-        resp = self._http.get(url, params=params, timeout=self.timeout)
-        if resp.status_code != 200:
-            log.warning("NCBI %s -> %s: %s", url, resp.status_code, resp.text[:200])
-            return {} if parse == "json" else ""
-        data = resp.text if parse == "text" else resp.json()
-        if self._cache is not None:
-            self._cache[cache_key] = data
-        return data
+        # Transient failures retry 3x, then propagate: a dropped connection
+        # or 429/5xx must NOT degrade to "no records" — that would fabricate
+        # a "refused" outcome or a graph silently missing enrichment. Only
+        # genuine non-200 *answers* (404 etc.) degrade to empty.
+        for attempt in range(3):
+            try:
+                resp = self._http.get(url, params=params, timeout=self.timeout)
+                if resp.status_code == 429 or resp.status_code >= 500:
+                    resp.raise_for_status()  # transient — retry below
+                if resp.status_code != 200:
+                    log.warning(
+                        "NCBI %s -> %s: %s",
+                        url, resp.status_code, resp.text[:200],
+                    )
+                    return {} if parse == "json" else ""
+                data = resp.text if parse == "text" else resp.json()
+                if self._cache is not None:
+                    self._cache[cache_key] = data
+                return data
+            except (httpx.HTTPError, ValueError) as e:
+                if attempt == 2:
+                    raise
+                wait = 0.5 * (attempt + 1)
+                log.warning(
+                    "NCBI %s attempt %d failed (%s); retrying in %.1fs",
+                    url, attempt + 1, e, wait,
+                )
+                time.sleep(wait)
 
 
 def _parse_gds_soft(text: str, symbol: str) -> list[dict[str, Any]]:

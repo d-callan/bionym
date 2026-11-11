@@ -359,6 +359,9 @@ def test_dataset_values_produce_data_claims():
     )
     assert edge.object == "claim:mock proposal"
     assert edge.evidence[0].payload["n_rows"] == 2
+    # data claims get categorized like text-path claims — mock JEV
+    # picks the first criteria option
+    assert edge.evidence[0].payload["category"] == "molecular function"
     # GEO GDS + GXA datasets lazy-fetch values and get the same treatment;
     # the GSE series is skipped (series-matrix layout, not fetched)
     reports_from = {
@@ -1010,6 +1013,38 @@ def test_publication_condition_becomes_condition_node():
     ]
     assert cond_edges, "no publication-sourced condition edge"
     assert g.nodes[cond_edges[0].object].type == NodeType.CONDITION
+    
+    
+def test_claim_categories_fallback_chain(monkeypatch):
+    from bionym import proposals
+
+    # explicit arg wins over env
+    monkeypatch.setenv("BIONYM_CLAIM_CATEGORIES", "env cat")
+    r = Resolver(
+        jev=JevClient(mock=True),
+        llm=LlmClient(mock=True),
+        claim_categories={"arg cat": ""},
+    )
+    assert r.claim_categories == {"arg cat": ""}
+    # env feeds in when no arg given
+    r2 = Resolver(jev=JevClient(mock=True), llm=LlmClient(mock=True))
+    assert r2.claim_categories == {"env cat": ""}
+    # no arg, no env -> built-in vocabulary
+    monkeypatch.delenv("BIONYM_CLAIM_CATEGORIES")
+    r3 = Resolver(jev=JevClient(mock=True), llm=LlmClient(mock=True))
+    assert r3.claim_categories == proposals.DEFAULT_CLAIM_CATEGORIES
+
+
+def test_claim_nodes_carry_category():
+    # JEV classifies text-path claims into the configured vocabulary;
+    # mock JEV deterministically picks the first criteria option
+    r = _resolver()
+    r.claim_categories = {"kinase activity": "", "expression": ""}
+    g = r.resolve("672", depth=1)
+    node = g.nodes["claim:mock proposal"]
+    assert node.attrs["category"] == "kinase activity"
+    reports = [e for e in g.edges if e.predicate == "reports"]
+    assert reports[0].evidence[0].payload["category"] == "kinase activity"
 
 
 def test_provenance_metadata():

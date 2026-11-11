@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from pathlib import Path
 from typing import Any
 
 log = logging.getLogger(__name__)
@@ -358,6 +359,112 @@ def build_questions(proposals: list[dict[str, Any]]) -> dict:
             ).format(i=i, node=p["node"]),
         }
         for i, p in enumerate(proposals)
+    }
+
+
+# -- claim categorization ---------------------------------------------------
+#
+# Text-path claims get a JEV-assigned category on top of their generated
+# label, drawn from a caller-supplied vocabulary. 'other' is always
+# offered so the judge is never forced into a wrong bucket.
+OTHER_CATEGORY = "other"
+
+# Used when the caller doesn't supply a vocabulary. Descriptions are
+# judge hints, not user-facing text — near-neighbor pairs (drug
+# resistance/sensitivity/target; interactions/host interactions) need
+# the hint to be told apart.
+DEFAULT_CLAIM_CATEGORIES: dict[str, str] = {
+    "molecular function": "biochemical activity of the gene product",
+    "structure and domains": "protein structure, domains, motifs",
+    "modification and processing":
+        "post-translational modifications, cleavage, folding",
+    "interactions and complexes":
+        "binding partners or complex membership within the organism",
+    "location in the cell": "subcellular localization",
+    "expression by stage or condition":
+        "where, when or how strongly it is expressed",
+    "how the gene is regulated":
+        "upstream regulators, promoters, feedback on this gene",
+    "biological process or pathway":
+        "pathway or process the gene participates in",
+    "effects on other genes":
+        "downstream effects on other genes' expression or products",
+    "essentiality and mutant phenotype":
+        "fitness or phenotype of knockout/mutant",
+    "life-cycle role": "role in developmental or life-cycle stages",
+    "virulence and pathogenesis":
+        "contribution to infectivity or disease severity",
+    "interaction with the host":
+        "host factors engaged or host responses modulated",
+    "antigen and vaccine": "antigenicity, epitopes, vaccine candidacy",
+    "drug resistance": "established resistance mechanisms or mutations",
+    "drug target and mode of action":
+        "the gene is a drug target; how a drug acts on it",
+    "changed drug sensitivity":
+        "perturbations altering drug response without established "
+        "resistance",
+    "variants and where they occur":
+        "SNPs, indels, population-level variation",
+    "gene family and evolution":
+        "paralogs, orthologs, family membership, phylogenetics",
+    "diagnostic or surveillance marker":
+        "used as a detection, typing or epidemiological marker",
+    "reagents and tools":
+        "experimental methods, reagents, tools (tagging, transfection)",
+    "naming and annotation history":
+        "synonyms, prior annotation, naming conventions",
+}
+
+
+def parse_categories(spec: str) -> dict[str, str]:
+    """Category spec -> {name: ""}. A spec naming an existing file is
+    read one category per line (blanks and # comments skipped);
+    anything else is parsed as a comma-separated list. Empty -> {}."""
+    spec = spec.strip()
+    if not spec:
+        return {}
+    path = Path(spec).expanduser()
+    if path.is_file():
+        return {
+            line.strip(): ""
+            for line in path.read_text().splitlines()
+            if line.strip() and not line.startswith("#")
+        }
+    if "," not in spec and "." in spec:
+        # a lone dotted token is almost always a mistyped file path
+        log.warning(
+            "claim category spec %r looks like a path but no such file "
+            "exists; treating it as a category name",
+            spec,
+        )
+    return {c.strip(): "" for c in spec.split(",") if c.strip()}
+
+
+def build_category_questions(
+    proposals: list[dict[str, Any]], categories: dict[str, str]
+) -> dict:
+    """cat_{i} choice questions classifying each claim proposal.
+
+    Only proposals tagged type="claim" get categorized — conditions are
+    self-describing. (claim-type-split formalizes this same type field
+    upstream.)"""
+    criteria = dict(categories)
+    criteria.setdefault(
+        OTHER_CATEGORY, "none of the categories describe this claim"
+    )
+    return {
+        f"cat_{i}": {
+            "type": "choice",
+            "instructions": (
+                f"`proposals[{i}]` is a claim machine-extracted from "
+                f"`source_texts` for node '{p['node']}'. Pick the "
+                "category that best describes the kind of knowledge it "
+                f"asserts; pick '{OTHER_CATEGORY}' if none fit."
+            ),
+            "criteria": criteria,
+        }
+        for i, p in enumerate(proposals)
+        if p.get("type") == "claim"
     }
 
 
