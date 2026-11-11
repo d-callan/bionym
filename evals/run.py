@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -29,12 +30,19 @@ from dotenv import load_dotenv  # noqa: E402
 
 load_dotenv(ROOT / ".env")
 
-from bionym.jev import JevClient  # noqa: E402
+from bionym.clients.ncbi import NcbiClient  # noqa: E402
+from bionym.clients.veupathdb import VEuPathDBClient  # noqa: E402
+from bionym.jev import JevClient, JevQuotaError  # noqa: E402
 from bionym.llm import LlmClient  # noqa: E402
 from bionym.resolver import Resolver  # noqa: E402
 
 CASES = Path(__file__).parent / "cases.yaml"
 RESULTS = Path(__file__).parent / "results"
+# Shared call cache: a --resume run replays already-paid JEV/LLM/NCBI
+# calls for free, so a quota stop mid-case loses no work.
+EVAL_CACHE = Path(__file__).parent / ".cache"
+# sysexits EX_TEMPFAIL — "refill, then --resume"
+EXIT_QUOTA = 75
 
 
 def git_sha() -> str:
@@ -76,6 +84,21 @@ def assertions(graph, expect: dict) -> list[dict]:
     return out
 
 
+def _write_row(fh, row: dict) -> None:
+    """Append a JSONL row durably — a crash must not lose completed work."""
+    fh.write(json.dumps(row) + "\n")
+    fh.flush()
+    os.fsync(fh.fileno())
+
+
+def _completed_cases(path: Path) -> set[str]:
+    return {
+        json.loads(l)["case"]
+        for l in path.read_text().splitlines()
+        if l.strip() and json.loads(l).get("kind") == "case"
+    }
+
+
 def run_case(resolver: Resolver, case: dict) -> dict:
     """One resolve -> one result row. Exceptions become outcome=error."""
     t0 = time.monotonic()
@@ -87,6 +110,8 @@ def run_case(resolver: Resolver, case: dict) -> dict:
             propose=not case.get("quick", True),
             summarize=not case.get("quick", True),
         )
+    except JevQuotaError:
+        raise  # never record quota exhaustion as a case failure
     except Exception as e:  # noqa: BLE001 — the row IS the record
         graph, error = None, f"{type(e).__name__}: {e}"
     wall = round(time.monotonic() - t0, 1)
@@ -119,6 +144,11 @@ def main() -> None:
     ap.add_argument("--case", help="run a single case by name")
     ap.add_argument("--name", default="run", help="run label in the filename")
     ap.add_argument("--mock", action="store_true", help="mock JEV+LLM (data APIs still real)")
+    ap.add_argument(
+        "--resume", metavar="FILE",
+        help="append to an existing results file, skipping cases it "
+             "already completed — use after a quota stop",
+    )
     args = ap.parse_args()
 
     cases = yaml.safe_load(CASES.read_text())
@@ -129,9 +159,15 @@ def main() -> None:
     if not cases:
         sys.exit("no cases matched")
 
-    jev = JevClient(mock=args.mock)
-    llm = LlmClient(mock=args.mock)
-    resolver = Resolver(jev=jev, llm=llm)
+    cache = str(EVAL_CACHE)
+    jev = JevClient(mock=args.mock, cache_dir=cache)
+    llm = LlmClient(mock=args.mock, cache_dir=cache)
+    resolver = Resolver(
+        jev=jev,
+        ncbi=NcbiClient(cache_dir=cache),
+        veupathdb=VEuPathDBClient(cache_dir=cache),
+        llm=llm,
+    )
 
     config = {
         "llm_model": llm.model, "llm_base": llm.base_url,
@@ -144,14 +180,43 @@ def main() -> None:
 
     RESULTS.mkdir(exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
-    out_path = RESULTS / f"{stamp}-{args.name}.jsonl"
-    with out_path.open("w") as fh:
-        fh.write(json.dumps({"kind": "config", **config,
-                             "ts": stamp, "n_cases": len(cases)}) + "\n")
+    if args.resume:
+        out_path = Path(args.resume)
+        if not out_path.exists():
+            sys.exit(f"--resume file not found: {out_path}")
+        done_cases = _completed_cases(out_path)
+        mode = "a"
+    else:
+        out_path = RESULTS / f"{stamp}-{args.name}.jsonl"
+        done_cases = set()
+        mode = "w"
+    with out_path.open(mode) as fh:
+        if args.resume:
+            _write_row(fh, {"kind": "resumed", "ts": stamp,
+                            "skipped": sorted(done_cases)})
+        else:
+            _write_row(fh, {"kind": "config", **config,
+                            "ts": stamp, "n_cases": len(cases)})
         for case in cases:
+            if case["name"] in done_cases:
+                print(f"[skip] {case['name']} — already in {out_path.name}",
+                      flush=True)
+                continue
             print(f"[case] {case['name']} ({case['id']}) …", flush=True)
-            row = run_case(resolver, case)
-            fh.write(json.dumps({"kind": "case", **row}) + "\n")
+            try:
+                row = run_case(resolver, case)
+            except JevQuotaError as e:
+                _write_row(fh, {"kind": "stopped", "reason": str(e),
+                                "case": case["name"], "ts": stamp})
+                print(
+                    f"\n[quota] JEV balance exhausted at "
+                    f"{case['name']} — progress is durable.\n"
+                    f"        Refill the account, then resume with:\n"
+                    f"        python evals/run.py --resume {out_path}",
+                    flush=True,
+                )
+                sys.exit(EXIT_QUOTA)
+            _write_row(fh, {"kind": "case", **row})
             mark = "ok" if row["ok"] else "FAIL"
             fails = [c["detail"] for c in row["assertions"] if not c["ok"]]
             print(f"  -> {row['outcome']} {row['wall_s']}s {mark}"

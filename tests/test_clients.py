@@ -11,7 +11,7 @@ from bionym.clients.ncbi import NcbiClient
 from bionym.clients.oma import OmaClient
 from bionym.clients.uniprot import UniProtClient
 from bionym.clients.expression import ExpressionAtlasClient
-from bionym.jev import JevClient
+from bionym.jev import JevClient, JevQuotaError, _is_quota_error
 from bionym.graph import KnowledgeGraph, Node, NodeType, Edge
 from bionym.report import render_html
 
@@ -235,6 +235,30 @@ def test_ncbi_get_recovers_on_retry(monkeypatch):
     client._http = SimpleNamespace(get=flaky)
     assert client._get("https://example.test/x") == {"ok": True}
     assert calls == 3
+
+
+def test_jev_quota_classifier():
+    for code in (401, 402, 403):
+        assert _is_quota_error(httpx.Response(code, text="denied"))
+    assert _is_quota_error(
+        httpx.Response(400, text='{"error": "insufficient balance"}')
+    )
+    assert _is_quota_error(httpx.Response(429, text="quota exceeded"))
+    # plain 429 = short-term rate limit, stays on the retry path
+    assert not _is_quota_error(httpx.Response(429, text="too many requests"))
+    assert not _is_quota_error(httpx.Response(500, text="boom"))
+    assert not _is_quota_error(httpx.Response(404, text="not found"))
+
+
+def test_jev_call_raises_quota_error():
+    client = JevClient(api_key="fake")
+
+    def resp(url, headers=None, json=None, timeout=None):
+        return httpx.Response(402, text='{"error": "insufficient balance"}')
+
+    client._http = SimpleNamespace(post=resp)
+    with pytest.raises(JevQuotaError):
+        client.ask({"s": 1}, {"q": {"type": "noul"}})
 
 
 # -- CLI ------------------------------------------------------------------
