@@ -1013,6 +1013,8 @@ def test_publication_condition_becomes_condition_node():
     ]
     assert cond_edges, "no publication-sourced condition edge"
     assert g.nodes[cond_edges[0].object].type == NodeType.CONDITION
+    
+    
 def test_claim_categories_fallback_chain(monkeypatch):
     from bionym import proposals
 
@@ -1043,3 +1045,16 @@ def test_claim_nodes_carry_category():
     assert node.attrs["category"] == "kinase activity"
     reports = [e for e in g.edges if e.predicate == "reports"]
     assert reports[0].evidence[0].payload["category"] == "kinase activity"
+
+
+def test_provenance_metadata():
+    # every graph records which bionym + models produced it
+    from datetime import datetime
+
+    g = _resolver().resolve("672", depth=1)
+    prov = g.metadata["provenance"]
+    assert prov["bionym"]
+    datetime.fromisoformat(prov["generated_at"])
+    # mock clients still report their configured model names
+    assert prov["models"]["jev"]
+    assert "llm" in prov["models"]

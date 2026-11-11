@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import os
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
 from typing import Any
 
 from .clients.expression import ExpressionAtlasClient
@@ -22,7 +23,7 @@ from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
 from .jev import JevClient, JevError
 from .llm import LlmClient
-from . import proposals
+from . import __version__, proposals
 from .species import same_species, species_key
 from .questions import (
     s0_classify,
@@ -185,6 +186,18 @@ class Resolver:
                 "input": identifier,
                 "query": identifier,
                 "depth": depth,
+                "provenance": {
+                    "bionym": __version__,
+                    "generated_at": datetime.now(timezone.utc).isoformat(
+                        timespec="seconds"
+                    ),
+                    # llm.model is "" when unconfigured — record null
+                    # rather than a misleading empty string
+                    "models": {
+                        "jev": self.jev.model,
+                        "llm": self.llm.model or None,
+                    },
+                },
                 "stages": [],
                 "jev_usage": {},
             }
