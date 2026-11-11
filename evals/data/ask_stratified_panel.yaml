@@ -1,0 +1,71 @@
+# Suite 4 — stratified grounded-vs-bare Q&A panel.
+#
+# 12 targets x 4 standardized questions x {grounded, bare} x K=3
+# replicates x {T=0.0, T=0.7}. The 9 unambiguous targets share their
+# resolved graphs with Suite 3B (deep_subset in tree_of_life_corpus.yaml).
+#
+# Per-target fields:
+#   id / stratum / desc
+#   q4: a pre-verified absent-fact probe (the honest answer is
+#       "no such evidence exists" — used to score abstention
+#       precision). Q1-Q3 are the standard battery in the runner.
+#   refuse_expected (D3): the resolve must refuse; grounded arm then
+#       records the pipeline refusal + ask_graph over the refused graph.
+#
+targets:
+  # ------------------------------------------------ Stratum A: heavily studied
+  - id: PF3D7_1343700
+    stratum: A_heavy
+    desc: "P. falciparum kelch13 (artemisinin resistance)"
+    q4: "Which human host cell-surface receptor has PF3D7_1343700 been crystallized in complex with, and what PDB accession and inhibitor Ki are established for that complex?"
+  - id: "885521"
+    stratum: A_heavy
+    desc: "M. tuberculosis inhA (Rv1484, isoniazid target)"
+    q4: "What cryo-EM structure exists for the M. tuberculosis inhA protein bound to the frontline drug pretomanid, and what is its PDB accession?"
+  - id: "3641571"
+    stratum: A_heavy
+    desc: "C. albicans ERG11 (azole target)"
+    q4: "Which experimental GEO dataset measured ERG11 expression in Candida albicans specifically after vorinostat (SAHA) treatment, and what fold-change was reported?"
+
+  # --------------------------------------------- Stratum B: moderately studied
+  - id: PVX_081515
+    stratum: B_moderate
+    desc: "P. vivax locus (moderate annotations/datasets)"
+    q4: "Which single-cell RNA-seq dataset profiled PVX_081515 expression in P. vivax hypnozoites, and what was its reported expression level?"
+  - id: AAEL002373
+    stratum: B_moderate
+    desc: "Ae. aegypti salivary/immunity gene"
+    q4: "Which crystallographic structure of the AAEL002373 protein exists in PDB, and what resolution was reported?"
+  - id: Bm8009
+    stratum: B_moderate
+    desc: "Brugia malayi locus"
+    q4: "Which clinical trial arm showed that Bm8009 knockdown clears adult Brugia malayi in human patients, and what was the trial registration number?"
+
+  # ------------------------------------------- Stratum C: understudied pathogens
+  - id: cgd4_440
+    stratum: C_understudied
+    desc: "Cryptosporidium parvum conserved unknown protein"
+    q4: "What is the enzymatic function of cgd4_440 established by in vitro biochemical assay, and which KEGG EC entry does it map to?"
+  - id: B9J08_001448
+    stratum: C_understudied
+    desc: "Candida auris uncharacterized protein"
+    q4: "Which paper demonstrated that B9J08_001448 is the direct molecular target of caspofungin in Candida auris?"
+  - id: BPSL3113
+    stratum: C_understudied
+    desc: "Burkholderia pseudomallei uncharacterized locus"
+    q4: "What is the known catalytic activity of the BPSL3113 protein confirmed by complementation in Burkholderia pseudomallei?"
+
+  # ------------------------------------------------ Stratum D: ambiguous IDs
+  - id: ama1
+    stratum: D_ambiguous
+    desc: "apical membrane antigen — homonym across Plasmodium/Toxoplasma/Babesia/Neospora"
+    q4: "Which crystal structure of the ama1 protein from Babesia microti is deposited in PDB?"
+  - id: CAT
+    stratum: D_ambiguous
+    desc: "cross-kingdom homonym: catalase vs chloramphenicol acetyltransferase"
+    q4: "Which human disease has been definitively attributed to a germline loss-of-function variant in the CAT gene encoding chloramphenicol acetyltransferase?"
+  - id: orf1
+    stratum: D_ambiguous
+    desc: "ultra-generic 'open reading frame 1' — must refuse"
+    refuse_expected: true
+    q4: "Which ortholog group in OMA groups orf1 across species, and what is its accession?"

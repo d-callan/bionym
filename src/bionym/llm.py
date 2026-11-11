@@ -39,6 +39,7 @@ class LlmClient:
         mock: bool = False,
         cache_dir: str | None = None,
         timeout: float = 180.0,
+        temperature: float = 0.0,
     ) -> None:
         self.base_url = (
             base_url or os.environ.get("LLM_BASE_URL") or DEFAULT_BASE_URL
@@ -46,6 +47,9 @@ class LlmClient:
         self.model = model or os.environ.get("LLM_MODEL") or ""
         self.mock = mock
         self.timeout = float(os.environ.get("LLM_TIMEOUT") or timeout)
+        # client-level default for calls that don't specify one
+        # (ask/proposal paths). 0.0 = production greedy decoding.
+        self.temperature = temperature
         # shared client: keep-alive/connection pooling across calls
         # (and across threads — resolver prefetches run in workers).
         self._http = httpx.Client()
@@ -63,7 +67,7 @@ class LlmClient:
         return self.mock or bool(self._api_key and self.model)
 
     def complete(
-        self, system: str, user: str, temperature: float = 0.0
+        self, system: str, user: str, temperature: float | None = None
     ) -> str:
         """One chat completion -> raw content string (expected JSON)."""
         if self.mock:
@@ -75,7 +79,8 @@ class LlmClient:
                 {"role": "user", "content": user},
             ],
             "response_format": {"type": "json_object"},
-            "temperature": temperature,
+            "temperature": self.temperature
+            if temperature is None else temperature,
         }
         key = hashlib.sha256(
             json.dumps(body, sort_keys=True).encode()
