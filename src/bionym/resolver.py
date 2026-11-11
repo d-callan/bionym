@@ -21,7 +21,7 @@ from .clients.uniprot import UniProtClient
 from .clients.veupathdb import VEuPathDBClient
 from .evidence import Evidence
 from .graph import Edge, KnowledgeGraph, Node, NodeType
-from .jev import JevClient, JevError
+from .jev import JevClient, JevError, JevQuotaError
 from .llm import LlmClient
 from . import __version__, proposals
 from .species import same_species, species_key
@@ -243,6 +243,8 @@ class Resolver:
             if summarize:
                 try:
                     self.summarize(graph, match)
+                except JevQuotaError:
+                    raise
                 except JevError as e:  # best-effort inside resolve
                     log.warning("summary verification failed: %s", e)
                 graph.mark_stage("summary")
@@ -296,6 +298,10 @@ class Resolver:
                 batch = self.jev.ask(
                     state_fn(chunk), questions_fn(chunk), stage=stage
                 )
+            except JevQuotaError:
+                # Out of budget — degrade-by-skip would fabricate
+                # wrong answers and burn remaining calls. Propagate.
+                raise
             except JevError as e:
                 log.warning("%s chunk %d failed: %s", stage, start, e)
                 batch = {}
@@ -2151,6 +2157,8 @@ class Resolver:
                     },
                     stage="proposals",
                 )
+            except JevQuotaError:
+                raise
             except JevError as e:
                 log.warning("proposal verify failed for %s: %s",
                             it["node"], e)
@@ -2307,6 +2315,8 @@ class Resolver:
                     },
                     stage="data_proposals",
                 )
+            except JevQuotaError:
+                raise
             except JevError as e:
                 log.warning(
                     "data proposal verify failed for %s: %s",

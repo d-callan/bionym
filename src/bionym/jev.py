@@ -36,6 +36,34 @@ class JevError(RuntimeError):
     pass
 
 
+class JevQuotaError(JevError):
+    """JEV budget/auth exhausted — refill the account, then resume.
+
+    Callers must NOT swallow this alongside JevError: degrading to empty
+    answers on an empty balance would silently corrupt results AND burn
+    the remaining calls into guaranteed failures. Eval runners treat it
+    as a stop-and-checkpoint signal.
+    """
+
+
+# JEV reports budget/auth exhaustion either as an auth status or as a
+# 400/429 whose body names the problem; a plain 429 with no quota text is
+# short-term rate limiting and stays on the transient-retry path.
+_QUOTA_STATUS = frozenset({401, 402, 403})
+_QUOTA_MARKERS = (
+    "quota", "insufficient", "billing", "credit", "balance", "payment",
+)
+
+
+def _is_quota_error(resp: httpx.Response) -> bool:
+    if resp.status_code in _QUOTA_STATUS:
+        return True
+    if resp.status_code not in (400, 429):
+        return False
+    text = resp.text.lower()
+    return any(m in text for m in _QUOTA_MARKERS)
+
+
 class JevClient:
     def __init__(
         self,
@@ -167,6 +195,11 @@ class JevClient:
                 continue
             if resp.status_code == 200:
                 break
+            if _is_quota_error(resp):
+                raise JevQuotaError(
+                    f"JEV quota/auth error {resp.status_code}: "
+                    f"{resp.text[:500]}"
+                )
             if resp.status_code < 500 and resp.status_code != 429:
                 raise JevError(
                     f"JEV API error {resp.status_code}: {resp.text[:500]}"

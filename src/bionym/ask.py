@@ -14,7 +14,7 @@ import logging
 from typing import Any
 
 from .graph import KnowledgeGraph
-from .jev import JevClient, JevError
+from .jev import JevClient, JevError, JevQuotaError
 from .llm import LlmClient, LlmError
 from .questions import ask as ask_q
 
@@ -124,6 +124,9 @@ def ask_graph(
             ask_q.build_questions(),
             stage="ask",
         )
+    except JevQuotaError:
+        # Out of budget — an "unscored" flag would hide corruption.
+        raise
     except JevError as e:
         # Judge failed after the answer was generated — same contract as
         # 'other': keep the answer, flag it unscored.
