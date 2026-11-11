@@ -2,6 +2,11 @@
 bugs have come from (Datasets v2 nesting, GEO esummary fields, OMA xrefs).
 """
 
+from types import SimpleNamespace
+
+import httpx
+import pytest
+
 from bionym.clients.ncbi import NcbiClient
 from bionym.clients.oma import OmaClient
 from bionym.clients.uniprot import UniProtClient
@@ -194,13 +199,57 @@ def test_render_html_embeds_graph():
     assert "kegg:k1" in html
 
 
+def test_ncbi_get_retries_then_propagates(monkeypatch):
+    # A persistent transport failure must raise, never degrade to "no
+    # records" (which would fabricate a refused/thinned graph).
+    client = NcbiClient()
+    client._min_interval = 0  # keep the test fast; backoff still stubbed below
+    monkeypatch.setattr("bionym.clients.ncbi.time.sleep", lambda *_: None)
+    calls = 0
+
+    def boom(url, params=None, timeout=None):
+        nonlocal calls
+        calls += 1
+        raise httpx.RemoteProtocolError("peer closed connection")
+
+    client._http = SimpleNamespace(get=boom)
+    with pytest.raises(httpx.RemoteProtocolError):
+        client._get("https://example.test/x")
+    assert calls == 3
+
+
+def test_ncbi_get_recovers_on_retry(monkeypatch):
+    client = NcbiClient()
+    client._min_interval = 0
+    monkeypatch.setattr("bionym.clients.ncbi.time.sleep", lambda *_: None)
+    calls = 0
+
+    def flaky(url, params=None, timeout=None):
+        nonlocal calls
+        calls += 1
+        if calls < 3:
+            raise httpx.RemoteProtocolError("peer closed connection")
+        return SimpleNamespace(status_code=200, text="{}",
+                               json=lambda: {"ok": True})
+
+    client._http = SimpleNamespace(get=flaky)
+    assert client._get("https://example.test/x") == {"ok": True}
+    assert calls == 3
+
+
 # -- CLI ------------------------------------------------------------------
 
-def test_cli_resolve_mock(tmp_path):
+def test_cli_resolve_mock(tmp_path, monkeypatch):
     from typer.testing import CliRunner
-    from bionym.cli import app
+    from fakes import FakeNcbiClient, FakeVeuPathDBClient
+    import bionym.cli as cli
+    # --mock-jev/--mock-llm stub only the model clients; the resolver would
+    # still hit live NCBI/VEuPathDB APIs. Swap in offline fakes so this
+    # wiring test is deterministic (issue: RemoteProtocolError flake).
+    monkeypatch.setattr(cli, "NcbiClient", FakeNcbiClient)
+    monkeypatch.setattr(cli, "VEuPathDBClient", FakeVeuPathDBClient)
     out = tmp_path / "g.json"
-    r = CliRunner().invoke(app, ["resolve", "672", "-o", str(out), "--mock-jev", "--mock-llm", "--depth", "1"])
+    r = CliRunner().invoke(cli.app, ["resolve", "672", "-o", str(out), "--mock-jev", "--mock-llm", "--depth", "1"])
     assert r.exit_code == 0, r.output
     assert out.exists()
     import json
