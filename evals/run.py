@@ -131,6 +131,7 @@ def run_case(resolver: Resolver, case: dict) -> dict:
         "wall_s": wall,
         "stage_times": meta.get("stage_times", {}),
         "jev_usage": meta.get("jev_usage", {}).get("total", {}),
+        "llm_usage": meta.get("llm_usage", {}).get("total", {}),
         "nodes": len(graph.nodes) if graph else 0,
         "edges": len(graph.edges) if graph else 0,
         "predicates": sorted({e.predicate for e in graph.edges}) if graph else [],

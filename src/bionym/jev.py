@@ -156,11 +156,16 @@ class JevClient:
         )
         return answers
 
-    def total_usage(self) -> dict[str, int]:
+    def total_usage(
+        self, entries: list[dict[str, Any]] | None = None
+    ) -> dict[str, int]:
+        """Token totals — over `entries` (a per-resolve slice) or the
+        whole log when omitted."""
+        log = self.usage_log if entries is None else entries
         return {
-            "input_tokens": sum(u["input_tokens"] for u in self.usage_log),
-            "output_tokens": sum(u["output_tokens"] for u in self.usage_log),
-            "calls": len(self.usage_log),
+            "input_tokens": sum(u["input_tokens"] for u in log),
+            "output_tokens": sum(u["output_tokens"] for u in log),
+            "calls": len(log),
         }
 
     # -- internals ---------------------------------------------------------

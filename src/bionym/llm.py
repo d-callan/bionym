@@ -62,7 +62,9 @@ class LlmClient:
         """Proposals only run with a configured model — never required."""
         return self.mock or bool(self._api_key and self.model)
 
-    def complete(self, system: str, user: str) -> str:
+    def complete(
+        self, system: str, user: str, temperature: float = 0.0
+    ) -> str:
         """One chat completion -> raw content string (expected JSON)."""
         if self.mock:
             return '{"proposals": [{"claim": "mock proposal", "citations": [1]}], "answer": "mock answer", "cited_nodes": []}'
@@ -73,7 +75,7 @@ class LlmClient:
                 {"role": "user", "content": user},
             ],
             "response_format": {"type": "json_object"},
-            "temperature": 0,
+            "temperature": temperature,
         }
         key = hashlib.sha256(
             json.dumps(body, sort_keys=True).encode()
@@ -112,3 +114,15 @@ class LlmClient:
         if self._cache is not None and content:
             self._cache[key] = content
         return content
+
+    def total_usage(
+        self, entries: list[dict[str, Any]] | None = None
+    ) -> dict[str, int]:
+        """Token totals — over `entries` (a per-resolve slice) or the
+        whole log when omitted."""
+        log = self.usage_log if entries is None else entries
+        return {
+            "input_tokens": sum(u["input_tokens"] for u in log),
+            "output_tokens": sum(u["output_tokens"] for u in log),
+            "calls": len(log),
+        }

@@ -181,6 +181,10 @@ class Resolver:
         summarize: bool = False,
         propose: bool = True,
     ) -> KnowledgeGraph:
+        # Usage is sliced per resolve() call — a reused Resolver must not
+        # report cumulative totals across every gene it has resolved.
+        jev_start = len(self.jev.usage_log)
+        llm_start = len(self.llm.usage_log)
         graph = KnowledgeGraph(
             metadata={
                 "input": identifier,
@@ -252,9 +256,15 @@ class Resolver:
         # resolved = S1 found a real record; refused = classify found
         # no gene match (wrong namespace, garbage id, unknown entity)
         graph.metadata["outcome"] = "resolved" if match else "refused"
+        jev_log = self.jev.usage_log[jev_start:]
         graph.metadata["jev_usage"] = {
-            "total": self.jev.total_usage(),
-            "by_stage": self.jev.usage_log,
+            "total": self.jev.total_usage(jev_log),
+            "by_stage": jev_log,
+        }
+        llm_log = self.llm.usage_log[llm_start:]
+        graph.metadata["llm_usage"] = {
+            "total": self.llm.total_usage(llm_log),
+            "by_stage": llm_log,
         }
         return graph
 
