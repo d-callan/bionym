@@ -60,7 +60,8 @@ def _expected_ok(rec: dict, entry: dict) -> list[str]:
                       "primary_symbol")
         }
         candidates |= {
-            str(a).lower() for a in (rec.get("aliases") or [])
+            str(a.get("alias") if isinstance(a, dict) else a).lower()
+            for a in (rec.get("aliases") or [])
         }
         if want_name not in candidates:
             problems.append(
