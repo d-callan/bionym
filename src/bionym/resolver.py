@@ -385,6 +385,20 @@ class Resolver:
         # JEV only arbitrates what the API can't settle: fuzzy single
         # hits and genuine multi-candidate ambiguity.
         exact = _exact_id_matches(identifier, candidates)
+
+        # find_gene enumerates at most _retmax records; a full-length
+        # list means the term maps to MORE genes than we can enumerate.
+        # Arbitrating a truncated pool is a coin-flip, and the downstream
+        # fan-out can die on transport errors rather than exit cleanly
+        # (Suite 2: gapdh/PMID ambiguity -> NCBI 429s). Refuse honestly
+        # instead — unless an exact hit pins the referent anyway.
+        if not exact and len(candidates) >= getattr(self.ncbi, "_retmax", 20):
+            log.warning(
+                "ambiguous: %r matches >=%d gene records, no exact hit",
+                identifier, len(candidates))
+            graph.mark_stage("s1_resolve:ambiguous")
+            return None
+
         if len(exact) == 1:
             match, confidence, probabilities = exact[0], 1.0, {}
         else:

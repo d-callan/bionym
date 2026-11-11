@@ -41,7 +41,11 @@ class NcbiClient:
         # Parallel resolver fetches can call _get from several threads;
         # the lock keeps _last_request updates + pacing atomic.
         self._throttle_lock = threading.Lock()
-        self._min_interval = 0.1 if self.api_key else 0.34  # 10/s vs 3/s
+        # NCBI's nominal caps (10/s keyed, 3/s unkeyed) are enforced on a
+        # sliding window that is stricter than the nominal rate — sustained
+        # request *starts* at exactly 10/s still 429 under bursts. Pacing
+        # below the cap (~8/s, ~2.5/s) keeps retries from amplifying it.
+        self._min_interval = 0.12 if self.api_key else 0.4
         self._retmax = 20
         self._cache = None
         if cache_dir:

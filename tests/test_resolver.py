@@ -953,6 +953,47 @@ def test_resolve_records_refused_outcome():
     assert g.metadata["outcome"] == "refused"
 
 
+def _saturation_candidates(n=20):
+    return [
+        {
+            "source": "ncbi_eutils",
+            "gene_id": str(9000 + i),
+            "symbol": f"GAPDH{i}",
+            "description": "glyceraldehyde-3-phosphate dehydrogenase",
+            "locus_tag": f"GAPDH{i}",
+            "tax_id": 9606,
+            "organism": f"Species {i}",
+            "assembly_accession": None,
+            "genomic_accessions": [],
+            "raw": {},
+        }
+        for i in range(n)
+    ]
+
+
+def test_saturated_candidates_no_exact_refused_ambiguous():
+    # A retmax-length find_gene list means the term maps to MORE genes
+    # than we can enumerate — refuse honestly rather than coin-flip on
+    # a truncated pool and fan out into transport errors (gapdh/PMID
+    # ambiguity -> NCBI 429s observed in the refusal suite).
+    r = _resolver()
+    r.ncbi.find_gene = lambda term: (_saturation_candidates(), [])
+    g = r.resolve("gapdh", depth=1)
+    assert g.metadata["outcome"] == "refused"
+    assert "s1_resolve:ambiguous" in g.metadata["stages"]
+
+
+def test_saturated_candidates_exact_hit_still_resolves():
+    # The bound only applies when nothing is API-verifiable: an exact
+    # symbol/locus hit pins the referent even inside a saturated list.
+    r = _resolver()
+    recs = _saturation_candidates()
+    recs[0]["symbol"] = "gapdh"
+    r.ncbi.find_gene = lambda term: (recs, [])
+    g = r.resolve("gapdh", depth=1)
+    assert g.metadata["outcome"] == "resolved"
+
+
 def test_nuccore_typed_by_kind():
     # genomic accessions are sequences (NC_*), transcript accessions
     # stay transcripts (XM_*) — issue #6
