@@ -1,0 +1,362 @@
+# Suite 3 — Tree-of-Life x Information-Density corpus.
+#
+# 7 clades x 3 tiers x 3 genes = 63 real identifiers spanning BRC-relevant
+# pathogen space plus vertebrate/host comparators. IDs marked `# verify`
+# are best-effort from curation — evals/verify_corpus_ids.py must pass
+# them live before any JEV spend.
+#
+# info_tier: well_studied | moderate | understudied
+# deep_subset: the 7x3x1 stratified subset run Full (propose+summarize)
+#              in stage 3B — one gene per (clade, tier).
+#
+# Ground truth registered per gene: expected_taxid, expected_symbol_or_locus.
+corpus:
+  # ============================================================= Bacteria
+  - id: "885521"            # M. tuberculosis inhA (Rv1484) — INH target
+    clade: bacteria
+    info_tier: well_studied
+    deep_subset: true
+    expected_taxid: 83332
+    expected_symbol_or_locus: "Rv1484"
+  - id: b3067               # E. coli rpoD (sigma-70)
+    clade: bacteria
+    info_tier: well_studied
+    expected_taxid: 511145
+    expected_symbol_or_locus: b3067
+  - id: "5284361"           # S. aureus mecA — MRSA resistance  # verify
+    clade: bacteria
+    info_tier: well_studied
+    expected_taxid: 1280
+    expected_symbol_or_locus: mecA
+  - id: "888208"            # M. tuberculosis ahpC  # verify
+    clade: bacteria
+    info_tier: moderate
+    deep_subset: true
+    expected_taxid: 83332
+    expected_symbol_or_locus: Rv2428
+  - id: b2582               # E. coli yfgF — annotated, moderate lit
+    clade: bacteria
+    info_tier: moderate
+    expected_taxid: 511145
+    expected_symbol_or_locus: b2582
+  - id: KPN_03241           # K. pneumoniae transporter locus  # verify
+    clade: bacteria
+    info_tier: moderate
+    expected_taxid: 573
+    expected_symbol_or_locus: KPN_03241
+  - id: "885806"            # M. tuberculosis Rv0071 conserved hypothetical
+    clade: bacteria
+    info_tier: understudied
+    deep_subset: true
+    expected_taxid: 83332
+    expected_symbol_or_locus: Rv0071
+  - id: BPSL3113            # B. pseudomallei uncharacterized locus  # verify
+    clade: bacteria
+    info_tier: understudied
+    expected_taxid: 28450
+    expected_symbol_or_locus: BPSL3113
+  - id: bb0525              # B. burgdorferi hypothetical protein  # verify
+    clade: bacteria
+    info_tier: understudied
+    expected_taxid: 139
+    expected_symbol_or_locus: bb0525
+
+  # ============================================================== Viruses
+  - id: "43740568"          # SARS-CoV-2 spike (S)
+    clade: viruses
+    info_tier: well_studied
+    deep_subset: true
+    expected_taxid: 2697049
+    expected_symbol_or_locus: S
+  - id: "956529"            # Influenza A hemagglutinin  # verify
+    clade: viruses
+    info_tier: well_studied
+    expected_taxid: 11320
+    expected_symbol_or_locus: HA
+  - id: "911829"            # Zaire ebolavirus glycoprotein  # verify
+    clade: viruses
+    info_tier: well_studied
+    expected_taxid: 186538
+    expected_symbol_or_locus: GP
+  - id: "1489648"           # Measles morbillivirus nucleoprotein (N)  # verify
+    clade: viruses
+    info_tier: moderate
+    deep_subset: true
+    expected_taxid: 11234
+    expected_symbol_or_locus: N
+  - id: "3729948"           # Rift Valley fever virus NSs  # verify
+    clade: viruses
+    info_tier: moderate
+    expected_taxid: 11588
+    expected_symbol_or_locus: NSs
+  - id: "921823"            # Nipah virus nucleocapsid  # verify
+    clade: viruses
+    info_tier: moderate
+    expected_taxid: 3052223
+    expected_symbol_or_locus: N
+  - id: "928878"            # Mpox virus C3L complement-control protein  # verify
+    clade: viruses
+    info_tier: understudied
+    deep_subset: true
+    expected_taxid: 10244
+    expected_symbol_or_locus: C3L
+  - id: "3162411"           # Oropouche virus accessory ORF  # verify
+    clade: viruses
+    info_tier: understudied
+    expected_taxid: 30051
+    expected_symbol_or_locus: NSs
+  - id: "2827449"           # SFTS virus nonstructural protein  # verify
+    clade: viruses
+    info_tier: understudied
+    expected_taxid: 1938024
+    expected_symbol_or_locus: NSs
+
+  # ====================================== Apicomplexan / kinetoplastid
+  - id: PF3D7_1343700       # P. falciparum kelch13 — ART resistance
+    clade: apicomplexan_kinetoplastid
+    info_tier: well_studied
+    deep_subset: true
+    expected_taxid: 5833
+    expected_symbol_or_locus: PF3D7_1343700
+  - id: PF3D7_0709000       # P. falciparum pfcrt
+    clade: apicomplexan_kinetoplastid
+    info_tier: well_studied
+    expected_taxid: 5833
+    expected_symbol_or_locus: PF3D7_0709000
+  - id: TGME49_221620       # T. gondii ROP16 rhoptry kinase  # verify
+    clade: apicomplexan_kinetoplastid
+    info_tier: well_studied
+    expected_taxid: 508771
+    expected_symbol_or_locus: TGME49_221620
+  - id: PVX_081515          # P. vivax locus  # verify
+    clade: apicomplexan_kinetoplastid
+    info_tier: moderate
+    deep_subset: true
+    expected_taxid: 5855
+    expected_symbol_or_locus: PVX_081515
+  - id: Tb927.7.6580        # T. brucei metabolic locus  # verify
+    clade: apicomplexan_kinetoplastid
+    info_tier: moderate
+    expected_taxid: 5691
+    expected_symbol_or_locus: Tb927.7.6580
+  - id: LmjF.36.2510        # L. major locus  # verify
+    clade: apicomplexan_kinetoplastid
+    info_tier: moderate
+    expected_taxid: 5664
+    expected_symbol_or_locus: LmjF.36.2510
+  - id: cgd4_440            # C. parvum conserved unknown protein  # verify
+    clade: apicomplexan_kinetoplastid
+    info_tier: understudied
+    deep_subset: true
+    expected_taxid: 5807
+    expected_symbol_or_locus: cgd4_440
+  - id: BMR1_03g00970       # Babesia microti uncharacterized  # verify
+    clade: apicomplexan_kinetoplastid
+    info_tier: understudied
+    expected_taxid: 5866
+    expected_symbol_or_locus: BMR1_03g00970
+  - id: EHI_049940          # E. histolytica hypothetical locus  # verify
+    clade: apicomplexan_kinetoplastid
+    info_tier: understudied
+    expected_taxid: 5759
+    expected_symbol_or_locus: EHI_049940
+
+  # ====================================================== Pathogenic fungi
+  - id: "3641571"           # C. albicans ERG11 — azole target
+    clade: pathogenic_fungi
+    info_tier: well_studied
+    deep_subset: true
+    expected_taxid: 5476
+    expected_symbol_or_locus: ERG11
+  - id: AFUA_4G06890        # A. fumigatus cyp51A
+    clade: pathogenic_fungi
+    info_tier: well_studied
+    expected_taxid: 746128
+    expected_symbol_or_locus: AFUA_4G06890
+  - id: CNAG_00047          # C. neoformans CAP59 capsule gene  # verify
+    clade: pathogenic_fungi
+    info_tier: well_studied
+    expected_taxid: 235443
+    expected_symbol_or_locus: CNAG_00047
+  - id: CAALFM_C405410      # C. albicans transcription factor  # verify
+    clade: pathogenic_fungi
+    info_tier: moderate
+    deep_subset: true
+    expected_taxid: 237561
+    expected_symbol_or_locus: CAALFM_C405410
+  - id: AFUA_1G14810        # A. fumigatus cell-wall enzyme  # verify
+    clade: pathogenic_fungi
+    info_tier: moderate
+    expected_taxid: 746128
+    expected_symbol_or_locus: AFUA_1G14810
+  - id: CIMG_01361          # Coccidioides immitis locus  # verify
+    clade: pathogenic_fungi
+    info_tier: moderate
+    expected_taxid: 410071
+    expected_symbol_or_locus: CIMG_01361
+  - id: B9J08_001448        # C. auris uncharacterized protein  # verify
+    clade: pathogenic_fungi
+    info_tier: understudied
+    deep_subset: true
+    expected_taxid: 498019
+    expected_symbol_or_locus: B9J08_001448
+  - id: B9J08_004164        # C. auris uncharacterized protein 2  # verify
+    clade: pathogenic_fungi
+    info_tier: understudied
+    expected_taxid: 498019
+    expected_symbol_or_locus: B9J08_004164
+  - id: HCG_00075           # Histoplasma capsulatum hypothetical  # verify
+    clade: pathogenic_fungi
+    info_tier: understudied
+    expected_taxid: 5037
+    expected_symbol_or_locus: HCG_00075
+
+  # ============================================================= Helminths
+  - id: WBGene00000898      # C. elegans daf-2 insulin receptor
+    clade: helminths
+    info_tier: well_studied
+    deep_subset: true
+    expected_taxid: 6239
+    expected_symbol_or_locus: daf-2
+  - id: Smp_089280          # S. mansoni Sm.TRPM_PZQ praziquantel target  # verify
+    clade: helminths
+    info_tier: well_studied
+    expected_taxid: 6183
+    expected_symbol_or_locus: Smp_089280
+  - id: Smp_095360          # S. mansoni Sm14 fatty-acid-binding protein  # verify
+    clade: helminths
+    info_tier: well_studied
+    expected_taxid: 6183
+    expected_symbol_or_locus: Smp_095360
+  - id: Bm8009              # Brugia malayi locus  # verify
+    clade: helminths
+    info_tier: moderate
+    deep_subset: true
+    expected_taxid: 6279
+    expected_symbol_or_locus: Bm8009
+  - id: Smp_157030          # S. mansoni tegumental protease  # verify
+    clade: helminths
+    info_tier: moderate
+    expected_taxid: 6183
+    expected_symbol_or_locus: Smp_157030
+  - id: OVOC11946           # Onchocerca volvulus locus  # verify
+    clade: helminths
+    info_tier: moderate
+    expected_taxid: 6282
+    expected_symbol_or_locus: OVOC11946
+  - id: Bm10415             # B. malayi uncharacterized locus  # verify
+    clade: helminths
+    info_tier: understudied
+    deep_subset: true
+    expected_taxid: 6279
+    expected_symbol_or_locus: Bm10415
+  - id: Smp_340310          # S. mansoni uncharacterized locus  # verify
+    clade: helminths
+    info_tier: understudied
+    expected_taxid: 6183
+    expected_symbol_or_locus: Smp_340310
+  - id: OVOC9988            # O. volvulus uncharacterized locus  # verify
+    clade: helminths
+    info_tier: understudied
+    expected_taxid: 6282
+    expected_symbol_or_locus: OVOC9988
+
+  # ====================================================== Arthropod vectors
+  - id: AGAP004707          # A. gambiae Vgsc — kdr resistance
+    clade: arthropod_vectors
+    info_tier: well_studied
+    deep_subset: true
+    expected_taxid: 7165
+    expected_symbol_or_locus: AGAP004707
+  - id: AGAP010815          # A. gambiae TEP1 complement-like
+    clade: arthropod_vectors
+    info_tier: well_studied
+    expected_taxid: 7165
+    expected_symbol_or_locus: AGAP010815
+  - id: AAEL023844          # Ae. aegypti odorant receptor (Orco)  # verify
+    clade: arthropod_vectors
+    info_tier: well_studied
+    expected_taxid: 7159
+    expected_symbol_or_locus: AAEL023844
+  - id: AAEL002373          # Ae. aegypti salivary/immunity gene  # verify
+    clade: arthropod_vectors
+    info_tier: moderate
+    deep_subset: true
+    expected_taxid: 7159
+    expected_symbol_or_locus: AAEL002373
+  - id: CPIJ005762          # Culex quinquefasciatus detox P450  # verify
+    clade: arthropod_vectors
+    info_tier: moderate
+    expected_taxid: 7176
+    expected_symbol_or_locus: CPIJ005762
+  - id: AGAP002845          # A. gambiae immunity-related locus  # verify
+    clade: arthropod_vectors
+    info_tier: moderate
+    expected_taxid: 7165
+    expected_symbol_or_locus: AGAP002845
+  - id: ISCW017784          # I. scapularis uncharacterized protein  # verify
+    clade: arthropod_vectors
+    info_tier: understudied
+    deep_subset: true
+    expected_taxid: 6945
+    expected_symbol_or_locus: ISCW017784
+  - id: ISCW019452          # I. scapularis uncharacterized protein 2  # verify
+    clade: arthropod_vectors
+    info_tier: understudied
+    expected_taxid: 6945
+    expected_symbol_or_locus: ISCW019452
+  - id: AAEL010008          # Ae. aegypti uncharacterized locus  # verify
+    clade: arthropod_vectors
+    info_tier: understudied
+    expected_taxid: 7159
+    expected_symbol_or_locus: AAEL010008
+
+  # ============================================ Vertebrates / plants
+  - id: "59272"             # Human ACE2 — SARS-CoV-2 receptor
+    clade: vertebrates_plants
+    info_tier: well_studied
+    deep_subset: true
+    expected_taxid: 9606
+    expected_symbol_or_locus: ACE2
+  - id: "21898"             # Mouse Tlr4
+    clade: vertebrates_plants
+    info_tier: well_studied
+    expected_taxid: 10090
+    expected_symbol_or_locus: Tlr4
+  - id: AT5G46330           # Arabidopsis FLS2 flagellin receptor
+    clade: vertebrates_plants
+    info_tier: well_studied
+    expected_taxid: 3702
+    expected_symbol_or_locus: AT5G46330
+  - id: "2532"              # Human ACKR1 (DARC) — malaria blood-group antigen  # verify
+    clade: vertebrates_plants
+    info_tier: moderate
+    deep_subset: true
+    expected_taxid: 9606
+    expected_symbol_or_locus: ACKR1
+  - id: "428661"            # Chicken IFITM3  # verify
+    clade: vertebrates_plants
+    info_tier: moderate
+    expected_taxid: 9031
+    expected_symbol_or_locus: IFITM3
+  - id: AT1G01010           # Arabidopsis NAC001 transcription factor
+    clade: vertebrates_plants
+    info_tier: moderate
+    expected_taxid: 3702
+    expected_symbol_or_locus: AT1G01010
+  - id: "165382"            # Human FAM171B — poorly characterized  # verify
+    clade: vertebrates_plants
+    info_tier: understudied
+    deep_subset: true
+    expected_taxid: 9606
+    expected_symbol_or_locus: FAM171B
+  - id: "100527842"         # Chicken uncharacterized locus  # verify
+    clade: vertebrates_plants
+    info_tier: understudied
+    expected_taxid: 9031
+    expected_symbol_or_locus: LOC100527842
+  - id: AT4G34410           # Arabidopsis uncharacterized locus  # verify
+    clade: vertebrates_plants
+    info_tier: understudied
+    expected_taxid: 3702
+    expected_symbol_or_locus: AT4G34410
